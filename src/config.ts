@@ -38,8 +38,12 @@ export const config = {
   resendApiKey: process.env.RESEND_API_KEY || '',
   
   // eBay Partner Network (EPN) Affiliate Program
-  // Get your Campaign ID from https://epn.ebay.com after approval
   epnCampaignId: optionalEnv('EPN_CAMPAIGN_ID', ''),
+  
+  // Web Push (VAPID)
+  vapidPublicKey: optionalEnv('VAPID_PUBLIC_KEY', ''),
+  vapidPrivateKey: optionalEnv('VAPID_PRIVATE_KEY', ''),
+  vapidSubject: optionalEnv('VAPID_SUBJECT', 'mailto:support@scoutloot.com'),
 } as const;
 
 export type Config = typeof config;

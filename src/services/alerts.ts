@@ -10,6 +10,7 @@ export interface Alert {
   listing_id: string | null;
   listing_scanned_for_country: string | null;
   set_number: string;
+  set_name: string | null;
   alert_source: 'ebay' | 'bricklink';
   price_eur: number | null;
   shipping_eur: number | null;
@@ -19,6 +20,7 @@ export interface Alert {
   target_price_eur: number | null;
   seller_id: string | null;
   listing_fingerprint: string | null;
+  listing_url: string | null;
   deal_score: number | null;
   notification_type: string | null;
   status: 'pending' | 'queued' | 'sent' | 'delivered' | 'failed';
@@ -28,6 +30,7 @@ export interface Alert {
   queued_at: Date | null;
   sent_at: Date | null;
   delivered_at: Date | null;
+  read_at: Date | null;
   idempotency_key: string;
   request_id: string | null;
 }
@@ -39,6 +42,7 @@ export interface CreateAlertData {
   listing_id: string;
   listing_scanned_for_country: string;
   set_number: string;
+  set_name?: string;
   alert_source: 'ebay' | 'bricklink';
   price_eur: number;
   shipping_eur: number;
@@ -48,6 +52,7 @@ export interface CreateAlertData {
   target_price_eur: number;
   seller_id: string | null;
   listing_fingerprint: string;
+  listing_url?: string;
   deal_score?: number;
   notification_type?: string;
   delay_reason?: string;
@@ -66,13 +71,13 @@ export async function createAlert(data: CreateAlertData): Promise<Alert | null> 
     const result = await query<Alert>(
       `INSERT INTO alert_history (
          user_id, watch_id, platform, listing_id, listing_scanned_for_country,
-         set_number, alert_source, price_eur, shipping_eur, 
+         set_number, set_name, alert_source, price_eur, shipping_eur, 
          import_charges_eur, import_charges_estimated, total_eur,
-         target_price_eur, seller_id, listing_fingerprint, deal_score,
+         target_price_eur, seller_id, listing_fingerprint, listing_url, deal_score,
          notification_type, status, delay_reason, scheduled_for,
          idempotency_key, request_id
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)
        RETURNING *`,
       [
         data.user_id,
@@ -81,6 +86,7 @@ export async function createAlert(data: CreateAlertData): Promise<Alert | null> 
         data.listing_id,
         data.listing_scanned_for_country,
         data.set_number,
+        data.set_name ?? null,
         data.alert_source,
         data.price_eur,
         data.shipping_eur,
@@ -90,6 +96,7 @@ export async function createAlert(data: CreateAlertData): Promise<Alert | null> 
         data.target_price_eur,
         data.seller_id,
         data.listing_fingerprint,
+        data.listing_url ?? null,
         data.deal_score ?? null,
         data.notification_type ?? null,
         'pending',
@@ -228,4 +235,15 @@ export async function wasListingAlertedRecently(
     [userId, fingerprint]
   );
   return parseInt(result.rows[0].count, 10) > 0;
+}
+
+/**
+ * Get alert by ID
+ */
+export async function getAlertById(alertId: number): Promise<Alert | null> {
+  const result = await query<Alert>(
+    `SELECT * FROM alert_history WHERE id = $1`,
+    [alertId]
+  );
+  return result.rows[0] ?? null;
 }

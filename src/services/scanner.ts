@@ -6,13 +6,16 @@ import { upsertListings, markListingsInactive } from './listings.js';
 import { createAlert } from './alerts.js';
 import { calculateDelay, getTierLimitsFromDb } from './delay.js';
 import { enqueueTelegramAlert } from '../jobs/telegramQueue.js';
+import { enqueuePushAlert } from '../jobs/pushQueue.js';
 import { formatDealAlertMessage } from '../telegram/escape.js';
 import { containsExcludeWord } from '../utils/normalize.js';
 import { getSet } from './sets.js';
 import { getUserById } from './users.js';
+import { userHasPushEnabled } from './push.js';
 import { filterListing } from '../utils/listingFilter.js';
 import { generateAffiliateUrlForCountry } from '../utils/affiliate.js';
 import { getMarketplaceForCountry } from '../providers/ebay/client.js';
+import { config } from '../config.js';
 import { 
   getNotificationState, 
   updateNotificationState, 
@@ -35,6 +38,23 @@ function shouldScanNow(): boolean {
   return true;
 }
 
+/**
+ * Get human-readable notification reason
+ */
+function getNotificationReasonText(reason: string): string {
+  switch (reason) {
+    case 'better_deal':
+      return 'Better deal found!';
+    case 'previous_sold':
+      return 'Previous sold — new best';
+    case 'price_drop':
+      return 'Price drop!';
+    case 'first_notification':
+    default:
+      return 'Deal alert';
+  }
+}
+
 export interface ScanResult {
   requestId: string;
   groupsScanned: number;
@@ -45,6 +65,7 @@ export interface ScanResult {
   alertsDeduplicated: number;
   alertsBlocked: number;
   alertsQueued: number;
+  pushQueued: number;
   skippedNoChange: number;
   filteredByQuality: number;
   filteredByShipping: number;
@@ -66,6 +87,7 @@ export async function runScanCycle(): Promise<ScanResult> {
       alertsDeduplicated: 0,
       alertsBlocked: 0,
       alertsQueued: 0,
+      pushQueued: 0,
       skippedNoChange: 0,
       filteredByQuality: 0,
       filteredByShipping: 0,
@@ -88,6 +110,7 @@ export async function runScanCycle(): Promise<ScanResult> {
     alertsDeduplicated: 0,
     alertsBlocked: 0,
     alertsQueued: 0,
+    pushQueued: 0,
     skippedNoChange: 0,
     filteredByQuality: 0,
     filteredByShipping: 0,
@@ -165,54 +188,33 @@ async function processScanGroup(
 
 /**
  * Check if listing has valid shipping info
- * 
- * v6 IMPROVED: Don't trust title keywords for cross-border shipping
- * 
- * "versandkostenfrei" in title often means domestic free shipping, not international.
- * Sellers use these keywords for SEO but don't actually ship internationally.
- * 
- * Returns true if:
- * 1. shipping_eur > 0 (explicit shipping cost from eBay API)
- * 2. Same-country shipping (domestic, shipping=0 is likely free)
- * 
- * Returns false if:
- * - shipping_eur = 0 AND cross-border (even with "free shipping" in title)
- *   (likely means "no shipping available" to destination country)
  */
 function hasValidShipping(listing: NormalizedListing, shipToCountry: string): boolean {
-  // Case 1: Explicit positive shipping cost from eBay API - always valid
-  // This means eBay calculated a shipping cost to the destination country
   if (listing.shipping_eur > 0) {
     return true;
   }
   
-  // Case 2: Same-country shipping - shipping=0 likely means free domestic shipping
   if (listing.ship_from_country === shipToCountry) {
     return true;
   }
   
-  // Handle UK/GB aliases
   const fromUK = listing.ship_from_country?.toUpperCase() === 'GB' || 
                  listing.ship_from_country?.toUpperCase() === 'UK';
   const toUK = shipToCountry.toUpperCase() === 'GB' || 
                shipToCountry.toUpperCase() === 'UK';
   
   if (fromUK && toUK) {
-    return true; // UK to UK domestic
+    return true;
   }
   
-  // Handle US/CA within North America block
   const fromUS = listing.ship_from_country?.toUpperCase() === 'US';
   const fromCA = listing.ship_from_country?.toUpperCase() === 'CA';
   const toUS = shipToCountry.toUpperCase() === 'US';
   const toCA = shipToCountry.toUpperCase() === 'CA';
   
-  if (fromUS && toUS) return true; // US domestic
-  if (fromCA && toCA) return true; // CA domestic
+  if (fromUS && toUS) return true;
+  if (fromCA && toCA) return true;
   
-  // Case 3: Cross-border with shipping=0 = NO SHIPPING AVAILABLE
-  // Don't trust title keywords like "versandkostenfrei" - they refer to domestic shipping
-  // eBay returns shipping=0 when seller doesn't ship to destination country
   return false;
 }
 
@@ -226,25 +228,17 @@ async function processWatchMatches(
 ): Promise<void> {
   let filtered = listings;
 
-  // ============================================
-  // SMART QUALITY FILTER (v6)
-  // Now includes:
-  // - Brand filtering (rejects COBI, Mega Bloks, etc.)
-  // - LEGO brand requirement (filters out bearings, unrelated products)
-  // - Condition filtering ("Neu: Sonstige" rejection when user wants new)
-  // - LED lighting kit filtering (V12)
-  // ============================================
+  // Quality filter
   const beforeQualityFilter = filtered.length;
   filtered = filtered.filter((l) => {
-    // v6: Pass condition info to filter
     const filterResult = filterListing(
       l.title, 
       watch.set_number, 
       setName, 
       l.total_eur,
-      50, // minQualityScore
-      l.condition, // raw condition string from eBay
-      watch.condition as 'new' | 'used' | 'any' // user's condition preference
+      50,
+      l.condition,
+      watch.condition as 'new' | 'used' | 'any'
     );
     if (!filterResult.passed) {
       console.log(`[${requestId}] Quality filter rejected: "${l.title.substring(0, 60)}..." - ${filterResult.reason}`);
@@ -257,15 +251,8 @@ async function processWatchMatches(
     console.log(`[${requestId}] Quality filter removed ${filteredByQuality} of ${beforeQualityFilter} listings`);
   }
 
-  // ============================================
-  // REMAINING FILTERS
-  // ============================================
-  
   // Filter by ship_from_countries
   filtered = filterByShipFrom(filtered, watch.ship_from_countries);
-
-  // NOTE: Condition filter is now handled in filterListing above
-  // This catches "Neu: Sonstige" and other edge cases properly
 
   // Filter by seller rating
   filtered = filtered.filter((l) => 
@@ -282,7 +269,7 @@ async function processWatchMatches(
     filtered = filtered.filter((l) => !containsExcludeWord(l.title, watch.exclude_words!));
   }
 
-  // Filter by minimum price (user's floor)
+  // Filter by minimum price
   const minTotalEur = Number(watch.min_total_eur) || 0;
   if (minTotalEur > 0) {
     const beforeMinPrice = filtered.length;
@@ -293,7 +280,7 @@ async function processWatchMatches(
     }
   }
 
-  // Filter out suspicious zero shipping (v5: improved logic)
+  // Filter out suspicious zero shipping
   const beforeShippingFilter = filtered.length;
   filtered = filtered.filter((l) => hasValidShipping(l, shipToCountry));
   const filteredByShipping = beforeShippingFilter - filtered.length;
@@ -302,31 +289,26 @@ async function processWatchMatches(
     console.log(`[${requestId}] Filtered out ${filteredByShipping} listings with no shipping to ${shipToCountry}`);
   }
 
-  // Filter by target price (must be at or below target)
-  // NOTE: total_eur now includes import charges
+  // Filter by target price
   const matches = filtered.filter((l) => l.total_eur <= Number(watch.target_total_price_eur));
 
   result.matchesFound += matches.length;
 
   if (matches.length === 0) {
-    return; // Nothing below target
+    return;
   }
 
   // Sort by price, get best deal
   const sortedMatches = [...matches].sort((a, b) => a.total_eur - b.total_eur);
   const bestDeal = sortedMatches[0];
 
-  // ============================================
-  // SMART NOTIFICATION LOGIC
-  // Only notify when something changes
-  // ============================================
-  
+  // Smart notification logic
   const lastState = await getNotificationState(watch.id);
   const decision = decideNotification(
     bestDeal.total_eur,
     bestDeal.id,
     lastState,
-    matches  // Pass all matches to check if previous listing still exists
+    matches
   );
 
   if (!decision.shouldNotify) {
@@ -335,10 +317,9 @@ async function processWatchMatches(
     return;
   }
 
-  // Log the notification reason
   console.log(`[${requestId}] Set ${watch.set_number}: ${decision.reason.toUpperCase()} - ${decision.message}`);
 
-  // Create alert and send notification
+  // Create alert and send notifications
   await createAlertForMatch(watch, bestDeal, setName ?? watch.set_number, shipToCountry, requestId, result, decision.reason);
 
   // Update notification state
@@ -388,6 +369,15 @@ async function createAlertForMatch(
     return;
   }
 
+  // Generate affiliate URL
+  const marketplace = getMarketplaceForCountry(shipToCountry);
+  const affiliateUrl = generateAffiliateUrlForCountry(listing.url, shipToCountry);
+  
+  if (affiliateUrl !== listing.url) {
+    console.log(`[${requestId}] Affiliate URL generated for marketplace ${marketplace}`);
+  }
+
+  // Create the alert with listing_url and set_name
   const alert = await createAlert({
     user_id: watch.user_id,
     watch_id: watch.id,
@@ -395,6 +385,7 @@ async function createAlertForMatch(
     listing_id: listing.id,
     listing_scanned_for_country: listing.scanned_for_country,
     set_number: listing.set_number,
+    set_name: setName,
     alert_source: 'ebay',
     price_eur: listing.price_eur,
     shipping_eur: listing.shipping_eur,
@@ -404,6 +395,7 @@ async function createAlertForMatch(
     target_price_eur: Number(watch.target_total_price_eur),
     seller_id: listing.seller_id,
     listing_fingerprint: listing.listing_fingerprint,
+    listing_url: affiliateUrl,
     deal_score: dealScore,
     notification_type: notifyReason,
     delay_reason: delay.reason ?? undefined,
@@ -418,67 +410,105 @@ async function createAlertForMatch(
 
   result.alertsCreated++;
 
-  if (!watch.telegram_chat_id) {
-    console.log(`[${requestId}] User ${watch.user_id} has no Telegram connected`);
-    return;
-  }
-
   // ============================================
-  // AFFILIATE LINK GENERATION (V13)
-  // Convert listing URL to affiliate-tracked URL
+  // TELEGRAM NOTIFICATION
   // ============================================
-  const marketplace = getMarketplaceForCountry(shipToCountry);
-  const affiliateUrl = generateAffiliateUrlForCountry(listing.url, shipToCountry);
-  
-  // Log if affiliate tracking is active
-  if (affiliateUrl !== listing.url) {
-    console.log(`[${requestId}] Affiliate URL generated for marketplace ${marketplace}`);
-  }
+  if (watch.telegram_chat_id) {
+    const messageText = formatDealAlertMessage({
+      setNumber: listing.set_number,
+      setName: setName,
+      price: listing.price_eur,
+      shipping: listing.shipping_eur,
+      total: listing.total_eur,
+      target: watch.target_total_price_eur,
+      savings: savings,
+      sellerName: listing.seller_username,
+      condition: listing.condition ?? 'Unknown',
+      listingUrl: affiliateUrl,
+      shipFromCountry: listing.ship_from_country,
+      notifyReason: notifyReason,
+      importCharges: listing.import_charges_eur,
+      importChargesEstimated: listing.import_charges_estimated,
+      currency: listing.currency_original,
+    });
 
-  // V12: Include currency in message formatting
-  const messageText = formatDealAlertMessage({
-    setNumber: listing.set_number,
-    setName: setName,
-    price: listing.price_eur,
-    shipping: listing.shipping_eur,
-    total: listing.total_eur,
-    target: watch.target_total_price_eur,
-    savings: savings,
-    sellerName: listing.seller_username,
-    condition: listing.condition ?? 'Unknown',
-    listingUrl: affiliateUrl, // Use affiliate URL in message
-    shipFromCountry: listing.ship_from_country,
-    notifyReason: notifyReason,
-    // Import charges
-    importCharges: listing.import_charges_eur,
-    importChargesEstimated: listing.import_charges_estimated,
-    // Currency (V12) - use original currency from listing
-    currency: listing.currency_original,
-  });
-
-  await enqueueTelegramAlert(
-    {
-      alertId: alert.id,
-      chatId: watch.telegram_chat_id,
-      message: {
-        text: messageText,
-        reply_markup: {
-          inline_keyboard: [[
-            { text: '🔗 View on eBay', url: affiliateUrl }, // Use affiliate URL in button
-          ]],
+    await enqueueTelegramAlert(
+      {
+        alertId: alert.id,
+        chatId: watch.telegram_chat_id,
+        message: {
+          text: messageText,
+          reply_markup: {
+            inline_keyboard: [[
+              { text: '🔗 View on eBay', url: affiliateUrl },
+            ]],
+          },
         },
       },
-    },
-    {
-      delay: delay.delayMs,
-      jobId: `alert-${alert.id}`,
-    }
-  );
+      {
+        delay: delay.delayMs,
+        jobId: `alert-${alert.id}-tg`,
+      }
+    );
+
+    result.alertsQueued++;
+    console.log(`[${requestId}] Telegram alert ${alert.id} queued for user ${watch.user_id} (reason: ${notifyReason}, delay: ${delay.reason ?? 'none'})`);
+  }
+
+  // ============================================
+  // WEB PUSH NOTIFICATION
+  // ============================================
+  const hasPush = await userHasPushEnabled(watch.user_id);
+  if (hasPush) {
+    const reasonText = getNotificationReasonText(notifyReason);
+    const currencySymbol = getCurrencySymbol(listing.currency_original);
+    
+    await enqueuePushAlert(
+      {
+        alertId: alert.id,
+        userId: watch.user_id,
+        payload: {
+          title: `${listing.set_number} — ${reasonText}`,
+          body: `${currencySymbol}${listing.total_eur.toFixed(2)} (save ${currencySymbol}${savings.toFixed(2)})`,
+          icon: '/icon-192.png',
+          badge: '/badge-72.png',
+          data: {
+            alertId: alert.id,
+            setNumber: listing.set_number,
+            listingUrl: affiliateUrl,
+            url: `${config.appBaseUrl}/alerts/${alert.id}`,
+          },
+          actions: [
+            { action: 'buy', title: '🛒 Buy Now' },
+            { action: 'view', title: '👁 View' },
+          ],
+        },
+      },
+      {
+        delay: delay.delayMs,
+        jobId: `alert-${alert.id}-push`,
+      }
+    );
+
+    result.pushQueued++;
+    console.log(`[${requestId}] Push alert ${alert.id} queued for user ${watch.user_id}`);
+  }
 
   await incrementWatchAlertCount(watch.id);
+}
 
-  result.alertsQueued++;
-  console.log(`[${requestId}] Alert ${alert.id} queued for user ${watch.user_id} (reason: ${notifyReason}, delay: ${delay.reason ?? 'none'})`);
+/**
+ * Get currency symbol for display
+ */
+function getCurrencySymbol(currency: string | null | undefined): string {
+  if (!currency) return '€';
+  const symbols: Record<string, string> = {
+    'EUR': '€',
+    'GBP': '£',
+    'USD': '$',
+    'CAD': 'C$',
+  };
+  return symbols[currency.toUpperCase()] || '€';
 }
 
 export async function scanSingleSet(

@@ -6,6 +6,13 @@
   <title>ScoutLoot — LEGO Deal Radar</title>
   <meta name="description" content="Get instant Telegram alerts when LEGO sets drop below your target price. Track deals across eBay in USA, Canada, UK, and Europe.">
   
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0A0A0F">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ScoutLoot">
+  
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,50 +20,33 @@
   
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧱</text></svg>">
+  <link rel="apple-touch-icon" href="/icon-192.png">
   
   <style>
     :root {
-      /* Colors - Bold LEGO-inspired palette */
       --brick-red: #E3000B;
       --brick-yellow: #FFD500;
       --brick-blue: #006DB7;
       --brick-green: #00852B;
       --brick-orange: #FE8A18;
-      
-      /* Dark theme base */
       --bg-primary: #0A0A0F;
       --bg-secondary: #12121A;
       --bg-tertiary: #1A1A25;
       --bg-card: #16161F;
-      
-      /* Text */
       --text-primary: #FFFFFF;
       --text-secondary: #A0A0B0;
       --text-muted: #606070;
-      
-      /* Accents */
       --accent: var(--brick-yellow);
       --accent-hover: #FFE044;
       --success: #10B981;
       --error: #EF4444;
-      
-      /* Effects */
       --glow-yellow: 0 0 40px rgba(255, 213, 0, 0.3);
       --glow-red: 0 0 40px rgba(227, 0, 11, 0.3);
-      
-      /* Spacing */
       --nav-height: 72px;
     }
     
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    html {
-      scroll-behavior: smooth;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     
     body {
       font-family: 'Outfit', sans-serif;
@@ -66,39 +56,21 @@
       overflow-x: hidden;
     }
     
-    /* Animated background */
     .bg-pattern {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       pointer-events: none;
       z-index: 0;
       opacity: 0.03;
       background-image: 
-        repeating-linear-gradient(
-          0deg,
-          transparent,
-          transparent 50px,
-          rgba(255,213,0,0.5) 50px,
-          rgba(255,213,0,0.5) 51px
-        ),
-        repeating-linear-gradient(
-          90deg,
-          transparent,
-          transparent 50px,
-          rgba(255,213,0,0.5) 50px,
-          rgba(255,213,0,0.5) 51px
-        );
+        repeating-linear-gradient(0deg, transparent, transparent 50px, rgba(255,213,0,0.5) 50px, rgba(255,213,0,0.5) 51px),
+        repeating-linear-gradient(90deg, transparent, transparent 50px, rgba(255,213,0,0.5) 50px, rgba(255,213,0,0.5) 51px);
     }
     
-    /* Navigation */
     nav {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
+      top: 0; left: 0; right: 0;
       height: var(--nav-height);
       background: rgba(10, 10, 15, 0.9);
       backdrop-filter: blur(20px);
@@ -121,8 +93,7 @@
     }
     
     .logo-icon {
-      width: 40px;
-      height: 40px;
+      width: 40px; height: 40px;
       background: var(--brick-yellow);
       border-radius: 8px;
       display: flex;
@@ -145,9 +116,7 @@
       transition: color 0.2s;
     }
     
-    .nav-links a:hover {
-      color: var(--text-primary);
-    }
+    .nav-links a:hover { color: var(--text-primary); }
     
     .nav-auth {
       display: flex;
@@ -170,43 +139,26 @@
       text-decoration: none;
     }
     
-    .btn-ghost {
-      background: transparent;
-      color: var(--text-secondary);
-    }
+    .btn-ghost { background: transparent; color: var(--text-secondary); }
+    .btn-ghost:hover { color: var(--text-primary); background: rgba(255,255,255,0.05); }
     
-    .btn-ghost:hover {
-      color: var(--text-primary);
-      background: rgba(255,255,255,0.05);
-    }
+    .btn-primary { background: var(--accent); color: var(--bg-primary); }
+    .btn-primary:hover { background: var(--accent-hover); box-shadow: var(--glow-yellow); transform: translateY(-2px); }
     
-    .btn-primary {
-      background: var(--accent);
-      color: var(--bg-primary);
-    }
+    .btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid rgba(255,255,255,0.1); }
+    .btn-secondary:hover { background: var(--bg-card); border-color: rgba(255,255,255,0.2); }
     
-    .btn-primary:hover {
-      background: var(--accent-hover);
-      box-shadow: var(--glow-yellow);
-      transform: translateY(-2px);
-    }
+    .btn-large { padding: 16px 32px; font-size: 1.1rem; }
     
-    .btn-secondary {
-      background: var(--bg-tertiary);
-      color: var(--text-primary);
-      border: 1px solid rgba(255,255,255,0.1);
-    }
+    .btn-telegram { background: #0088CC; color: white; width: 100%; margin-bottom: 16px; }
+    .btn-telegram:hover { background: #0099DD; }
     
-    .btn-secondary:hover {
-      background: var(--bg-card);
-      border-color: rgba(255,255,255,0.2);
-    }
+    .btn-push { background: var(--brick-orange); color: white; width: 100%; }
+    .btn-push:hover { background: #FF9933; }
     
-    .btn-large {
-      padding: 16px 32px;
-      font-size: 1.1rem;
-    }
-    
+    .btn-danger { background: var(--error); color: white; }
+    .btn-danger:hover { background: #DC2626; }
+
     /* Hero Section */
     .hero {
       min-height: 100vh;
@@ -238,9 +190,7 @@
       animation: fadeInUp 0.6s ease-out;
     }
     
-    .hero-badge::before {
-      content: '🔔';
-    }
+    .hero-badge::before { content: '🔔'; }
     
     h1 {
       font-size: clamp(2.5rem, 6vw, 4.5rem);
@@ -276,10 +226,8 @@
     
     .hero-visual {
       position: absolute;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
+      width: 100%; height: 100%;
+      top: 0; left: 0;
       overflow: hidden;
       pointer-events: none;
     }
@@ -304,16 +252,10 @@
     }
     
     @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    
+
     /* Stats Bar */
     .stats-bar {
       background: var(--bg-secondary);
@@ -330,9 +272,7 @@
       gap: 40px;
     }
     
-    .stat {
-      text-align: center;
-    }
+    .stat { text-align: center; }
     
     .stat-value {
       font-family: 'Space Mono', monospace;
@@ -347,8 +287,8 @@
       color: var(--text-muted);
       margin-top: 4px;
     }
-    
-    /* How It Works */
+
+    /* Sections */
     .section {
       padding: 100px 40px;
       position: relative;
@@ -396,8 +336,7 @@
     }
     
     .step-number {
-      width: 56px;
-      height: 56px;
+      width: 56px; height: 56px;
       background: linear-gradient(135deg, var(--brick-yellow), var(--brick-orange));
       border-radius: 12px;
       display: flex;
@@ -420,11 +359,9 @@
       color: var(--text-secondary);
       font-size: 0.95rem;
     }
-    
+
     /* Features */
-    .features-section {
-      background: var(--bg-secondary);
-    }
+    .features-section { background: var(--bg-secondary); }
     
     .features-grid {
       max-width: 1200px;
@@ -444,13 +381,10 @@
       transition: all 0.3s;
     }
     
-    .feature-card:hover {
-      border-color: rgba(255,255,255,0.1);
-    }
+    .feature-card:hover { border-color: rgba(255,255,255,0.1); }
     
     .feature-icon {
-      width: 48px;
-      height: 48px;
+      width: 48px; height: 48px;
       background: rgba(255, 213, 0, 0.1);
       border-radius: 12px;
       display: flex;
@@ -470,7 +404,7 @@
       color: var(--text-secondary);
       font-size: 0.9rem;
     }
-    
+
     /* Pricing */
     .pricing-grid {
       max-width: 1000px;
@@ -550,19 +484,12 @@
       font-weight: 700;
     }
     
-    .pricing-features li:last-child {
-      border-bottom: none;
-    }
-    
+    .pricing-features li:last-child { border-bottom: none; }
+
     /* Demo Alert */
-    .demo-section {
-      background: var(--bg-secondary);
-    }
+    .demo-section { background: var(--bg-secondary); }
     
-    .demo-container {
-      max-width: 500px;
-      margin: 0 auto;
-    }
+    .demo-container { max-width: 500px; margin: 0 auto; }
     
     .demo-alert {
       background: #1E1E2E;
@@ -585,8 +512,7 @@
     }
     
     .telegram-icon {
-      width: 40px;
-      height: 40px;
+      width: 40px; height: 40px;
       background: #0088CC;
       border-radius: 50%;
       display: flex;
@@ -594,31 +520,12 @@
       justify-content: center;
     }
     
-    .demo-alert-content {
-      color: var(--text-primary);
-    }
-    
-    .demo-alert-content .emoji {
-      margin-right: 4px;
-    }
-    
-    .demo-alert-content .label {
-      color: var(--text-muted);
-    }
-    
-    .demo-alert-content .value {
-      color: var(--text-primary);
-    }
-    
-    .demo-alert-content .price {
-      color: var(--success);
-      font-weight: 700;
-    }
-    
-    .demo-alert-content .savings {
-      color: var(--accent);
-      font-weight: 700;
-    }
+    .demo-alert-content { color: var(--text-primary); }
+    .demo-alert-content .emoji { margin-right: 4px; }
+    .demo-alert-content .label { color: var(--text-muted); }
+    .demo-alert-content .value { color: var(--text-primary); }
+    .demo-alert-content .price { color: var(--success); font-weight: 700; }
+    .demo-alert-content .savings { color: var(--accent); font-weight: 700; }
     
     .demo-alert-btn {
       display: block;
@@ -632,7 +539,7 @@
       text-decoration: none;
       font-weight: 600;
     }
-    
+
     /* CTA Section */
     .cta-section {
       background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
@@ -653,7 +560,7 @@
       margin-left: auto;
       margin-right: auto;
     }
-    
+
     /* Footer */
     footer {
       background: var(--bg-secondary);
@@ -684,13 +591,8 @@
       margin-bottom: 20px;
     }
     
-    .footer-column ul {
-      list-style: none;
-    }
-    
-    .footer-column li {
-      margin-bottom: 12px;
-    }
+    .footer-column ul { list-style: none; }
+    .footer-column li { margin-bottom: 12px; }
     
     .footer-column a {
       color: var(--text-secondary);
@@ -699,10 +601,8 @@
       transition: color 0.2s;
     }
     
-    .footer-column a:hover {
-      color: var(--text-primary);
-    }
-    /* Source status badges */
+    .footer-column a:hover { color: var(--text-primary); }
+    
     .source-status {
       display: inline-flex;
       align-items: center;
@@ -713,21 +613,9 @@
       font-weight: 500;
     }
     
-    .source-status.active {
-      background: rgba(16, 185, 129, 0.15);
-      color: #10B981;
-    }
-    
-    .source-status.coming {
-      background: rgba(255, 213, 0, 0.15);
-      color: #FFD500;
-    }
-    
-    .source-status.reference {
-      background: rgba(160, 160, 176, 0.15);
-      color: #A0A0B0;
-    }
-
+    .source-status.active { background: rgba(16, 185, 129, 0.15); color: #10B981; }
+    .source-status.coming { background: rgba(255, 213, 0, 0.15); color: #FFD500; }
+    .source-status.reference { background: rgba(160, 160, 176, 0.15); color: #A0A0B0; }
     
     .footer-bottom {
       max-width: 1200px;
@@ -746,17 +634,13 @@
       text-decoration: none;
     }
     
-    .footer-bottom a:hover {
-      color: var(--text-secondary);
-    }
-    
-    /* Auth Modal */
+    .footer-bottom a:hover { color: var(--text-secondary); }
+
+    /* Modal */
     .modal-overlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       background: rgba(0,0,0,0.8);
       backdrop-filter: blur(10px);
       z-index: 2000;
@@ -780,20 +664,19 @@
       padding: 40px;
       width: 100%;
       max-width: 420px;
+      max-height: 90vh;
+      overflow-y: auto;
       transform: translateY(20px);
       transition: transform 0.3s;
+      position: relative;
     }
     
-    .modal-overlay.active .modal {
-      transform: translateY(0);
-    }
+    .modal-overlay.active .modal { transform: translateY(0); }
     
     .modal-close {
       position: absolute;
-      top: 16px;
-      right: 16px;
-      width: 40px;
-      height: 40px;
+      top: 16px; right: 16px;
+      width: 40px; height: 40px;
       background: var(--bg-tertiary);
       border: none;
       border-radius: 50%;
@@ -815,9 +698,7 @@
       margin-bottom: 32px;
     }
     
-    .form-group {
-      margin-bottom: 20px;
-    }
+    .form-group { margin-bottom: 20px; }
     
     .form-group label {
       display: block;
@@ -845,9 +726,7 @@
       box-shadow: 0 0 0 3px rgba(255, 213, 0, 0.1);
     }
     
-    .form-group input::placeholder {
-      color: var(--text-muted);
-    }
+    .form-group input::placeholder { color: var(--text-muted); }
     
     .form-divider {
       display: flex;
@@ -865,17 +744,6 @@
       background: rgba(255,255,255,0.1);
     }
     
-    .btn-telegram {
-      background: #0088CC;
-      color: white;
-      width: 100%;
-      margin-bottom: 16px;
-    }
-    
-    .btn-telegram:hover {
-      background: #0099DD;
-    }
-    
     .modal-footer {
       text-align: center;
       margin-top: 24px;
@@ -888,23 +756,13 @@
       text-decoration: none;
       font-weight: 500;
     }
+
+    /* Dashboard */
+    .dashboard { display: none; }
     
-    /* Dashboard Styles */
-    .dashboard {
-      display: none;
-    }
-    
-    body.logged-in .landing {
-      display: none;
-    }
-    
-    body.logged-in .dashboard {
-      display: block;
-    }
-    
-    body.logged-in nav .nav-links {
-      display: none;
-    }
+    body.logged-in .landing { display: none; }
+    body.logged-in .dashboard { display: block; }
+    body.logged-in nav .nav-links { display: none; }
     
     .dashboard-container {
       max-width: 1200px;
@@ -949,7 +807,54 @@
       font-size: 1.75rem;
       font-weight: 700;
     }
+
+    /* Dashboard Tabs */
+    .dashboard-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      background: var(--bg-secondary);
+      padding: 4px;
+      border-radius: 12px;
+      width: fit-content;
+    }
     
+    .dashboard-tab {
+      padding: 12px 24px;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .dashboard-tab:hover { color: var(--text-primary); }
+    
+    .dashboard-tab.active {
+      background: var(--bg-card);
+      color: var(--text-primary);
+    }
+    
+    .tab-badge {
+      background: var(--error);
+      color: white;
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 100px;
+      font-weight: 700;
+    }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Watches Section */
     .watches-section {
       background: var(--bg-card);
       border: 1px solid rgba(255,255,255,0.05);
@@ -965,9 +870,7 @@
       border-bottom: 1px solid rgba(255,255,255,0.05);
     }
     
-    .watches-header h2 {
-      font-size: 1.25rem;
-    }
+    .watches-header h2 { font-size: 1.25rem; }
     
     .watches-list {
       max-height: 500px;
@@ -982,33 +885,50 @@
       transition: background 0.2s;
     }
     
-    .watch-item:hover {
-      background: rgba(255,255,255,0.02);
-    }
+    .watch-item:hover { background: rgba(255,255,255,0.02); }
+    .watch-item:last-child { border-bottom: none; }
     
-    .watch-item:last-child {
-      border-bottom: none;
-    }
-    
-    .watch-icon {
-      width: 48px;
-      height: 48px;
-      background: rgba(255, 213, 0, 0.1);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
+    .watch-image {
+      width: 64px; height: 64px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--bg-tertiary);
+      flex-shrink: 0;
       margin-right: 16px;
     }
     
-    .watch-info {
-      flex: 1;
+    .watch-image img {
+      width: 100%; height: 100%;
+      object-fit: contain;
+      background: white;
+    }
+    
+    .watch-image-fallback {
+      width: 100%; height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      background: var(--bg-tertiary);
+    }
+    
+    .watch-info { flex: 1; }
+    
+    .watch-set-number {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 2px;
     }
     
     .watch-title {
       font-weight: 600;
       margin-bottom: 4px;
+    }
+    
+    .watch-year {
+      font-weight: 400;
+      color: var(--text-muted);
+      font-size: 0.9rem;
     }
     
     .watch-meta {
@@ -1033,6 +953,12 @@
       color: var(--text-muted);
     }
     
+    .watch-min-price {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    
     .watch-status {
       padding: 6px 12px;
       border-radius: 100px;
@@ -1042,35 +968,28 @@
       letter-spacing: 0.5px;
     }
     
-    .watch-status.active {
-      background: rgba(16, 185, 129, 0.1);
-      color: var(--success);
-    }
-    
-    .watch-status.stopped {
-      background: rgba(239, 68, 68, 0.1);
-      color: var(--error);
-    }
+    .watch-status.active { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+    .watch-status.stopped { background: rgba(239, 68, 68, 0.1); color: var(--error); }
     
     .watch-actions {
+      display: flex;
+      gap: 8px;
       margin-left: 16px;
     }
     
     .watch-actions button {
-      width: 36px;
-      height: 36px;
+      width: 36px; height: 36px;
       background: var(--bg-tertiary);
       border: none;
       border-radius: 8px;
       color: var(--text-muted);
       cursor: pointer;
       transition: all 0.2s;
+      font-size: 1rem;
     }
     
-    .watch-actions button:hover {
-      background: var(--error);
-      color: white;
-    }
+    .watch-actions .btn-edit:hover { background: var(--accent); color: var(--bg-primary); }
+    .watch-actions .btn-delete:hover { background: var(--error); color: white; }
     
     .empty-state {
       text-align: center;
@@ -1083,196 +1002,125 @@
       margin-bottom: 16px;
       opacity: 0.5;
     }
-    
-    /* Add Watch Modal */
-    .add-watch-form .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-    
-    /* Responsive */
-    @media (max-width: 1024px) {
-      .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-      
-      .steps-grid {
-        grid-template-columns: 1fr;
-        max-width: 500px;
-      }
-      
-      .features-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .pricing-grid {
-        grid-template-columns: 1fr;
-        max-width: 400px;
-      }
-      
-      .pricing-card.featured {
-        transform: none;
-      }
-      
-      .footer-content {
-        grid-template-columns: 1fr 1fr;
-      }
-      
-      .dashboard-stats {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-    
-    @media (max-width: 768px) {
-      nav {
-        padding: 0 20px;
-      }
-      
-      .nav-links {
-        display: none;
-      }
-      
-      .hero {
-        padding: 120px 20px 60px;
-      }
-      
-      .section {
-        padding: 60px 20px;
-      }
-      
-      .stats-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-      }
-      
-      .stat-value {
-        font-size: 1.75rem;
-      }
-      
-      .footer-content {
-        grid-template-columns: 1fr;
-        gap: 40px;
-      }
-      
-      .footer-bottom {
-        flex-direction: column;
-        gap: 16px;
-        text-align: center;
-      }
-      
-      .modal {
-        margin: 20px;
-        padding: 24px;
-      }
-      
-      .dashboard-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 16px;
-      }
-      
-      .dashboard-stats {
-        grid-template-columns: 1fr;
-      }
-      
-      .watch-item {
-        flex-wrap: wrap;
-        gap: 12px;
-      }
-      
-      .watch-price {
-        text-align: left;
-        margin-right: 0;
-      }
-    }
-    
-    
-    /* Watch image styles */
-    .watch-image {
-      width: 64px;
-      height: 64px;
-      border-radius: 8px;
+
+    /* Notifications Inbox */
+    .inbox-section {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 16px;
       overflow: hidden;
-      background: var(--bg-tertiary);
-      flex-shrink: 0;
-      margin-right: 16px;
     }
     
-    .watch-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      background: white;
+    .inbox-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
     }
     
-    .watch-image-fallback {
-      width: 100%;
-      height: 100%;
+    .inbox-header h2 { font-size: 1.25rem; }
+    
+    .inbox-list {
+      max-height: 600px;
+      overflow-y: auto;
+    }
+    
+    .inbox-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 20px 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .inbox-item:hover { background: rgba(255,255,255,0.02); }
+    .inbox-item:last-child { border-bottom: none; }
+    
+    .inbox-item.unread {
+      background: rgba(255, 213, 0, 0.03);
+      border-left: 3px solid var(--accent);
+    }
+    
+    .inbox-item-icon {
+      width: 48px; height: 48px;
+      background: rgba(255, 213, 0, 0.1);
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2rem;
-      background: var(--bg-tertiary);
+      font-size: 1.5rem;
+      flex-shrink: 0;
     }
     
-    .watch-set-number {
+    .inbox-item-content { flex: 1; min-width: 0; }
+    
+    .inbox-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 4px;
+    }
+    
+    .inbox-item-title {
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .inbox-item-time {
       font-size: 0.8rem;
       color: var(--text-muted);
-      margin-bottom: 2px;
+      white-space: nowrap;
+      margin-left: 12px;
     }
     
-    .watch-year {
-      font-weight: 400;
-      color: var(--text-muted);
-      font-size: 0.9rem;
+    .inbox-item-reason {
+      font-size: 0.85rem;
+      color: var(--brick-orange);
+      margin-bottom: 8px;
     }
     
-    .watch-min-price {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      margin-top: 4px;
+    .inbox-item-details {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
     }
     
-    .watch-actions {
+    .inbox-item-detail {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+    
+    .inbox-item-detail strong {
+      color: var(--success);
+    }
+    
+    .inbox-item-actions {
       display: flex;
       gap: 8px;
-      margin-left: 16px;
+      flex-shrink: 0;
     }
     
-    .watch-actions button {
-      width: 36px;
-      height: 36px;
-      background: var(--bg-tertiary);
-      border: none;
-      border-radius: 8px;
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: all 0.2s;
-      font-size: 1rem;
+    .inbox-item-actions .btn {
+      padding: 8px 16px;
+      font-size: 0.85rem;
     }
     
-    .watch-actions .btn-edit:hover {
-      background: var(--accent);
-      color: var(--bg-primary);
-    }
-    
-    .watch-actions .btn-delete:hover {
-      background: var(--error);
-      color: white;
+    .inbox-load-more {
+      padding: 20px;
+      text-align: center;
     }
 
-    
-    /* Set Autocomplete */
-    .autocomplete-container {
-      position: relative;
-    }
+    /* Autocomplete */
+    .autocomplete-container { position: relative; }
     
     .autocomplete-results {
       position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
+      top: 100%; left: 0; right: 0;
       background: var(--bg-tertiary);
       border: 1px solid rgba(255,255,255,0.1);
       border-radius: 10px;
@@ -1283,9 +1131,7 @@
       display: none;
     }
     
-    .autocomplete-results.active {
-      display: block;
-    }
+    .autocomplete-results.active { display: block; }
     
     .autocomplete-item {
       display: flex;
@@ -1296,17 +1142,11 @@
       transition: background 0.2s;
     }
     
-    .autocomplete-item:last-child {
-      border-bottom: none;
-    }
-    
-    .autocomplete-item:hover {
-      background: rgba(255,255,255,0.05);
-    }
+    .autocomplete-item:last-child { border-bottom: none; }
+    .autocomplete-item:hover { background: rgba(255,255,255,0.05); }
     
     .autocomplete-item-image {
-      width: 48px;
-      height: 48px;
+      width: 48px; height: 48px;
       border-radius: 6px;
       overflow: hidden;
       background: white;
@@ -1315,15 +1155,11 @@
     }
     
     .autocomplete-item-image img {
-      width: 100%;
-      height: 100%;
+      width: 100%; height: 100%;
       object-fit: contain;
     }
     
-    .autocomplete-item-info {
-      flex: 1;
-      min-width: 0;
-    }
+    .autocomplete-item-info { flex: 1; min-width: 0; }
     
     .autocomplete-item-name {
       font-weight: 500;
@@ -1337,23 +1173,14 @@
       color: var(--text-muted);
     }
     
-    .autocomplete-loading {
-      padding: 16px;
-      text-align: center;
-      color: var(--text-muted);
-    }
-    
-    .autocomplete-empty {
+    .autocomplete-loading, .autocomplete-empty {
       padding: 16px;
       text-align: center;
       color: var(--text-muted);
     }
 
-
-    /* User menu */
-    .user-menu {
-      position: relative;
-    }
+    /* User Menu */
+    .user-menu { position: relative; }
     
     .user-btn {
       display: flex;
@@ -1369,8 +1196,7 @@
     }
     
     .user-avatar {
-      width: 32px;
-      height: 32px;
+      width: 32px; height: 32px;
       background: var(--accent);
       border-radius: 50%;
       display: flex;
@@ -1382,8 +1208,7 @@
     
     .user-dropdown {
       position: absolute;
-      top: 100%;
-      right: 0;
+      top: 100%; right: 0;
       margin-top: 8px;
       background: var(--bg-card);
       border: 1px solid rgba(255,255,255,0.1);
@@ -1425,15 +1250,12 @@
       color: var(--text-primary);
     }
     
-    .user-dropdown .logout-btn {
-      color: var(--error);
-    }
-    
-    /* Toast Notifications */
+    .user-dropdown .logout-btn { color: var(--error); }
+
+    /* Toast */
     .toast-container {
       position: fixed;
-      bottom: 24px;
-      right: 24px;
+      bottom: 24px; right: 24px;
       z-index: 3000;
       display: flex;
       flex-direction: column;
@@ -1453,32 +1275,107 @@
       animation: slideIn 0.3s ease-out;
     }
     
-    .toast.success {
-      border-color: var(--success);
-    }
+    .toast.success { border-color: var(--success); }
+    .toast.error { border-color: var(--error); }
     
-    .toast.error {
-      border-color: var(--error);
-    }
-    
-    .toast-icon {
-      font-size: 1.25rem;
-    }
-    
-    .toast-message {
-      flex: 1;
-      font-size: 0.95rem;
-    }
+    .toast-icon { font-size: 1.25rem; }
+    .toast-message { flex: 1; font-size: 0.95rem; }
     
     @keyframes slideIn {
-      from {
-        transform: translateX(100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* Form Row */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    /* Push Status */
+    .push-status-box {
+      padding: 16px;
+      background: var(--bg-tertiary);
+      border-radius: 10px;
+      margin-bottom: 16px;
+    }
+    
+    .push-status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    
+    .push-status-row:last-child { margin-bottom: 0; }
+    
+    .push-status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .push-status-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+    }
+    
+    .push-status-dot.active { background: var(--success); }
+    .push-status-dot.inactive { background: var(--text-muted); }
+
+    /* iOS Instructions */
+    .ios-instructions {
+      background: rgba(255, 213, 0, 0.1);
+      border: 1px solid rgba(255, 213, 0, 0.3);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+      font-size: 0.9rem;
+    }
+    
+    .ios-instructions h4 {
+      color: var(--accent);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .ios-instructions ol {
+      margin-left: 20px;
+      color: var(--text-secondary);
+    }
+    
+    .ios-instructions li { margin-bottom: 4px; }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .steps-grid { grid-template-columns: 1fr; max-width: 500px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .pricing-grid { grid-template-columns: 1fr; max-width: 400px; }
+      .pricing-card.featured { transform: none; }
+      .footer-content { grid-template-columns: 1fr 1fr; }
+      .dashboard-stats { grid-template-columns: repeat(2, 1fr); }
+    }
+    
+    @media (max-width: 768px) {
+      nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      .hero { padding: 120px 20px 60px; }
+      .section { padding: 60px 20px; }
+      .stats-grid { grid-template-columns: 1fr 1fr; gap: 20px; }
+      .stat-value { font-size: 1.75rem; }
+      .footer-content { grid-template-columns: 1fr; gap: 40px; }
+      .footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
+      .modal { margin: 20px; padding: 24px; }
+      .dashboard-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+      .dashboard-stats { grid-template-columns: 1fr; }
+      .watch-item { flex-wrap: wrap; gap: 12px; }
+      .watch-price { text-align: left; margin-right: 0; }
+      .inbox-item { flex-wrap: wrap; }
+      .inbox-item-actions { width: 100%; justify-content: flex-end; margin-top: 8px; }
     }
   </style>
 </head>
@@ -1537,9 +1434,9 @@
       </div>
       
       <div class="hero-content">
-        <div class="hero-badge">Instant Telegram Alerts</div>
+        <div class="hero-badge">Instant Telegram & Push Alerts</div>
         <h1>Never Miss a <span class="highlight">LEGO Deal</span> Again</h1>
-        <p class="hero-subtitle">Set your target price, get instant Telegram alerts when deals drop. Available in USA, Canada, UK, and Europe. Stop overpaying for LEGO.</p>
+        <p class="hero-subtitle">Set your target price, get instant alerts when deals drop. Available in USA, Canada, UK, and Europe. Stop overpaying for LEGO.</p>
         <div class="hero-cta">
           <button class="btn btn-primary btn-large" onclick="openModal('signup')">
             🔔 Start Tracking Deals
@@ -1555,7 +1452,7 @@
     <div class="stats-bar">
       <div class="stats-grid">
         <div class="stat">
-          <span class="stat-value" id="stat-sets">10,000+</span>
+          <span class="stat-value">10,000+</span>
           <span class="stat-label">LEGO Sets Tracked</span>
         </div>
         <div class="stat">
@@ -1594,7 +1491,7 @@
         <div class="step-card">
           <div class="step-number">3</div>
           <h3>Get Instant Alerts</h3>
-          <p>When a deal hits your target, you get an instant Telegram notification with all details.</p>
+          <p>When a deal hits your target, you get instant Telegram or browser notifications with all details.</p>
         </div>
       </div>
     </section>
@@ -1624,8 +1521,8 @@
         <div class="feature-card">
           <div class="feature-icon">⚡</div>
           <div class="feature-content">
-            <h3>Instant Telegram Alerts</h3>
-            <p>Get notified in seconds when deals appear. Be the first to grab that rare set.</p>
+            <h3>Instant Alerts</h3>
+            <p>Get notified via Telegram or browser push in seconds. Be the first to grab that rare set.</p>
           </div>
         </div>
         <div class="feature-card">
@@ -1645,8 +1542,8 @@
         <div class="feature-card">
           <div class="feature-icon">📊</div>
           <div class="feature-content">
-            <h3>Price Comparison</h3>
-            <p>Compare prices across sources with BrickLink reference pricing. Always know if it's a good deal.</p>
+            <h3>Notifications Inbox</h3>
+            <p>All your alerts in one place. Never lose track of a deal even if you miss the push.</p>
           </div>
         </div>
       </div>
@@ -1656,7 +1553,7 @@
     <section class="section demo-section">
       <div class="section-header">
         <h2>Real-Time Alerts</h2>
-        <p>Here's what you'll receive on Telegram</p>
+        <p>Here's what you'll receive</p>
       </div>
       
       <div class="demo-container">
@@ -1720,7 +1617,7 @@
           <div class="pricing-price">€6.99<span>/month</span></div>
           <ul class="pricing-features">
             <li>25 active watches</li>
-            <li>Instant Telegram alerts</li>
+            <li>Instant Telegram & Push alerts</li>
             <li>Advanced filters</li>
             <li>Priority scanning</li>
             <li>100 alerts/day</li>
@@ -1733,7 +1630,7 @@
           <div class="pricing-price">€14.99<span>/month</span></div>
           <ul class="pricing-features">
             <li>100 active watches</li>
-            <li>Instant Telegram alerts</li>
+            <li>Instant Telegram & Push alerts</li>
             <li>All advanced filters</li>
             <li>Highest priority scanning</li>
             <li>500 alerts/day</li>
@@ -1821,7 +1718,7 @@
   <div class="dashboard">
     <div class="dashboard-container">
       <div class="dashboard-header">
-        <h1>Your Watches</h1>
+        <h1>Dashboard</h1>
         <button class="btn btn-primary" onclick="openModal('add-watch')">
           + Add Watch
         </button>
@@ -1846,14 +1743,46 @@
         </div>
       </div>
       
-      <div class="watches-section">
-        <div class="watches-header">
-          <h2>Your Watchlist</h2>
+      <!-- Dashboard Tabs -->
+      <div class="dashboard-tabs">
+        <button class="dashboard-tab active" onclick="switchTab('watches')">
+          👀 Watches
+        </button>
+        <button class="dashboard-tab" onclick="switchTab('notifications')" id="notifications-tab">
+          🔔 Notifications <span class="tab-badge" id="unread-badge" style="display: none;">0</span>
+        </button>
+      </div>
+      
+      <!-- Watches Tab -->
+      <div class="tab-content active" id="tab-watches">
+        <div class="watches-section">
+          <div class="watches-header">
+            <h2>Your Watchlist</h2>
+          </div>
+          <div class="watches-list" id="watches-list">
+            <div class="empty-state">
+              <div class="empty-state-icon">🔍</div>
+              <p>No watches yet. Add your first LEGO set to start tracking deals!</p>
+            </div>
+          </div>
         </div>
-        <div class="watches-list" id="watches-list">
-          <div class="empty-state">
-            <div class="empty-state-icon">🔍</div>
-            <p>No watches yet. Add your first LEGO set to start tracking deals!</p>
+      </div>
+      
+      <!-- Notifications Tab -->
+      <div class="tab-content" id="tab-notifications">
+        <div class="inbox-section">
+          <div class="inbox-header">
+            <h2>Notifications Inbox</h2>
+            <button class="btn btn-ghost" onclick="markAllRead()">Mark all read</button>
+          </div>
+          <div class="inbox-list" id="inbox-list">
+            <div class="empty-state">
+              <div class="empty-state-icon">🔔</div>
+              <p>No notifications yet. Alerts will appear here when deals are found!</p>
+            </div>
+          </div>
+          <div class="inbox-load-more" id="inbox-load-more" style="display: none;">
+            <button class="btn btn-secondary" onclick="loadMoreAlerts()">Load More</button>
           </div>
         </div>
       </div>
@@ -1862,7 +1791,7 @@
   
   <!-- Login Modal -->
   <div class="modal-overlay" id="modal-login">
-    <div class="modal" style="position: relative;">
+    <div class="modal">
       <button class="modal-close" onclick="closeModal('login')">×</button>
       <h2>Welcome Back</h2>
       <p class="modal-subtitle">Log in to your ScoutLoot account</p>
@@ -1890,7 +1819,7 @@
   
   <!-- Signup Modal -->
   <div class="modal-overlay" id="modal-signup">
-    <div class="modal" style="position: relative;">
+    <div class="modal">
       <button class="modal-close" onclick="closeModal('signup')">×</button>
       <h2>Create Account</h2>
       <p class="modal-subtitle">Start tracking LEGO deals in seconds</p>
@@ -1971,7 +1900,7 @@
   
   <!-- Add Watch Modal -->
   <div class="modal-overlay" id="modal-add-watch">
-    <div class="modal" style="position: relative;">
+    <div class="modal">
       <button class="modal-close" onclick="closeModal('add-watch')">×</button>
       <h2>Add Watch</h2>
       <p class="modal-subtitle">Start tracking a LEGO set</p>
@@ -2007,7 +1936,7 @@
   
   <!-- Edit Watch Modal -->
   <div class="modal-overlay" id="modal-edit-watch">
-    <div class="modal" style="position: relative;">
+    <div class="modal">
       <button class="modal-close" onclick="closeModal('edit-watch')">×</button>
       <h2>Edit Watch</h2>
       <p class="modal-subtitle" id="edit-watch-name">Edit your watch settings</p>
@@ -2042,7 +1971,7 @@
   
   <!-- Settings Modal -->
   <div class="modal-overlay" id="modal-settings">
-    <div class="modal" style="position: relative;">
+    <div class="modal">
       <button class="modal-close" onclick="closeModal('settings')">×</button>
       <h2>Settings</h2>
       <p class="modal-subtitle">Manage your account</p>
@@ -2151,7 +2080,38 @@
           Connect Telegram
         </button>
         
-        <div class="form-divider">Notifications</div>
+        <div class="form-divider">Push Notifications</div>
+        
+        <!-- iOS Instructions (shown conditionally) -->
+        <div class="ios-instructions" id="ios-instructions" style="display: none;">
+          <h4>📱 iPhone/iPad Instructions</h4>
+          <ol>
+            <li>Tap the Share button in Safari</li>
+            <li>Select "Add to Home Screen"</li>
+            <li>Open ScoutLoot from the home screen icon</li>
+            <li>Then enable Push Notifications below</li>
+          </ol>
+        </div>
+        
+        <div class="push-status-box" id="push-status-box">
+          <div class="push-status-row">
+            <span>Browser Push</span>
+            <div class="push-status-indicator">
+              <span class="push-status-dot" id="push-status-dot"></span>
+              <span id="push-status-text">Checking...</span>
+            </div>
+          </div>
+          <div class="push-status-row" id="push-devices-row" style="display: none;">
+            <span>Active Devices</span>
+            <span id="push-device-count">0</span>
+          </div>
+        </div>
+        
+        <button type="button" class="btn btn-push" id="push-toggle-btn" onclick="togglePushNotifications()">
+          Enable Push Notifications
+        </button>
+        
+        <div class="form-divider">Email Preferences</div>
         
         <div class="form-group">
           <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 8px 0;">
@@ -2180,7 +2140,7 @@
 
   <!-- Forgot Password Modal -->
   <div class="modal-overlay" id="modal-forgot-password">
-    <div class="modal" style="position: relative;">
+    <div class="modal">
       <button class="modal-close" onclick="closeModal('forgot-password')">×</button>
       <h2>Forgot Password?</h2>
       <p class="modal-subtitle">Enter your email and we'll send you a reset link</p>
@@ -2201,7 +2161,7 @@
   
   <!-- Reset Password Modal -->
   <div class="modal-overlay" id="modal-reset-password">
-    <div class="modal" style="position: relative;">
+    <div class="modal">
       <button class="modal-close" onclick="closeResetModal()">×</button>
       <h2>Reset Password</h2>
       <p class="modal-subtitle" id="reset-email-display">Enter your new password</p>
@@ -2220,6 +2180,26 @@
     </div>
   </div>
 
+  <!-- Alert Detail Modal -->
+  <div class="modal-overlay" id="modal-alert-detail">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal('alert-detail')">×</button>
+      <h2 id="alert-detail-title">Deal Alert</h2>
+      <p class="modal-subtitle" id="alert-detail-reason">New deal found!</p>
+      
+      <div id="alert-detail-content">
+        <!-- Populated by JS -->
+      </div>
+      
+      <div style="display: flex; gap: 12px; margin-top: 24px;">
+        <a href="#" id="alert-detail-buy-btn" class="btn btn-primary" style="flex: 1; text-align: center;" target="_blank">
+          🛒 Buy on eBay
+        </a>
+        <button class="btn btn-secondary" onclick="closeModal('alert-detail')">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Container -->
   <div class="toast-container" id="toast-container"></div>
   
@@ -2234,6 +2214,11 @@
       user: null,
       watches: [],
       alerts: [],
+      alertsCursor: null,
+      hasMoreAlerts: false,
+      unreadCount: 0,
+      pushSupported: false,
+      pushSubscribed: false,
     };
     
     // ===========================================
@@ -2255,7 +2240,7 @@
     }
     
     // ===========================================
-    // V13: REGIONAL HELPERS
+    // REGIONAL HELPERS
     // ===========================================
     
     function getUserCurrencySymbol() {
@@ -2315,7 +2300,6 @@
       const country = document.getElementById('signup-country').value;
       
       try {
-        // Validate password length
         if (password.length < 8) {
           showToast('Password must be at least 8 characters', 'error');
           return;
@@ -2327,8 +2311,6 @@
             email,
             password,
             ship_to_country: country,
-            weekly_digest_enabled: document.getElementById('settings-weekly-digest')?.checked ?? true,
-            still_available_reminders: document.getElementById('settings-still-available')?.checked ?? false,
             timezone: getDefaultTimezone(country),
           }),
         });
@@ -2352,7 +2334,6 @@
       const password = document.getElementById('login-password').value;
       
       try {
-        // Authenticate with email and password
         const user = await apiCall('/users/login', {
           method: 'POST',
           body: JSON.stringify({ email, password }),
@@ -2365,6 +2346,7 @@
         updateUI();
         showDashboard();
         await loadWatches();
+        await loadAlerts();
         showToast('Welcome back! 👋', 'success');
       } catch (error) {
         showToast('Invalid email or password', 'error');
@@ -2374,6 +2356,7 @@
     function logout() {
       state.user = null;
       state.watches = [];
+      state.alerts = [];
       clearStorage();
       document.body.classList.remove('logged-in');
       updateUI();
@@ -2428,8 +2411,8 @@
         updateDashboardStats();
         showToast(`Now tracking set ${setNumber}! 🔔`, 'success');
         
-        // Reset form
         event.target.reset();
+        selectedSetNumber = null;
       } catch (error) {
         showToast(error.message || 'Failed to add watch', 'error');
       }
@@ -2493,7 +2476,6 @@
       `).join('');
     }
     
-    
     // ===========================================
     // EDIT WATCH FUNCTIONS
     // ===========================================
@@ -2534,7 +2516,6 @@
           }),
         });
         
-        // Update local state
         const index = state.watches.findIndex(w => w.id === editingWatchId);
         if (index !== -1) {
           state.watches[index] = { ...state.watches[index], ...updated };
@@ -2549,7 +2530,232 @@
       }
     }
 
+    // ===========================================
+    // NOTIFICATIONS INBOX FUNCTIONS
+    // ===========================================
     
+    async function loadAlerts(reset = true) {
+      if (!state.user) return;
+      
+      try {
+        const cursor = reset ? '' : (state.alertsCursor ? `&cursor=${state.alertsCursor}` : '');
+        const data = await apiCall(`/alerts/inbox/${state.user.id}?limit=20${cursor}`);
+        
+        if (reset) {
+          state.alerts = data.alerts || [];
+        } else {
+          state.alerts = [...state.alerts, ...(data.alerts || [])];
+        }
+        
+        state.alertsCursor = data.nextCursor;
+        state.hasMoreAlerts = data.hasMore;
+        
+        renderInbox();
+        await updateUnreadCount();
+      } catch (error) {
+        console.error('Failed to load alerts:', error);
+      }
+    }
+    
+    async function loadMoreAlerts() {
+      await loadAlerts(false);
+    }
+    
+    async function updateUnreadCount() {
+      if (!state.user) return;
+      
+      try {
+        const data = await apiCall(`/alerts/unread-count/${state.user.id}`);
+        state.unreadCount = data.count || 0;
+        
+        const badge = document.getElementById('unread-badge');
+        if (state.unreadCount > 0) {
+          badge.textContent = state.unreadCount > 99 ? '99+' : state.unreadCount;
+          badge.style.display = 'inline';
+        } else {
+          badge.style.display = 'none';
+        }
+      } catch (error) {
+        console.error('Failed to get unread count:', error);
+      }
+    }
+    
+    async function markAlertRead(alertId) {
+      try {
+        await apiCall(`/alerts/${alertId}/read`, { method: 'POST' });
+        
+        const alert = state.alerts.find(a => a.id === alertId);
+        if (alert) {
+          alert.read_at = new Date().toISOString();
+        }
+        
+        renderInbox();
+        await updateUnreadCount();
+      } catch (error) {
+        console.error('Failed to mark alert read:', error);
+      }
+    }
+    
+    async function markAllRead() {
+      if (!state.user) return;
+      
+      try {
+        await apiCall(`/alerts/mark-all-read/${state.user.id}`, { method: 'POST' });
+        
+        state.alerts.forEach(a => a.read_at = new Date().toISOString());
+        
+        renderInbox();
+        await updateUnreadCount();
+        showToast('All notifications marked as read', 'success');
+      } catch (error) {
+        showToast('Failed to mark all as read', 'error');
+      }
+    }
+    
+    function renderInbox() {
+      const container = document.getElementById('inbox-list');
+      const loadMoreBtn = document.getElementById('inbox-load-more');
+      const currencySymbol = getUserCurrencySymbol();
+      
+      if (state.alerts.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">🔔</div>
+            <p>No notifications yet. Alerts will appear here when deals are found!</p>
+          </div>
+        `;
+        loadMoreBtn.style.display = 'none';
+        return;
+      }
+      
+      container.innerHTML = state.alerts.map(alert => {
+        const isUnread = !alert.read_at;
+        const timeAgo = getTimeAgo(alert.created_at);
+        const reason = getNotificationReason(alert.notification_type);
+        const savings = (parseFloat(alert.target_price_eur) - parseFloat(alert.total_eur)).toFixed(2);
+        
+        return `
+          <div class="inbox-item ${isUnread ? 'unread' : ''}" onclick="openAlertDetail(${alert.id})">
+            <div class="inbox-item-icon">🧱</div>
+            <div class="inbox-item-content">
+              <div class="inbox-item-header">
+                <div class="inbox-item-title">${alert.set_name || alert.set_number}</div>
+                <div class="inbox-item-time">${timeAgo}</div>
+              </div>
+              <div class="inbox-item-reason">${reason}</div>
+              <div class="inbox-item-details">
+                <div class="inbox-item-detail">💰 <strong>${currencySymbol}${parseFloat(alert.total_eur).toFixed(2)}</strong></div>
+                <div class="inbox-item-detail">🎯 Target: ${currencySymbol}${parseFloat(alert.target_price_eur).toFixed(2)}</div>
+                <div class="inbox-item-detail">✅ Save ${currencySymbol}${savings}</div>
+              </div>
+            </div>
+            <div class="inbox-item-actions" onclick="event.stopPropagation()">
+              <a href="${alert.listing_url || '#'}" class="btn btn-primary" target="_blank" onclick="markAlertRead(${alert.id})">Buy</a>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      loadMoreBtn.style.display = state.hasMoreAlerts ? 'block' : 'none';
+    }
+    
+    function getNotificationReason(type) {
+      const reasons = {
+        'first_notification': '🆕 First deal found!',
+        'better_deal': '🔥 Better deal found!',
+        'previous_sold': '🔄 Previous sold - new best!',
+        'price_drop': '📉 Price drop!',
+      };
+      return reasons[type] || '🧱 Deal alert';
+    }
+    
+    function getTimeAgo(dateStr) {
+      const date = new Date(dateStr);
+      const now = new Date();
+      const seconds = Math.floor((now - date) / 1000);
+      
+      if (seconds < 60) return 'Just now';
+      if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+      if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+      if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+      return date.toLocaleDateString();
+    }
+    
+    async function openAlertDetail(alertId) {
+      const alert = state.alerts.find(a => a.id === alertId);
+      if (!alert) return;
+      
+      // Mark as read
+      if (!alert.read_at) {
+        await markAlertRead(alertId);
+      }
+      
+      const currencySymbol = getUserCurrencySymbol();
+      const savings = (parseFloat(alert.target_price_eur) - parseFloat(alert.total_eur)).toFixed(2);
+      const savingsPercent = Math.round((savings / parseFloat(alert.target_price_eur)) * 100);
+      
+      document.getElementById('alert-detail-title').textContent = `${alert.set_number} - ${alert.set_name || 'LEGO Set'}`;
+      document.getElementById('alert-detail-reason').textContent = getNotificationReason(alert.notification_type);
+      
+      document.getElementById('alert-detail-content').innerHTML = `
+        <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+          <div style="display: grid; gap: 12px;">
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: var(--text-muted);">💰 Price</span>
+              <strong>${currencySymbol}${parseFloat(alert.price_eur).toFixed(2)}</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: var(--text-muted);">📦 Shipping</span>
+              <span>${currencySymbol}${parseFloat(alert.shipping_eur).toFixed(2)}</span>
+            </div>
+            ${alert.import_charges_eur > 0 ? `
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: var(--text-muted);">🛃 Import${alert.import_charges_estimated ? ' (est.)' : ''}</span>
+              <span>${currencySymbol}${parseFloat(alert.import_charges_eur).toFixed(2)}</span>
+            </div>
+            ` : ''}
+            <div style="display: flex; justify-content: space-between; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
+              <span style="color: var(--text-muted);">➡️ Total</span>
+              <strong style="color: var(--success);">${currencySymbol}${parseFloat(alert.total_eur).toFixed(2)}</strong>
+            </div>
+          </div>
+        </div>
+        
+        <div style="display: grid; gap: 8px; font-size: 0.95rem;">
+          <div>🎯 <span style="color: var(--text-muted);">Your target:</span> ${currencySymbol}${parseFloat(alert.target_price_eur).toFixed(2)}</div>
+          <div>✅ <span style="color: var(--text-muted);">You save:</span> <strong style="color: var(--accent);">${currencySymbol}${savings} (${savingsPercent}%)</strong></div>
+          <div style="margin-top: 8px;">📋 <span style="color: var(--text-muted);">Alert sent:</span> ${new Date(alert.created_at).toLocaleString()}</div>
+        </div>
+      `;
+      
+      document.getElementById('alert-detail-buy-btn').href = alert.listing_url || '#';
+      
+      openModal('alert-detail');
+    }
+    
+    // ===========================================
+    // DASHBOARD TABS
+    // ===========================================
+    
+    function switchTab(tabName) {
+      // Update tab buttons
+      document.querySelectorAll('.dashboard-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelector(`.dashboard-tab[onclick="switchTab('${tabName}')"]`).classList.add('active');
+      
+      // Update tab content
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      document.getElementById(`tab-${tabName}`).classList.add('active');
+      
+      // Load data if needed
+      if (tabName === 'notifications' && state.alerts.length === 0) {
+        loadAlerts();
+      }
+    }
+
     // ===========================================
     // SET AUTOCOMPLETE
     // ===========================================
@@ -2557,43 +2763,36 @@
     let autocompleteTimeout = null;
     let selectedSetNumber = null;
     
-    // Initialize autocomplete on page load
     document.addEventListener('DOMContentLoaded', () => {
       const input = document.getElementById('watch-set');
       const results = document.getElementById('set-autocomplete');
       
       if (!input || !results) return;
       
-      // Search as user types
       input.addEventListener('input', (e) => {
         const query = e.target.value.trim();
         selectedSetNumber = null;
         
-        // Clear previous timeout
         if (autocompleteTimeout) {
           clearTimeout(autocompleteTimeout);
         }
         
-        // Hide results if query too short
         if (query.length < 2) {
           results.classList.remove('active');
           return;
         }
         
-        // Debounce search (wait 300ms after typing stops)
         autocompleteTimeout = setTimeout(() => {
           searchSets(query);
         }, 300);
       });
       
-      // Hide results when clicking outside
       document.addEventListener('click', (e) => {
         if (!e.target.closest('.autocomplete-container')) {
           results.classList.remove('active');
         }
       });
       
-      // Show results when focusing on input with existing query
       input.addEventListener('focus', () => {
         const query = input.value.trim();
         if (query.length >= 2 && results.innerHTML) {
@@ -2605,7 +2804,6 @@
     async function searchSets(query) {
       const results = document.getElementById('set-autocomplete');
       
-      // Show loading state
       results.innerHTML = '<div class="autocomplete-loading">Searching...</div>';
       results.classList.add('active');
       
@@ -2647,7 +2845,6 @@
       selectedSetNumber = setNum;
       results.classList.remove('active');
       
-      // Focus on target price field
       document.getElementById('watch-target').focus();
       
       showToast(`Selected: ${setName}`, 'success');
@@ -2659,6 +2856,195 @@
       return div.innerHTML;
     }
 
+    // ===========================================
+    // PUSH NOTIFICATIONS
+    // ===========================================
+    
+    let vapidPublicKey = null;
+    
+    async function initPush() {
+      // Check if push is supported
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+        console.log('Push notifications not supported');
+        updatePushUI(false, 'Not supported');
+        return;
+      }
+      
+      state.pushSupported = true;
+      
+      // Show iOS instructions if needed
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+      
+      if (isIOS && !isStandalone) {
+        document.getElementById('ios-instructions').style.display = 'block';
+      }
+      
+      // Register service worker
+      try {
+        const registration = await navigator.serviceWorker.register('/sw.js');
+        console.log('Service worker registered:', registration);
+        
+        // Get VAPID key
+        const keyResponse = await fetch('/api/push/vapid-public-key');
+        const keyData = await keyResponse.json();
+        vapidPublicKey = keyData.publicKey;
+        
+        // Check subscription status
+        await checkPushSubscription();
+      } catch (error) {
+        console.error('Push init error:', error);
+        updatePushUI(false, 'Error');
+      }
+    }
+    
+    async function checkPushSubscription() {
+      if (!state.pushSupported || !state.user) return;
+      
+      try {
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.getSubscription();
+        
+        if (subscription) {
+          // Check if this subscription is registered on our server
+          const statusResponse = await fetch(`/api/push/status/${state.user.id}`);
+          const statusData = await statusResponse.json();
+          
+          state.pushSubscribed = statusData.hasActiveSubscriptions;
+          updatePushUI(state.pushSubscribed, state.pushSubscribed ? 'Enabled' : 'Disabled');
+          
+          if (statusData.deviceCount > 0) {
+            document.getElementById('push-devices-row').style.display = 'flex';
+            document.getElementById('push-device-count').textContent = statusData.deviceCount;
+          }
+        } else {
+          state.pushSubscribed = false;
+          updatePushUI(false, 'Disabled');
+        }
+      } catch (error) {
+        console.error('Check subscription error:', error);
+        updatePushUI(false, 'Error');
+      }
+    }
+    
+    function updatePushUI(enabled, statusText) {
+      const dot = document.getElementById('push-status-dot');
+      const text = document.getElementById('push-status-text');
+      const btn = document.getElementById('push-toggle-btn');
+      
+      dot.className = `push-status-dot ${enabled ? 'active' : 'inactive'}`;
+      text.textContent = statusText;
+      
+      if (enabled) {
+        btn.textContent = 'Disable Push Notifications';
+        btn.classList.remove('btn-push');
+        btn.classList.add('btn-danger');
+      } else {
+        btn.textContent = 'Enable Push Notifications';
+        btn.classList.remove('btn-danger');
+        btn.classList.add('btn-push');
+      }
+    }
+    
+    async function togglePushNotifications() {
+      if (!state.pushSupported) {
+        showToast('Push notifications are not supported on this browser', 'error');
+        return;
+      }
+      
+      if (!state.user) {
+        showToast('Please log in first', 'error');
+        return;
+      }
+      
+      if (state.pushSubscribed) {
+        await unsubscribePush();
+      } else {
+        await subscribePush();
+      }
+    }
+    
+    async function subscribePush() {
+      try {
+        const permission = await Notification.requestPermission();
+        
+        if (permission !== 'granted') {
+          showToast('Notification permission denied', 'error');
+          return;
+        }
+        
+        const registration = await navigator.serviceWorker.ready;
+        
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+        });
+        
+        // Send subscription to server
+        const response = await fetch('/api/push/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: state.user.id,
+            subscription: subscription.toJSON(),
+            userAgent: navigator.userAgent,
+          }),
+        });
+        
+        if (response.ok) {
+          state.pushSubscribed = true;
+          updatePushUI(true, 'Enabled');
+          showToast('Push notifications enabled! 🔔', 'success');
+          await checkPushSubscription();
+        } else {
+          throw new Error('Failed to save subscription');
+        }
+      } catch (error) {
+        console.error('Subscribe error:', error);
+        showToast('Failed to enable push notifications', 'error');
+      }
+    }
+    
+    async function unsubscribePush() {
+      try {
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.getSubscription();
+        
+        if (subscription) {
+          // Remove from server
+          await fetch('/api/push/unsubscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: state.user.id,
+              endpoint: subscription.endpoint,
+            }),
+          });
+          
+          // Unsubscribe locally
+          await subscription.unsubscribe();
+        }
+        
+        state.pushSubscribed = false;
+        updatePushUI(false, 'Disabled');
+        document.getElementById('push-devices-row').style.display = 'none';
+        showToast('Push notifications disabled', 'success');
+      } catch (error) {
+        console.error('Unsubscribe error:', error);
+        showToast('Failed to disable push notifications', 'error');
+      }
+    }
+    
+    function urlBase64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - base64String.length % 4) % 4);
+      const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+      const rawData = window.atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+      for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+      }
+      return outputArray;
+    }
 
     // ===========================================
     // SETTINGS FUNCTIONS
@@ -2685,7 +3071,7 @@
         saveToStorage('user', user);
         
         closeModal('settings');
-        renderWatches(); // Re-render to update currency symbol
+        renderWatches();
         showToast('Settings saved!', 'success');
       } catch (error) {
         showToast('Failed to save settings', 'error');
@@ -2693,124 +3079,10 @@
     }
     
     function connectTelegram() {
-      // Open Telegram bot link with user ID
-      const botUsername = 'BrickAlpha_bot'; // Your bot username
+      const botUsername = 'BrickAlpha_bot';
       const startParam = state.user ? `start=${state.user.id}` : '';
       window.open(`https://t.me/${botUsername}?${startParam}`, '_blank');
       showToast('Opening Telegram... Send /start to connect', 'success');
-    }
-    
-    // ===========================================
-    // UI FUNCTIONS
-    // ===========================================
-    
-    function updateUI() {
-      const navAuth = document.getElementById('nav-auth');
-      const userMenu = document.getElementById('user-menu');
-      
-      if (state.user) {
-        navAuth.style.display = 'none';
-        userMenu.style.display = 'block';
-        
-        const avatar = document.getElementById('user-avatar');
-        const emailSpan = document.getElementById('user-email');
-        
-        avatar.textContent = state.user.email.charAt(0).toUpperCase();
-        emailSpan.textContent = state.user.email;
-        
-        // Update settings form
-        if (state.user.ship_to_country) {
-          document.getElementById('settings-country').value = state.user.ship_to_country;
-          document.getElementById('settings-weekly-digest').checked = state.user.weekly_digest_enabled ?? true;
-          document.getElementById('settings-still-available').checked = state.user.still_available_reminders ?? false;
-        }
-        if (state.user.timezone) {
-          document.getElementById('settings-timezone').value = state.user.timezone;
-        }
-        
-        // Update telegram status
-        if (state.user.telegram_chat_id) {
-          document.getElementById('telegram-connected').style.display = 'inline';
-          document.getElementById('telegram-disconnected').style.display = 'none';
-        }
-      } else {
-        navAuth.style.display = 'flex';
-        userMenu.style.display = 'none';
-        document.body.classList.remove('logged-in');
-      }
-    }
-    
-    function updateDashboardStats() {
-      document.getElementById('dash-watches').textContent = state.watches.filter(w => w.status === 'active').length;
-      document.getElementById('dash-alerts-total').textContent = state.watches.reduce((sum, w) => sum + (w.total_alerts_sent || 0), 0);
-      document.getElementById('dash-tier').textContent = state.user?.subscription_tier ? 
-        state.user.subscription_tier.charAt(0).toUpperCase() + state.user.subscription_tier.slice(1) : 'Free';
-    }
-    
-    function showDashboard() {
-      document.body.classList.add('logged-in');
-      loadWatches();
-    }
-    
-    // ===========================================
-    // MODAL FUNCTIONS
-    // ===========================================
-    
-    function openModal(name) {
-      document.getElementById(`modal-${name}`).classList.add('active');
-    }
-    
-    function closeModal(name) {
-      document.getElementById(`modal-${name}`).classList.remove('active');
-    }
-    
-    function switchModal(from, to) {
-      closeModal(from);
-      setTimeout(() => openModal(to), 150);
-    }
-    
-    // Close modal on overlay click
-    document.querySelectorAll('.modal-overlay').forEach(overlay => {
-      overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) {
-          overlay.classList.remove('active');
-        }
-      });
-    });
-    
-    // Close modal on Escape key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
-      }
-    });
-    
-    // ===========================================
-    // TOAST NOTIFICATIONS
-    // ===========================================
-    
-    function showToast(message, type = 'success') {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
-      toast.className = `toast ${type}`;
-      toast.innerHTML = `
-        <span class="toast-icon">${type === 'success' ? '✔' : type === 'error' ? '✕' : 'ℹ'}</span>
-        <span class="toast-message">${message}</span>
-      `;
-      container.appendChild(toast);
-      
-      setTimeout(() => {
-        toast.style.animation = 'slideIn 0.3s ease-out reverse';
-        setTimeout(() => toast.remove(), 300);
-      }, 4000);
-    }
-    
-    // ===========================================
-    // UTILITY FUNCTIONS
-    // ===========================================
-    
-    function scrollTo(selector) {
-      document.querySelector(selector)?.scrollIntoView({ behavior: 'smooth' });
     }
     
     // ===========================================
@@ -2840,7 +3112,7 @@
         
         if (response.ok) {
           closeModal('forgot-password');
-          showToast('If an account exists, a reset link has been sent. Check your inbox (and spam folder) - it may take a few minutes to arrive.', 'success');
+          showToast('If an account exists, a reset link has been sent.', 'success');
           document.getElementById('forgot-email').value = '';
         } else {
           showToast(data.error || 'Failed to send reset email', 'error');
@@ -2946,33 +3218,164 @@
         }
       }
     }
+    
+    // Check for alert deep link
+    async function checkForAlertDeepLink() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const alertId = urlParams.get('alert');
+      
+      if (alertId && state.user) {
+        // Switch to notifications tab and load the alert
+        switchTab('notifications');
+        await loadAlerts();
+        
+        // Try to open the alert detail
+        const alert = state.alerts.find(a => a.id === parseInt(alertId));
+        if (alert) {
+          openAlertDetail(alert.id);
+        }
+        
+        // Clean URL
+        const url = new URL(window.location);
+        url.searchParams.delete('alert');
+        window.history.replaceState({}, '', url);
+      }
+    }
 
+    // ===========================================
+    // UI FUNCTIONS
+    // ===========================================
+    
+    function updateUI() {
+      const navAuth = document.getElementById('nav-auth');
+      const userMenu = document.getElementById('user-menu');
+      
+      if (state.user) {
+        navAuth.style.display = 'none';
+        userMenu.style.display = 'block';
+        
+        const avatar = document.getElementById('user-avatar');
+        const emailSpan = document.getElementById('user-email');
+        
+        avatar.textContent = state.user.email.charAt(0).toUpperCase();
+        emailSpan.textContent = state.user.email;
+        
+        if (state.user.ship_to_country) {
+          document.getElementById('settings-country').value = state.user.ship_to_country;
+          document.getElementById('settings-weekly-digest').checked = state.user.weekly_digest_enabled ?? true;
+          document.getElementById('settings-still-available').checked = state.user.still_available_reminders ?? false;
+        }
+        if (state.user.timezone) {
+          document.getElementById('settings-timezone').value = state.user.timezone;
+        }
+        
+        if (state.user.telegram_chat_id) {
+          document.getElementById('telegram-connected').style.display = 'inline';
+          document.getElementById('telegram-disconnected').style.display = 'none';
+        }
+        
+        // Init push after user is loaded
+        initPush();
+      } else {
+        navAuth.style.display = 'flex';
+        userMenu.style.display = 'none';
+        document.body.classList.remove('logged-in');
+      }
+    }
+    
+    function updateDashboardStats() {
+      document.getElementById('dash-watches').textContent = state.watches.filter(w => w.status === 'active').length;
+      document.getElementById('dash-alerts-total').textContent = state.watches.reduce((sum, w) => sum + (w.total_alerts_sent || 0), 0);
+      document.getElementById('dash-tier').textContent = state.user?.subscription_tier ? 
+        state.user.subscription_tier.charAt(0).toUpperCase() + state.user.subscription_tier.slice(1) : 'Free';
+    }
+    
+    function showDashboard() {
+      document.body.classList.add('logged-in');
+      loadWatches();
+      loadAlerts();
+    }
+    
+    // ===========================================
+    // MODAL FUNCTIONS
+    // ===========================================
+    
+    function openModal(name) {
+      document.getElementById(`modal-${name}`).classList.add('active');
+    }
+    
+    function closeModal(name) {
+      document.getElementById(`modal-${name}`).classList.remove('active');
+    }
+    
+    function switchModal(from, to) {
+      closeModal(from);
+      setTimeout(() => openModal(to), 150);
+    }
+    
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          overlay.classList.remove('active');
+        }
+      });
+    });
+    
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
+      }
+    });
+    
+    // ===========================================
+    // TOAST NOTIFICATIONS
+    // ===========================================
+    
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `
+        <span class="toast-icon">${type === 'success' ? '✔' : type === 'error' ? '✕' : 'ℹ'}</span>
+        <span class="toast-message">${message}</span>
+      `;
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.animation = 'slideIn 0.3s ease-out reverse';
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+    
+    // ===========================================
+    // UTILITY FUNCTIONS
+    // ===========================================
+    
+    function scrollTo(selector) {
+      document.querySelector(selector)?.scrollIntoView({ behavior: 'smooth' });
+    }
     
     // ===========================================
     // INITIALIZATION
     // ===========================================
     
     async function init() {
-      // Load user from storage
       const savedUser = loadFromStorage('user');
       if (savedUser) {
-        // Verify user still exists
         try {
           const user = await apiCall(`/users/${savedUser.id}`);
           state.user = user;
           updateUI();
           showDashboard();
         } catch (error) {
-          // User no longer exists, clear storage
           clearStorage();
         }
       }
       
-      // Check for password reset token in URL
       await checkForResetToken();
+      await checkForAlertDeepLink();
     }
     
-    // Run on page load
     document.addEventListener('DOMContentLoaded', init);
   </script>
 </body>

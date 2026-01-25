@@ -3,6 +3,7 @@
  * 
  * Handles:
  * - Telegram message queue processing
+ * - Push notification queue processing
  * - Scheduled cron jobs:
  *   - Weekly Digest: Sunday 9:00 AM UTC
  *   - Still-Available Reminders: Daily 10:00 AM UTC
@@ -10,6 +11,7 @@
 
 import { config } from './config.js';
 import { createTelegramWorker } from './jobs/telegramWorker.js';
+import { createPushWorker } from './jobs/pushWorker.js';
 import { runWeeklyDigest, runStillAvailableReminders } from './jobs/scheduledJobs.js';
 import { closeRedis } from './db/redis.js';
 import { closePool } from './db/index.js';
@@ -23,6 +25,13 @@ console.log(`   Environment: ${config.nodeEnv}`);
 
 const telegramWorker = createTelegramWorker();
 console.log('✅ Telegram worker started');
+
+// ============================================
+// PUSH NOTIFICATION QUEUE WORKER
+// ============================================
+
+const pushWorker = createPushWorker();
+console.log('✅ Push notification worker started');
 
 // ============================================
 // CRON JOB SCHEDULER
@@ -126,6 +135,7 @@ runCronScheduler();
 async function shutdown(): Promise<void> {
   console.log('Shutting down worker...');
   await telegramWorker.close();
+  await pushWorker.close();
   await closeRedis();
   await closePool();
   process.exit(0);
