@@ -1,0 +1,178 @@
+import { Router, Request, Response } from 'express';
+import {
+  createUser,
+  getUserById,
+  getUserByEmail,
+  connectTelegram,
+  disconnectTelegram,
+  updateUserLocation,
+  updateQuietHours,
+} from '../services/users.js';
+
+const router = Router();
+
+router.post('/', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email, password_hash, ship_to_country, timezone } = req.body;
+
+    if (!email || !password_hash) {
+      res.status(400).json({
+        error: 'Missing required fields: email, password_hash',
+      });
+      return;
+    }
+
+    const user = await createUser({
+      email,
+      password_hash,
+      ship_to_country,
+      timezone,
+    });
+
+    const { password_hash: _, ...safeUser } = user;
+    res.status(201).json(safeUser);
+  } catch (error: unknown) {
+    const err = error as { code?: string };
+    if (err.code === '23505') {
+      res.status(409).json({ error: 'Email already exists' });
+      return;
+    }
+    console.error('Create user error:', error);
+    res.status(500).json({ error: 'Failed to create user' });
+  }
+});
+
+router.get('/:id', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+      res.status(400).json({ error: 'Invalid user ID' });
+      return;
+    }
+
+    const user = await getUserById(id);
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    const { password_hash: _, ...safeUser } = user;
+    res.json(safeUser);
+  } catch (error) {
+    console.error('Get user error:', error);
+    res.status(500).json({ error: 'Failed to get user' });
+  }
+});
+
+router.get('/email/:email', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const user = await getUserByEmail(req.params.email);
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    const { password_hash: _, ...safeUser } = user;
+    res.json(safeUser);
+  } catch (error) {
+    console.error('Get user error:', error);
+    res.status(500).json({ error: 'Failed to get user' });
+  }
+});
+
+router.post('/:id/telegram', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const { telegram_chat_id, telegram_user_id, telegram_username } = req.body;
+
+    if (isNaN(id) || !telegram_chat_id || !telegram_user_id) {
+      res.status(400).json({
+        error: 'Missing required fields: telegram_chat_id, telegram_user_id',
+      });
+      return;
+    }
+
+    const user = await connectTelegram(id, {
+      telegram_chat_id,
+      telegram_user_id,
+      telegram_username,
+    });
+
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    const { password_hash: _, ...safeUser } = user;
+    res.json(safeUser);
+  } catch (error) {
+    console.error('Connect telegram error:', error);
+    res.status(500).json({ error: 'Failed to connect Telegram' });
+  }
+});
+
+router.delete('/:id/telegram', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+      res.status(400).json({ error: 'Invalid user ID' });
+      return;
+    }
+
+    await disconnectTelegram(id);
+    res.status(204).send();
+  } catch (error) {
+    console.error('Disconnect telegram error:', error);
+    res.status(500).json({ error: 'Failed to disconnect Telegram' });
+  }
+});
+
+router.patch('/:id/location', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const { ship_to_country, ship_to_postal_code } = req.body;
+
+    if (isNaN(id) || !ship_to_country) {
+      res.status(400).json({ error: 'Missing ship_to_country' });
+      return;
+    }
+
+    const user = await updateUserLocation(id, ship_to_country, ship_to_postal_code);
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    const { password_hash: _, ...safeUser } = user;
+    res.json(safeUser);
+  } catch (error) {
+    console.error('Update location error:', error);
+    res.status(500).json({ error: 'Failed to update location' });
+  }
+});
+
+router.patch('/:id/quiet-hours', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const { quiet_hours_start, quiet_hours_end } = req.body;
+
+    if (isNaN(id)) {
+      res.status(400).json({ error: 'Invalid user ID' });
+      return;
+    }
+
+    const user = await updateQuietHours(id, quiet_hours_start, quiet_hours_end);
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    const { password_hash: _, ...safeUser } = user;
+    res.json(safeUser);
+  } catch (error) {
+    console.error('Update quiet hours error:', error);
+    res.status(500).json({ error: 'Failed to update quiet hours' });
+  }
+});
+
+export default router;
