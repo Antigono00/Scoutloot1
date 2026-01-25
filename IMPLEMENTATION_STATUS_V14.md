@@ -9,11 +9,51 @@ The app is live at **https://scoutloot.com** with:
 - **NEW: Web Push Notifications** (dual channel with Telegram)
 - **NEW: Notifications Inbox** (view all alerts in browser)
 - **NEW: PWA Support** (installable web app)
+- **FIXED: Minor EU markets** (SK, CZ, PT, etc. now return correct EU listings)
 - USA & Canada marketplace support (EBAY_US, EBAY_CA)
 - UK marketplace support (EBAY_GB)
 - Complete EU coverage (EBAY_DE, EBAY_FR, EBAY_ES, EBAY_IT)
 - Import charges calculation (EU↔UK)
 - Multi-currency support (€/£/$)
+
+---
+
+## ✅ V14.1 Bug Fix (January 25, 2026)
+
+### Minor EU Markets Fix
+
+**Problem discovered:** Users in Slovakia (SK) and other minor EU markets were getting US listings instead of EU listings.
+
+**Root cause:** The `itemLocationRegion:EUROPEAN_UNION` filter combined with `deliveryCountry:SK` caused eBay API to return incorrect results (US listings).
+
+**Solution:** Removed the `itemLocationRegion:EUROPEAN_UNION` filter for EU countries without their own eBay marketplace. The `ship_from_countries` post-filter handles EU-only filtering, and `deliveryCountry` still ensures correct shipping calculation.
+
+**Countries affected (now fixed):**
+| Country | Code | Mapped To |
+|---------|------|-----------|
+| Slovakia | SK | EBAY_DE |
+| Czechia | CZ | EBAY_DE |
+| Portugal | PT | EBAY_ES |
+| Luxembourg | LU | EBAY_DE |
+| Greece | GR | EBAY_DE |
+| Malta | MT | EBAY_IT |
+| Cyprus | CY | EBAY_DE |
+| Sweden | SE | EBAY_DE |
+| Denmark | DK | EBAY_DE |
+| Finland | FI | EBAY_DE |
+| Estonia | EE | EBAY_DE |
+| Latvia | LV | EBAY_DE |
+| Lithuania | LT | EBAY_DE |
+| Hungary | HU | EBAY_DE |
+| Slovenia | SI | EBAY_AT |
+| Croatia | HR | EBAY_DE |
+| Romania | RO | EBAY_DE |
+| Bulgaria | BG | EBAY_DE |
+
+**Countries using EUROPEAN_UNION filter (works correctly):**
+DE, FR, ES, IT, NL, BE, AT, IE, PL
+
+**File changed:** `src/providers/ebay/client.ts`
 
 ---
 
@@ -31,7 +71,7 @@ The app is live at **https://scoutloot.com** with:
   - `src/routes/push.ts` - Push API endpoints
 
 ### 2. Notifications Inbox
-- **Browser-based alert history**: View all deals in one place
+- **Browser-based alert history**: View all deals in browser
 - **Read/unread tracking**: Know which alerts you've seen
 - **Pagination support**: Cursor-based pagination
 - **Deep linking**: Push notifications open specific alerts
@@ -143,7 +183,7 @@ npm install --save-dev @types/web-push
 | `alert_history` | Sent alerts with read status |
 | `watch_notification_state` | Tracks last notification per watch |
 | `subscription_tiers` | Tier limits configuration |
-| `push_subscriptions` | **NEW** Web push subscriptions |
+| `push_subscriptions` | Web push subscriptions |
 
 ---
 
@@ -163,35 +203,35 @@ npm install --save-dev @types/web-push
 │   ├── jobs/
 │   │   ├── telegramQueue.ts      # Telegram BullMQ queue
 │   │   ├── telegramWorker.ts     # Telegram worker
-│   │   ├── pushQueue.ts          # NEW: Push BullMQ queue
-│   │   ├── pushWorker.ts         # NEW: Push worker
+│   │   ├── pushQueue.ts          # Push BullMQ queue
+│   │   ├── pushWorker.ts         # Push worker
 │   │   └── scheduledJobs.ts      # Cron jobs
 │   │
 │   ├── providers/
 │   │   └── ebay/
 │   │       ├── auth.ts           # eBay OAuth
-│   │       ├── client.ts         # eBay API (US/CA/UK/EU)
+│   │       ├── client.ts         # eBay API (US/CA/UK/EU) - UPDATED V14.1
 │   │       ├── normalizer.ts     # Listing normalizer
 │   │       ├── types.ts          # TypeScript types
 │   │       └── index.ts          # Provider exports
 │   │
 │   ├── routes/
 │   │   ├── index.ts              # Main router
-│   │   ├── alerts.ts             # UPDATED: Inbox endpoints
-│   │   ├── push.ts               # NEW: Push notification routes
+│   │   ├── alerts.ts             # Alerts + Inbox routes
+│   │   ├── push.ts               # Push notification routes
 │   │   ├── scan.ts               # Scan routes
 │   │   ├── sets.ts               # Sets search
 │   │   ├── users.ts              # Users routes
 │   │   └── watches.ts            # Watches routes
 │   │
 │   ├── services/
-│   │   ├── alerts.ts             # UPDATED: Inbox queries
-│   │   ├── delay.ts              # Alert delay calculation
+│   │   ├── alerts.ts             # Alert logic + inbox queries
+│   │   ├── delay.ts              # Delay calculation
 │   │   ├── email.ts              # Resend email service
 │   │   ├── listings.ts           # Listings CRUD
 │   │   ├── notificationState.ts  # Notification state
-│   │   ├── push.ts               # NEW: Push notification service
-│   │   ├── scanner.ts            # UPDATED: Dual notifications
+│   │   ├── push.ts               # Push notification service
+│   │   ├── scanner.ts            # Scan cycle (dual notifications)
 │   │   ├── sets.ts               # Sets lookup
 │   │   ├── sync-sets.ts          # Rebrickable sync
 │   │   ├── users.ts              # Users CRUD
@@ -211,9 +251,9 @@ npm install --save-dev @types/web-push
 │       └── time.ts               # Time utilities
 │
 ├── public/
-│   ├── index.html                # UPDATED: Full SPA with inbox
-│   ├── sw.js                     # NEW: Service worker
-│   ├── manifest.json             # NEW: PWA manifest
+│   ├── index.html                # Full SPA with inbox
+│   ├── sw.js                     # Service worker
+│   ├── manifest.json             # PWA manifest
 │   ├── privacy.html              # Privacy policy
 │   ├── terms.html                # Terms of service
 │   └── faq.html                  # FAQ page
@@ -271,6 +311,15 @@ curl https://scoutloot.com/api/push/queue-stats | jq
 # Check VAPID key
 curl https://scoutloot.com/api/push/vapid-public-key | jq
 
+# Test minor EU market search (SK should return EU listings)
+cd /var/www/scoutloot/app && node -e "
+const { searchEbay } = require('./dist/providers/ebay/client.js');
+searchEbay('75192', 'SK', { limit: 5 }).then(r => {
+  console.log('Total:', r.total);
+  r.itemSummaries?.slice(0,5).forEach(i => console.log(i.itemLocation?.country, i.price?.value));
+});
+"
+
 # View logs
 pm2 logs scoutloot --lines 50
 pm2 logs scoutloot-worker --lines 50
@@ -280,7 +329,7 @@ pm2 logs scoutloot-worker --lines 50
 
 ## 📋 API Endpoints (V14)
 
-### Push Notifications (NEW)
+### Push Notifications
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/push/vapid-public-key` | Get VAPID public key |
@@ -292,7 +341,7 @@ pm2 logs scoutloot-worker --lines 50
 | GET | `/api/push/queue-stats` | Queue statistics |
 | POST | `/api/push/test/:userId` | Send test notification |
 
-### Alerts Inbox (NEW)
+### Alerts Inbox
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/alerts/inbox/:userId` | Get paginated alerts |
@@ -307,6 +356,7 @@ pm2 logs scoutloot-worker --lines 50
 
 | Version | Date | Key Changes |
 |---------|------|-------------|
+| V14.1 | Jan 25, 2026 | Fix minor EU markets (SK, CZ, PT, etc.) returning wrong listings |
 | V14 | Jan 25, 2026 | Web Push notifications, Notifications Inbox, PWA support |
 | V13 | Jan 25, 2026 | USA/Canada support, region-aware ship_from |
 | V12 | Jan 25, 2026 | Currency symbols, LED filter, rate limiting |
@@ -316,7 +366,7 @@ pm2 logs scoutloot-worker --lines 50
 
 ---
 
-## 📧 Server Info
+## 🔧 Server Info
 
 ```
 Server: ssh root@188.166.160.168
@@ -328,7 +378,7 @@ GitHub: https://github.com/Antigono00/Scoutloot1
 
 ---
 
-## 🔜 Next Steps
+## 📜 Next Steps
 
 ### Immediate
 - [ ] BrickOwl API integration (awaiting API access)

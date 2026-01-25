@@ -61,6 +61,12 @@ const COUNTRY_TO_MARKETPLACE: Record<string, string> = {
 const DEFAULT_MARKETPLACE = 'EBAY_DE';
 
 /**
+ * EU countries that have their own eBay marketplace
+ * For these, the itemLocationRegion:EUROPEAN_UNION filter works correctly
+ */
+const EU_COUNTRIES_WITH_MARKETPLACE = ['DE', 'FR', 'ES', 'IT', 'NL', 'BE', 'AT', 'IE', 'PL'];
+
+/**
  * Get the eBay marketplace ID for a given country
  */
 export function getMarketplaceForCountry(country: string): string {
@@ -93,9 +99,14 @@ export function getRegionalBlock(countryCode: string): 'north_america' | 'eu_uk'
 /**
  * Determine the item location region filter based on destination country
  * 
- * For EU users: Search EU region (itemLocationRegion:EUROPEAN_UNION)
- * For UK users: No region restriction (allows both UK and EU, post-filter handles it)
- * For US/CA users: No region restriction (uses ship_from_countries post-filter)
+ * IMPORTANT: The itemLocationRegion:EUROPEAN_UNION filter only works correctly
+ * when combined with deliveryCountry for countries that have their own eBay marketplace.
+ * 
+ * For minor EU markets (SK, CZ, PT, etc.), using this filter causes eBay to return
+ * incorrect results (e.g., US listings instead of EU). For these countries, we rely
+ * on the ship_from_countries post-filter to keep only EU sellers.
+ * 
+ * The deliveryCountry filter still ensures shipping costs are calculated correctly.
  */
 function getItemLocationRegion(shipToCountry: string): string {
   const upper = shipToCountry.toUpperCase();
@@ -110,8 +121,17 @@ function getItemLocationRegion(shipToCountry: string): string {
     return '';
   }
   
-  // EU users: Search EU region
-  return 'EUROPEAN_UNION';
+  // EU countries WITH their own eBay marketplace: use EUROPEAN_UNION filter
+  // This works correctly for DE, FR, ES, IT, NL, BE, AT, IE, PL
+  if (EU_COUNTRIES_WITH_MARKETPLACE.includes(upper)) {
+    return 'EUROPEAN_UNION';
+  }
+  
+  // EU countries WITHOUT their own marketplace (SK, CZ, PT, LU, GR, etc.):
+  // No region filter - it causes eBay to return incorrect results
+  // The ship_from_countries post-filter will keep only EU sellers
+  // deliveryCountry still ensures correct shipping calculation
+  return '';
 }
 
 function buildFilters(shipToCountry: string): string {
