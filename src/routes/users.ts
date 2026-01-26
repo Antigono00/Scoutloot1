@@ -18,7 +18,7 @@ import {
   changePassword,
   exportUserData,
 } from '../services/users.js';
-import { sendPasswordResetEmail } from '../services/email.js';
+import { sendPasswordResetEmail, sendWelcomeEmail } from '../services/email.js';
 
 const router = Router();
 
@@ -56,6 +56,11 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       timezone,
       weekly_digest_enabled: weekly_digest_enabled ?? true,  // Default ON
       still_available_reminders: still_available_reminders ?? false,  // Default OFF
+    });
+
+    // Send welcome email (fire and forget - don't block signup)
+    sendWelcomeEmail(email).catch(err => {
+      console.error('[Signup] Failed to send welcome email:', err);
     });
 
     const { password_hash: _, reset_token: _rt, reset_token_expires: _rte, ...safeUser } = user;

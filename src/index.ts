@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import rateLimit from 'express-rate-limit';
+import helmet from 'helmet';
 import { config } from './config.js';
 import { pool, closePool } from './db/index.js';
 import { redis, closeRedis } from './db/redis.js';
@@ -16,6 +17,21 @@ const app = express();
 
 // Trust Nginx proxy (required for rate limiting behind reverse proxy)
 app.set('trust proxy', 1);
+
+// Security headers
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],  // Needed for inline onclick handlers
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", "https://api.resend.com"],
+    },
+  },
+  crossOriginEmbedderPolicy: false,  // Allow embedding images from eBay
+}));
 
 // ============================================
 // SECURITY: Block suspicious paths FIRST
@@ -234,6 +250,7 @@ app.listen(config.port, () => {
   console.log(`🧱 ScoutLoot running on port ${config.port}`);
   console.log(`   Environment: ${config.nodeEnv}`);
   console.log(`   Rate limiting: enabled`);
+  console.log(`   Security headers: enabled (Helmet)`);
   console.log(`   Frontend: http://localhost:${config.port}/`);
   console.log(`   Health check: http://localhost:${config.port}/health`);
   console.log(`   API base: http://localhost:${config.port}/api`);

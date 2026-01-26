@@ -172,8 +172,12 @@ function formatWeeklyDigest(
     message += `\n`;
   }
   
-  message += `_Manage your watches at ${formatLink('scoutloot\\.com', 'https://scoutloot.com')}_\n`;
-  message += `_Disable weekly digest in Settings if you don't want these\\._`;
+  // Footer with unsubscribe instructions
+  message += `_Manage your watches at ${formatLink('scoutloot\\.com', 'https://scoutloot.com')}_\n\n`;
+  message += `📧 _To unsubscribe from weekly digests:_\n`;
+  message += `_1\\. Go to ${formatLink('scoutloot\\.com', 'https://scoutloot.com')}_\n`;
+  message += `_2\\. Click Settings \\(⚙️\\)_\n`;
+  message += `_3\\. Uncheck "Weekly Digest"_`;
   
   return message;
 }
