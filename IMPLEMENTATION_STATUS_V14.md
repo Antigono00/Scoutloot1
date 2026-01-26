@@ -1,4 +1,4 @@
-# ScoutLoot Implementation Status V14.4
+# ScoutLoot Implementation Status V14.5
 ## Updated: January 26, 2026
 
 ---
@@ -6,7 +6,8 @@
 ## 🎯 Current Status: PRODUCTION + GLOBAL + WEB PUSH + FULL GDPR COMPLIANCE
 
 The app is live at **https://scoutloot.com** with:
-- **NEW V14.4: GDPR Frontend** (Cookie Banner, Delete Account UI, Change Password UI, Export Data UI)
+- **NEW V14.5: Frontend Code Split** (Separate HTML/CSS/JS files for maintainability)
+- V14.4: GDPR Frontend (Cookie Banner, Delete Account UI, Change Password UI, Export Data UI)
 - V14.3: GDPR Backend (Delete Account, Change Password, Export Data APIs)
 - V14.2: Weekly Digest Fixed, Country Change Resets, Registration Preferences
 - V14.2: Post-Signup Setup Modal, Jobs API
@@ -18,6 +19,45 @@ The app is live at **https://scoutloot.com** with:
 - Complete EU coverage (EBAY_DE, EBAY_FR, EBAY_ES, EBAY_IT)
 - Import charges calculation (EU↔UK)
 - Multi-currency support (€/£/$)
+
+---
+
+## ✅ V14.5 Features (January 26, 2026)
+
+### Frontend Code Split
+
+Split monolithic `index.html` (~4000 lines) into three separate files for better maintainability:
+
+#### File Structure
+```
+public/
+├── index.html      (1,027 lines) - HTML structure only
+├── css/
+│   └── styles.css  (1,545 lines) - All CSS styles
+└── js/
+    └── app.js      (1,446 lines) - All JavaScript
+```
+
+#### Benefits
+- **Easier maintenance**: Edit CSS without touching HTML/JS
+- **Better caching**: Browser can cache CSS/JS separately
+- **Cleaner diffs**: Git changes are isolated to specific files
+- **IDE support**: Better syntax highlighting and linting per file type
+
+#### Technical Details
+- HTML references external files:
+  ```html
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="/js/app.js"></script>
+  ```
+- All onclick handlers preserved (functions remain in global scope)
+- DOMContentLoaded listener at end of app.js
+- Zero functional changes - pure code organization
+
+#### Files Changed
+- `public/index.html` - Reduced to HTML structure only
+- `public/css/styles.css` - NEW: All CSS extracted
+- `public/js/app.js` - NEW: All JavaScript extracted
 
 ---
 
@@ -108,9 +148,6 @@ Plus Twitter Card tags for Twitter/X sharing.
   - Export My Data button (📥)
   - Delete Account button (🗑️)
   - Red border styling for visual warning
-
-### Files Changed
-- `public/index.html` - Complete frontend update (~4000 lines)
 
 ### New CSS Classes
 ```css
@@ -226,7 +263,7 @@ Fixed minor EU markets (SK, CZ, PT, etc.) returning wrong listings by removing `
 
 ---
 
-## 📋 API Endpoints (V14.4)
+## 📋 API Endpoints (V14.5)
 
 ### Users (GDPR Compliant)
 | Method | Endpoint | Description |
@@ -268,7 +305,8 @@ Fixed minor EU markets (SK, CZ, PT, etc.) returning wrong listings by removing `
 
 | Version | Date | Key Changes |
 |---------|------|-------------|
-| **V14.4** | **Jan 26, 2026** | **GDPR Frontend: Cookie Banner, Delete Account UI, Change Password UI, Export Data UI, Loading Spinners, Fixed Stats, OG Tags, About Section** |
+| **V14.5** | **Jan 26, 2026** | **Frontend Code Split: Separate HTML/CSS/JS files** |
+| V14.4 | Jan 26, 2026 | GDPR Frontend: Cookie Banner, Delete Account UI, Change Password UI, Export Data UI, Loading Spinners, Fixed Stats, OG Tags, About Section |
 | V14.3 | Jan 26, 2026 | GDPR Backend: Delete Account, Change Password, Export Data APIs |
 | V14.2 | Jan 26, 2026 | Weekly digest fix, country change reset, registration prefs, setup modal, jobs API |
 | V14.1 | Jan 25, 2026 | Fix minor EU markets (SK, CZ, PT, etc.) returning wrong listings |
