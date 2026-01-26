@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FAQ â€” ScoutLoot</title>
+  <title>FAQ — ScoutLoot</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>ðŸ§±</text></svg>">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/icon-192.png">
   <style>
     :root {
       --bg-primary: #0A0A0F;
@@ -174,7 +175,7 @@
 <body>
   <nav>
     <a href="/" class="logo">
-      <div class="logo-icon">ðŸ§±</div>
+      <img src="/logo-icon.png" alt="ScoutLoot" class="logo-icon">
       <span>ScoutLoot</span>
     </a>
   </nav>
@@ -189,7 +190,7 @@
       <button class="faq-question">What is ScoutLoot?</button>
       <div class="faq-answer">
         <div class="faq-answer-content">
-          ScoutLoot is a deal alert service for LEGO collectors. We monitor eBay listings across 5 EU marketplaces and compare prices to BrickLink market data. When prices drop below your target, we send instant Telegram alerts. More marketplaces coming soon!
+          ScoutLoot is a deal alert service for LEGO collectors. We monitor eBay listings across USA, Canada, UK, and EU marketplaces and compare prices to BrickLink market data. When prices drop below your target, we send instant Telegram or browser push alerts. More marketplaces coming soon!
         </div>
       </div>
     </div>
@@ -200,7 +201,7 @@
         <div class="faq-answer-content">
           <ol style="padding-left: 20px;">
             <li>Create a free account on ScoutLoot</li>
-            <li>Connect your Telegram account</li>
+            <li>Connect your Telegram account or enable browser push notifications</li>
             <li>Add LEGO sets to your watchlist with your target prices</li>
             <li>Wait for alerts to arrive when deals match your criteria!</li>
           </ol>
@@ -223,7 +224,7 @@
       <button class="faq-question">Which marketplaces do you scan?</button>
       <div class="faq-answer">
         <div class="faq-answer-content">
-          Currently we scan all major European eBay marketplaces: Germany, France, Spain, Italy, and Netherlands. We also use BrickLink price data as a reference so you can see how deals compare to market averages. More marketplaces (BrickOwl, Amazon, retailers) coming soon!
+          We scan eBay marketplaces in your region — USA, Canada, UK, or Europe (Germany, France, Spain, Italy). We also use BrickLink price data as a reference so you can see how deals compare to market averages. More marketplaces (BrickOwl, Amazon, retailers) coming soon!
         </div>
       </div>
     </div>
@@ -232,7 +233,7 @@
       <button class="faq-question">Does the price include shipping?</button>
       <div class="faq-answer">
         <div class="faq-answer-content">
-          Yes! All prices shown include estimated shipping to your country. We calculate shipping to your destination country, so the total you see is the total you pay. No hidden costs or surprise fees at checkout.
+          Yes! All prices shown include estimated shipping to your country. For cross-border purchases (like UK to EU or EU to UK), we also calculate and show estimated import charges. The total you see is the total you pay.
         </div>
       </div>
     </div>
@@ -241,7 +242,7 @@
       <button class="faq-question">How fast are the alerts?</button>
       <div class="faq-answer">
         <div class="faq-answer-content">
-          Our system scans marketplaces every 15 minutes. When a deal matching your criteria appears, you'll typically receive a Telegram notification within minutes. For paid subscribers, alerts are sent instantly without batching delays.
+          Our system scans marketplaces every 15 minutes during active hours (7am-11pm your time). When a deal matching your criteria appears, you'll typically receive a Telegram or push notification within minutes. For paid subscribers, alerts are sent instantly without batching delays.
         </div>
       </div>
     </div>
@@ -250,18 +251,23 @@
       <button class="faq-question">Why do I only get one alert per day for the same set?</button>
       <div class="faq-answer">
         <div class="faq-answer-content">
-          To prevent spam, we only alert you once per day for each LEGO setâ€”unless a better deal appears. If a cheaper listing is found after your first alert, you'll get a new notification immediately. This ensures you always know about the best deal without being overwhelmed.
+          To prevent spam, we only alert you once per day for each LEGO set—unless a better deal appears. If a cheaper listing is found after your first alert, you'll get a new notification immediately. This ensures you always know about the best deal without being overwhelmed.
         </div>
       </div>
     </div>
     
-    <div class="faq-category">Telegram</div>
+    <div class="faq-category">Notifications</div>
     
     <div class="faq-item">
-      <button class="faq-question">Why do I need Telegram?</button>
+      <button class="faq-question">What notification options do I have?</button>
       <div class="faq-answer">
         <div class="faq-answer-content">
-          Telegram allows us to send you instant, reliable notifications directly to your phone. Unlike email, Telegram messages arrive immediately and don't get lost in spam folders. It's free, fast, and secure.
+          We offer two notification channels:
+          <ul style="padding-left: 20px; margin-top: 12px;">
+            <li><strong>Telegram:</strong> Most reliable, instant delivery to your phone</li>
+            <li><strong>Browser Push:</strong> Works on desktop and mobile browsers, even when the site is closed</li>
+          </ul>
+          You can use both at the same time for maximum coverage!
         </div>
       </div>
     </div>
@@ -271,9 +277,9 @@
       <div class="faq-answer">
         <div class="faq-answer-content">
           <ol style="padding-left: 20px;">
-            <li>Open Telegram and search for <strong>@ScoutLootBot</strong></li>
+            <li>Open Telegram and search for <strong>@BrickAlpha_bot</strong></li>
             <li>Send the /start command</li>
-            <li>The bot will give you a code to enter in your ScoutLoot settings</li>
+            <li>The bot will automatically link to your ScoutLoot account</li>
             <li>That's it! You'll start receiving alerts.</li>
           </ol>
         </div>
@@ -284,7 +290,7 @@
       <button class="faq-question">Can I use WhatsApp or email instead?</button>
       <div class="faq-answer">
         <div class="faq-answer-content">
-          Currently, we only support Telegram notifications. We chose Telegram because it's free, has excellent bot support, and delivers messages instantly. Email notifications may be added in the future for paid subscribers.
+          Currently, we support Telegram and browser push notifications. We chose Telegram because it's free, has excellent bot support, and delivers messages instantly. Email notifications may be added in the future for paid subscribers.
         </div>
       </div>
     </div>
@@ -296,8 +302,8 @@
       <div class="faq-answer">
         <div class="faq-answer-content">
           <strong>Free:</strong> Track 3 sets, daily email digest, basic filters<br><br>
-          <strong>Collector (â‚¬6.99/mo):</strong> 25 watches, instant Telegram alerts, advanced filters, 100 alerts/day<br><br>
-          <strong>Dealer (â‚¬14.99/mo):</strong> 100 watches, highest priority scanning, 500 alerts/day
+          <strong>Collector (€6.99/mo):</strong> 25 watches, instant Telegram & push alerts, advanced filters, 100 alerts/day<br><br>
+          <strong>Dealer (€14.99/mo):</strong> 100 watches, highest priority scanning, 500 alerts/day
         </div>
       </div>
     </div>
@@ -320,7 +326,8 @@
           Common reasons:
           <ul style="padding-left: 20px; margin-top: 12px;">
             <li>Your target price may be too low for current market prices</li>
-            <li>Telegram may not be connected properlyâ€”try reconnecting</li>
+            <li>Telegram may not be connected properly—try reconnecting</li>
+            <li>Browser push notifications may be blocked—check your browser settings</li>
             <li>You may have reached your daily alert limit</li>
             <li>The set may be rare with few listings</li>
           </ul>
@@ -333,7 +340,7 @@
       <button class="faq-question">The deal was already sold when I clicked the link</button>
       <div class="faq-answer">
         <div class="faq-answer-content">
-          Hot deals can sell within minutes! While we scan frequently and alert quickly, popular sets at low prices get snapped up fast. We recommend enabling Telegram notifications on your phone so you see alerts immediately.
+          Hot deals can sell within minutes! While we scan frequently and alert quickly, popular sets at low prices get snapped up fast. We recommend enabling both Telegram and push notifications on your phone so you see alerts immediately.
         </div>
       </div>
     </div>
@@ -357,7 +364,8 @@
     <a href="/">Home</a>
     <a href="/privacy">Privacy Policy</a>
     <a href="/terms">Terms of Service</a>
-    <p style="margin-top: 24px;">Â© 2026 ScoutLoot. Not affiliated with LEGO Group, eBay Inc, or BrickLink.</p>
+    <a href="/cookies">Cookie Policy</a>
+    <p style="margin-top: 24px;">© 2026 ScoutLoot. Not affiliated with LEGO Group, eBay Inc, or BrickLink.</p>
   </footer>
   
   <script>

@@ -324,7 +324,7 @@ function renderWatches() {
     <div class="watch-item" data-watch-id="${watch.id}">
       <div class="watch-image">
         ${watch.set_image_url 
-          ? `<img src="${watch.set_image_url}" alt="${watch.set_number}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="watch-image-fallback" style="display:none">🧱</div>`
+          ? `<img loading="lazy" src="${watch.set_image_url}" alt="${watch.set_number}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="watch-image-fallback" style="display:none">🧱</div>`
           : '<div class="watch-image-fallback">🧱</div>'
         }
       </div>

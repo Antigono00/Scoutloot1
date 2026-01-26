@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://scoutloot.com/sitemap.xml
+
+# Block API endpoints from indexing
+Disallow: /api/
+
+# Block service worker and manifest
+Disallow: /sw.js
+Disallow: /manifest.json

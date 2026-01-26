@@ -25,7 +25,8 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],  // Needed for inline onclick handlers
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrcAttr: ["'unsafe-inline'"],  // Needed for inline onclick handlers
       imgSrc: ["'self'", "data:", "https:"],
       connectSrc: ["'self'", "https://api.resend.com"],
     },
@@ -215,7 +216,7 @@ app.get('/faq', (_req, res) => {
 });
 
 app.get('/cookies', (_req, res) => {
-  res.redirect('/privacy#cookies');
+  res.sendFile(path.join(publicPath, 'cookies.html'));
 });
 
 // ============================================
