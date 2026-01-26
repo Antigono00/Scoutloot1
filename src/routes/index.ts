@@ -1,22 +1,36 @@
+/**
+ * Main Router
+ * 
+ * Aggregates all API routes
+ */
+
 import { Router } from 'express';
-import scanRoutes from './scan.js';
-import watchesRoutes from './watches.js';
-import usersRoutes from './users.js';
-import alertsRoutes from './alerts.js';
-import testRoutes from './test.js';
-import setsRoutes from './sets.js';
-import jobsRoutes from './jobs.js';
-import pushRoutes from './push.js';
+import usersRouter from './users.js';
+import watchesRouter from './watches.js';
+import alertsRouter from './alerts.js';
+import scanRouter from './scan.js';
+import setsRouter from './sets.js';
+import pushRouter from './push.js';
+import jobsRouter from './jobs.js';
 
 const router = Router();
 
-router.use('/scan', scanRoutes);
-router.use('/watches', watchesRoutes);
-router.use('/users', usersRoutes);
-router.use('/alerts', alertsRoutes);
-router.use('/test', testRoutes);
-router.use('/sets', setsRoutes);
-router.use('/jobs', jobsRoutes);
-router.use('/push', pushRoutes);
+// Mount routes
+router.use('/users', usersRouter);
+router.use('/watches', watchesRouter);
+router.use('/alerts', alertsRouter);
+router.use('/scan', scanRouter);
+router.use('/sets', setsRouter);
+router.use('/push', pushRouter);
+router.use('/jobs', jobsRouter);
+
+// Health check
+router.get('/health', (_req, res) => {
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    version: 'v14.2',
+  });
+});
 
 export default router;

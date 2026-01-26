@@ -32,7 +32,7 @@ interface DigestWatch {
   id: number;
   set_number: string;
   set_name: string | null;
-  target_price: number;
+  target_total_price_eur: number;
   total_alerts_sent: number;
   last_alert_at: Date | null;
   status: string;
@@ -50,7 +50,7 @@ interface ReminderCandidate {
   watch_id: number;
   set_number: string;
   set_name: string | null;
-  target_price: number;
+  target_total_price_eur: number;
   listing_id: string;
   listing_price: number;
   listing_url: string | null;
@@ -84,7 +84,7 @@ async function getDigestUsers(): Promise<DigestUser[]> {
  */
 async function getUserWatches(userId: number): Promise<DigestWatch[]> {
   const result = await query<DigestWatch>(
-    `SELECT w.id, w.set_number, s.name as set_name, w.target_price, 
+    `SELECT w.id, w.set_number, s.name as set_name, w.target_total_price_eur, 
             w.total_alerts_sent, w.last_alert_at, w.status
      FROM watches w
      LEFT JOIN sets s ON w.set_number = s.set_number
@@ -141,9 +141,10 @@ function formatWeeklyDigest(
     for (const alert of alerts.slice(0, 5)) {
       const watch = watches.find(w => w.set_number === alert.set_number);
       const setName = watch?.set_name || alert.set_number;
-      const savings = watch ? watch.target_price - Number(alert.total_eur) : 0;
-      const savingsPercent = watch && watch.target_price > 0 
-        ? Math.round((savings / watch.target_price) * 100) 
+      const targetPrice = watch ? Number(watch.target_total_price_eur) : 0;
+      const savings = targetPrice > 0 ? targetPrice - Number(alert.total_eur) : 0;
+      const savingsPercent = targetPrice > 0 
+        ? Math.round((savings / targetPrice) * 100) 
         : 0;
       
       message += `\n• *${escapeMarkdownV2(alert.set_number)}* \\- ${escapeMarkdownV2(setName)}\n`;
@@ -163,7 +164,7 @@ function formatWeeklyDigest(
     message += `👀 *Active Watches:*\n`;
     for (const watch of activeWatches.slice(0, 10)) {
       const setName = watch.set_name || watch.set_number;
-      message += `• ${escapeMarkdownV2(watch.set_number)} \\- ${escapeMarkdownV2(setName)} \\(target: ${formatPrice(watch.target_price)}\\)\n`;
+      message += `• ${escapeMarkdownV2(watch.set_number)} \\- ${escapeMarkdownV2(setName)} \\(target: ${formatPrice(watch.target_total_price_eur)}\\)\n`;
     }
     if (activeWatches.length > 10) {
       message += `_\\.\\.\\. and ${activeWatches.length - 10} more_\n`;
@@ -267,7 +268,7 @@ async function getReminderCandidates(): Promise<ReminderCandidate[]> {
        wns.reminder_count,
        w.user_id,
        w.set_number,
-       w.target_price,
+       w.target_total_price_eur,
        s.name as set_name,
        u.telegram_chat_id,
        u.ship_to_country
@@ -283,7 +284,7 @@ async function getReminderCandidates(): Promise<ReminderCandidate[]> {
        AND wns.notified_at <= NOW() - INTERVAL '3 days'
        AND wns.reminder_count < 2
        AND (wns.reminder_sent_at IS NULL OR wns.reminder_sent_at <= NOW() - INTERVAL '3 days')
-       AND wns.listing_price < w.target_price * 0.80  -- >20% off
+       AND wns.listing_price < w.target_total_price_eur * 0.80  -- >20% off
      ORDER BY wns.notified_at ASC`
   );
   return result.rows;
@@ -391,7 +392,7 @@ export async function runStillAvailableReminders(): Promise<{
           setNumber: candidate.set_number,
           setName: candidate.set_name || candidate.set_number,
           price: price,
-          targetPrice: Number(candidate.target_price),
+          targetPrice: Number(candidate.target_total_price_eur),
           daysAvailable: daysAvailable,
           listingUrl: candidate.listing_url || '',
         });

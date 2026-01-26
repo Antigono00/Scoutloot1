@@ -159,6 +159,11 @@
     .btn-danger { background: var(--error); color: white; }
     .btn-danger:hover { background: #DC2626; }
 
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
     /* Hero Section */
     .hero {
       min-height: 100vh;
@@ -727,6 +732,37 @@
     }
     
     .form-group input::placeholder { color: var(--text-muted); }
+
+    /* Checkbox styling */
+    .checkbox-group {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--accent);
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .checkbox-group .checkbox-label {
+      flex: 1;
+    }
+
+    .checkbox-group .checkbox-title {
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .checkbox-group .checkbox-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
     
     .form-divider {
       display: flex;
@@ -1349,6 +1385,59 @@
     
     .ios-instructions li { margin-bottom: 4px; }
 
+    /* Setup Options */
+    .setup-options {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .setup-option {
+      background: var(--bg-tertiary);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .setup-option:hover {
+      border-color: var(--accent);
+      background: rgba(255, 213, 0, 0.05);
+    }
+
+    .setup-option-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .setup-option-icon {
+      font-size: 1.5rem;
+    }
+
+    .setup-option-title {
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    .setup-option-desc {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-left: 36px;
+    }
+
+    .setup-option.connected {
+      border-color: var(--success);
+      background: rgba(16, 185, 129, 0.05);
+    }
+
+    .setup-option.connected .setup-option-title::after {
+      content: ' ✓';
+      color: var(--success);
+    }
+
     /* Responsive */
     @media (max-width: 1024px) {
       .stats-grid { grid-template-columns: repeat(2, 1fr); }
@@ -1808,7 +1897,7 @@
         <div style="text-align: right; margin-bottom: 16px;">
           <a href="#" onclick="switchModal('login', 'forgot-password'); return false;" style="font-size: 0.85rem; color: var(--accent); text-decoration: none;">Forgot password?</a>
         </div>
-        <button type="submit" class="btn btn-primary" style="width: 100%;">Log In</button>
+        <button type="submit" class="btn btn-primary" style="width: 100%;" id="login-submit-btn">Log In</button>
       </form>
       
       <div class="modal-footer">
@@ -1880,20 +1969,69 @@
             </optgroup>
           </select>
         </div>
-        <button type="submit" class="btn btn-primary" style="width: 100%;">Create Account</button>
+        
+        <div class="form-divider">Notification Preferences</div>
+        
+        <div class="checkbox-group">
+          <input type="checkbox" id="signup-weekly-digest" checked>
+          <div class="checkbox-label">
+            <div class="checkbox-title">📊 Weekly Digest</div>
+            <div class="checkbox-desc">Sunday summary of all your watches and best deals</div>
+          </div>
+        </div>
+        
+        <div class="checkbox-group">
+          <input type="checkbox" id="signup-reminders">
+          <div class="checkbox-label">
+            <div class="checkbox-title">💡 3-Day Reminders</div>
+            <div class="checkbox-desc">Reminder if a great deal (&gt;20% off) is still available after 3 days</div>
+          </div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 16px;" id="signup-submit-btn">Create Account</button>
       </form>
-      
-      <div class="form-divider">or</div>
-      
-      <button class="btn btn-telegram" onclick="showToast('Telegram login coming soon!', 'info')">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.359 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.461-1.901-.903-1.056-.692-1.653-1.123-2.678-1.799-1.185-.781-.417-1.21.258-1.911.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.139-5.062 3.345-.479.329-.913.489-1.302.481-.428-.009-1.252-.242-1.865-.442-.752-.244-1.349-.374-1.297-.789.027-.216.324-.437.893-.663 3.498-1.524 5.831-2.529 6.998-3.015 3.333-1.386 4.025-1.627 4.477-1.635.099-.002.321.023.465.141.121.1.154.234.169.334.016.099.036.323.02.498z"/>
-        </svg>
-        Continue with Telegram
-      </button>
       
       <div class="modal-footer">
         Already have an account? <a href="#" onclick="switchModal('signup', 'login'); return false;">Log in</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Complete Setup Modal (shown after signup) -->
+  <div class="modal-overlay" id="modal-complete-setup">
+    <div class="modal">
+      <button class="modal-close" onclick="closeSetupModal()">×</button>
+      <h2>🎉 Account Created!</h2>
+      <p class="modal-subtitle">Set up notifications to never miss a deal</p>
+      
+      <div class="setup-options">
+        <div class="setup-option" id="setup-telegram" onclick="setupTelegram()">
+          <div class="setup-option-header">
+            <span class="setup-option-icon">📱</span>
+            <span class="setup-option-title">Connect Telegram</span>
+          </div>
+          <div class="setup-option-desc">
+            Get instant alerts on your phone via Telegram. Most reliable option.
+          </div>
+        </div>
+        
+        <div class="setup-option" id="setup-push" onclick="setupPush()">
+          <div class="setup-option-header">
+            <span class="setup-option-icon">🔔</span>
+            <span class="setup-option-title">Enable Browser Push</span>
+          </div>
+          <div class="setup-option-desc">
+            Get notifications in this browser. Works on desktop and mobile.
+          </div>
+        </div>
+      </div>
+      
+      <div style="margin-top: 24px; text-align: center;">
+        <button class="btn btn-ghost" onclick="closeSetupModal()">Skip for now</button>
+      </div>
+      
+      <div style="margin-top: 16px; text-align: center; font-size: 0.85rem; color: var(--text-muted);">
+        You can always set these up later in Settings
       </div>
     </div>
   </div>
@@ -2023,6 +2161,9 @@
               <option value="BG">Bulgaria 🇧🇬</option>
             </optgroup>
           </select>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">
+            ⚠️ Changing your country will reset notifications to show fresh deals in your new region.
+          </div>
         </div>
         <div class="form-group">
           <label for="settings-timezone">Timezone</label>
@@ -2113,22 +2254,20 @@
         
         <div class="form-divider">Email Preferences</div>
         
-        <div class="form-group">
-          <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 8px 0;">
-            <input type="checkbox" id="settings-weekly-digest" checked style="width: 20px; height: 20px; accent-color: var(--accent);">
-            <span style="color: var(--text-secondary);">
-              📊 <strong>Weekly Digest</strong> — Sunday summary of all your watches
-            </span>
-          </label>
+        <div class="checkbox-group">
+          <input type="checkbox" id="settings-weekly-digest" checked>
+          <div class="checkbox-label">
+            <div class="checkbox-title">📊 Weekly Digest</div>
+            <div class="checkbox-desc">Sunday summary of all your watches</div>
+          </div>
         </div>
         
-        <div class="form-group">
-          <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 8px 0;">
-            <input type="checkbox" id="settings-still-available" style="width: 20px; height: 20px; accent-color: var(--accent);">
-            <span style="color: var(--text-secondary);">
-              💡 <strong>"Still Available" Reminders</strong> — Notify after 3 days if deal &gt;20% off is still there
-            </span>
-          </label>
+        <div class="checkbox-group">
+          <input type="checkbox" id="settings-still-available">
+          <div class="checkbox-label">
+            <div class="checkbox-title">💡 "Still Available" Reminders</div>
+            <div class="checkbox-desc">Notify after 3 days if deal &gt;20% off is still there</div>
+          </div>
         </div>
         
         <div style="margin-top: 24px;">
@@ -2298,12 +2437,20 @@
       const email = document.getElementById('signup-email').value;
       const password = document.getElementById('signup-password').value;
       const country = document.getElementById('signup-country').value;
+      const weeklyDigest = document.getElementById('signup-weekly-digest').checked;
+      const reminders = document.getElementById('signup-reminders').checked;
+      
+      const submitBtn = document.getElementById('signup-submit-btn');
+      const originalText = submitBtn.textContent;
       
       try {
         if (password.length < 8) {
           showToast('Password must be at least 8 characters', 'error');
           return;
         }
+        
+        submitBtn.textContent = 'Creating account...';
+        submitBtn.disabled = true;
         
         const user = await apiCall('/users', {
           method: 'POST',
@@ -2312,6 +2459,8 @@
             password,
             ship_to_country: country,
             timezone: getDefaultTimezone(country),
+            weekly_digest_enabled: weeklyDigest,
+            still_available_reminders: reminders,
           }),
         });
         
@@ -2322,8 +2471,18 @@
         updateUI();
         showDashboard();
         showToast('Account created! Welcome to ScoutLoot 🎉', 'success');
+        
+        // Show setup modal for Telegram/Push
+        setTimeout(() => {
+          openModal('complete-setup');
+        }, 500);
+        
+        event.target.reset();
       } catch (error) {
         showToast(error.message || 'Failed to create account', 'error');
+      } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
       }
     }
     
@@ -2333,7 +2492,13 @@
       const email = document.getElementById('login-email').value;
       const password = document.getElementById('login-password').value;
       
+      const submitBtn = document.getElementById('login-submit-btn');
+      const originalText = submitBtn.textContent;
+      
       try {
+        submitBtn.textContent = 'Logging in...';
+        submitBtn.disabled = true;
+        
         const user = await apiCall('/users/login', {
           method: 'POST',
           body: JSON.stringify({ email, password }),
@@ -2350,6 +2515,9 @@
         showToast('Welcome back! 👋', 'success');
       } catch (error) {
         showToast('Invalid email or password', 'error');
+      } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
       }
     }
     
@@ -2361,6 +2529,32 @@
       document.body.classList.remove('logged-in');
       updateUI();
       showToast('Logged out successfully', 'success');
+    }
+    
+    // ===========================================
+    // SETUP MODAL (POST-SIGNUP)
+    // ===========================================
+    
+    function closeSetupModal() {
+      closeModal('complete-setup');
+    }
+    
+    async function setupTelegram() {
+      connectTelegram();
+      document.getElementById('setup-telegram').classList.add('connected');
+    }
+    
+    async function setupPush() {
+      if (!state.pushSupported) {
+        showToast('Push notifications are not supported on this browser', 'error');
+        return;
+      }
+      
+      await subscribePush();
+      
+      if (state.pushSubscribed) {
+        document.getElementById('setup-push').classList.add('connected');
+      }
     }
     
     // ===========================================
@@ -2910,7 +3104,7 @@
           const statusResponse = await fetch(`/api/push/status/${state.user.id}`);
           const statusData = await statusResponse.json();
           
-          state.pushSubscribed = statusData.hasActiveSubscriptions;
+          state.pushSubscribed = statusData.enabled;
           updatePushUI(state.pushSubscribed, state.pushSubscribed ? 'Enabled' : 'Disabled');
           
           if (statusData.deviceCount > 0) {
@@ -2931,6 +3125,8 @@
       const dot = document.getElementById('push-status-dot');
       const text = document.getElementById('push-status-text');
       const btn = document.getElementById('push-toggle-btn');
+      
+      if (!dot || !text || !btn) return;
       
       dot.className = `push-status-dot ${enabled ? 'active' : 'inactive'}`;
       text.textContent = statusText;
@@ -3056,23 +3252,36 @@
       if (!state.user) return;
       
       const country = document.getElementById('settings-country').value;
+      const timezone = document.getElementById('settings-timezone').value;
+      const weeklyDigest = document.getElementById('settings-weekly-digest').checked;
+      const reminders = document.getElementById('settings-still-available').checked;
       
       try {
-        const user = await apiCall(`/users/${state.user.id}/location`, {
+        // Use the generic PATCH endpoint which handles country change logic
+        const user = await apiCall(`/users/${state.user.id}`, {
           method: 'PATCH',
           body: JSON.stringify({
             ship_to_country: country,
-            weekly_digest_enabled: document.getElementById('settings-weekly-digest').checked,
-            still_available_reminders: document.getElementById('settings-still-available').checked,
+            timezone: timezone,
+            weekly_digest_enabled: weeklyDigest,
+            still_available_reminders: reminders,
           }),
         });
+        
+        // Check if country changed
+        const countryChanged = state.user.ship_to_country !== country;
         
         state.user = user;
         saveToStorage('user', user);
         
         closeModal('settings');
         renderWatches();
-        showToast('Settings saved!', 'success');
+        
+        if (countryChanged) {
+          showToast('Settings saved! Notifications reset for your new region.', 'success');
+        } else {
+          showToast('Settings saved!', 'success');
+        }
       } catch (error) {
         showToast('Failed to save settings', 'error');
       }
@@ -3260,18 +3469,23 @@
         avatar.textContent = state.user.email.charAt(0).toUpperCase();
         emailSpan.textContent = state.user.email;
         
+        // Update settings modal with user's current values
         if (state.user.ship_to_country) {
           document.getElementById('settings-country').value = state.user.ship_to_country;
-          document.getElementById('settings-weekly-digest').checked = state.user.weekly_digest_enabled ?? true;
-          document.getElementById('settings-still-available').checked = state.user.still_available_reminders ?? false;
         }
         if (state.user.timezone) {
           document.getElementById('settings-timezone').value = state.user.timezone;
         }
         
+        document.getElementById('settings-weekly-digest').checked = state.user.weekly_digest_enabled ?? true;
+        document.getElementById('settings-still-available').checked = state.user.still_available_reminders ?? false;
+        
         if (state.user.telegram_chat_id) {
           document.getElementById('telegram-connected').style.display = 'inline';
           document.getElementById('telegram-disconnected').style.display = 'none';
+        } else {
+          document.getElementById('telegram-connected').style.display = 'none';
+          document.getElementById('telegram-disconnected').style.display = 'inline';
         }
         
         // Init push after user is loaded

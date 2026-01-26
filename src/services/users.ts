@@ -27,6 +27,8 @@ export interface User {
   quiet_hours_end: string | null;
   timezone: string;
   global_exclude_words: string[] | null;
+  weekly_digest_enabled: boolean;
+  still_available_reminders: boolean;
   deleted_at: Date | null;
   created_at: Date;
   updated_at: Date;
@@ -40,6 +42,8 @@ export type CreateUserData = {
   password: string;  // Plain password - we hash it here
   ship_to_country?: string;
   timezone?: string;
+  weekly_digest_enabled?: boolean;
+  still_available_reminders?: boolean;
 };
 
 /**
@@ -104,14 +108,23 @@ export async function createUser(data: CreateUserData): Promise<User> {
   const passwordHash = await hashPassword(data.password);
   
   const result = await query<User>(
-    `INSERT INTO users (email, password_hash, ship_to_country, timezone)
-     VALUES ($1, $2, $3, $4)
-     RETURNING *`,
+    `INSERT INTO users (
+      email, 
+      password_hash, 
+      ship_to_country, 
+      timezone,
+      weekly_digest_enabled,
+      still_available_reminders
+    )
+    VALUES ($1, $2, $3, $4, $5, $6)
+    RETURNING *`,
     [
       data.email,
       passwordHash,
       data.ship_to_country ?? 'DE',
       data.timezone ?? 'Europe/Berlin',
+      data.weekly_digest_enabled ?? true,  // Default ON
+      data.still_available_reminders ?? false,  // Default OFF
     ]
   );
   return result.rows[0];
@@ -311,11 +324,24 @@ export async function disconnectTelegram(userId: number): Promise<void> {
   );
 }
 
+/**
+ * Update user location (country)
+ * IMPORTANT: When country changes, we reset notification state so user gets fresh alerts
+ */
 export async function updateUserLocation(
   userId: number,
-  country: string,
+  newCountry: string,
   postalCode?: string
 ): Promise<User | null> {
+  // First, get current country to check if it changed
+  const currentUser = await getUserById(userId);
+  if (!currentUser) {
+    return null;
+  }
+  
+  const countryChanged = currentUser.ship_to_country !== newCountry;
+  
+  // Update user location
   const result = await query<User>(
     `UPDATE users SET 
        ship_to_country = $2,
@@ -323,9 +349,55 @@ export async function updateUserLocation(
        updated_at = NOW()
      WHERE id = $1 AND deleted_at IS NULL
      RETURNING *`,
-    [userId, country, postalCode ?? null]
+    [userId, newCountry, postalCode ?? null]
   );
-  return result.rows[0] ?? null;
+  
+  const updatedUser = result.rows[0];
+  if (!updatedUser) {
+    return null;
+  }
+  
+  // If country changed, reset notification state for fresh alerts
+  if (countryChanged) {
+    console.log(`[USER] Country changed for user ${userId}: ${currentUser.ship_to_country} -> ${newCountry}`);
+    await resetNotificationsForUser(userId, currentUser.ship_to_country);
+  }
+  
+  return updatedUser;
+}
+
+/**
+ * Reset notification state when user changes country
+ * This ensures they get fresh alerts for their new region
+ */
+async function resetNotificationsForUser(userId: number, oldCountry: string): Promise<void> {
+  try {
+    // 1. Clear watch_notification_state for all user's watches
+    const clearNotificationState = await query(
+      `DELETE FROM watch_notification_state 
+       WHERE watch_id IN (SELECT id FROM watches WHERE user_id = $1)`,
+      [userId]
+    );
+    console.log(`[USER] Cleared ${clearNotificationState.rowCount} notification states for user ${userId}`);
+    
+    // 2. Delete listings cached for the old country that are related to user's watches
+    // Only delete listings that were scanned specifically for this user's old country
+    const clearListings = await query(
+      `DELETE FROM listings 
+       WHERE scanned_for_country = $1
+         AND set_number IN (SELECT set_number FROM watches WHERE user_id = $2)`,
+      [oldCountry, userId]
+    );
+    console.log(`[USER] Cleared ${clearListings.rowCount} cached listings for old country ${oldCountry}`);
+    
+    // 3. Note: We keep alert_history for historical record
+    // The user can still see their past alerts
+    
+    console.log(`[USER] Notification reset complete for user ${userId} after country change`);
+  } catch (error) {
+    console.error(`[USER] Error resetting notifications for user ${userId}:`, error);
+    // Don't throw - we don't want to fail the location update
+  }
 }
 
 export async function updateQuietHours(
@@ -342,5 +414,80 @@ export async function updateQuietHours(
      RETURNING *`,
     [userId, start, end]
   );
+  return result.rows[0] ?? null;
+}
+
+/**
+ * Update user settings (generic)
+ */
+export async function updateUserSettings(
+  userId: number,
+  settings: {
+    ship_to_country?: string;
+    timezone?: string;
+    weekly_digest_enabled?: boolean;
+    still_available_reminders?: boolean;
+  }
+): Promise<User | null> {
+  // Check if country is changing
+  if (settings.ship_to_country) {
+    // Use updateUserLocation which handles the notification reset
+    const user = await updateUserLocation(userId, settings.ship_to_country);
+    if (!user) return null;
+    
+    // Now update the other settings if provided
+    const otherSettings = { ...settings };
+    delete otherSettings.ship_to_country;
+    
+    if (Object.keys(otherSettings).length > 0) {
+      return await updateUserSettingsOnly(userId, otherSettings);
+    }
+    return user;
+  }
+  
+  // No country change, just update settings
+  return await updateUserSettingsOnly(userId, settings);
+}
+
+/**
+ * Update user settings without country change logic
+ */
+async function updateUserSettingsOnly(
+  userId: number,
+  settings: {
+    timezone?: string;
+    weekly_digest_enabled?: boolean;
+    still_available_reminders?: boolean;
+  }
+): Promise<User | null> {
+  const updates: string[] = [];
+  const values: (string | boolean | number)[] = [];
+  let paramCount = 1;
+
+  if (settings.timezone !== undefined) {
+    updates.push(`timezone = $${paramCount++}`);
+    values.push(settings.timezone);
+  }
+  if (settings.weekly_digest_enabled !== undefined) {
+    updates.push(`weekly_digest_enabled = $${paramCount++}`);
+    values.push(settings.weekly_digest_enabled);
+  }
+  if (settings.still_available_reminders !== undefined) {
+    updates.push(`still_available_reminders = $${paramCount++}`);
+    values.push(settings.still_available_reminders);
+  }
+
+  if (updates.length === 0) {
+    return await getUserById(userId);
+  }
+
+  updates.push('updated_at = NOW()');
+  values.push(userId);
+
+  const result = await query<User>(
+    `UPDATE users SET ${updates.join(', ')} WHERE id = $${paramCount} AND deleted_at IS NULL RETURNING *`,
+    values
+  );
+
   return result.rows[0] ?? null;
 }

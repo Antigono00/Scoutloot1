@@ -9,6 +9,7 @@ import {
   disconnectTelegram,
   updateUserLocation,
   updateQuietHours,
+  updateUserSettings,
   createPasswordResetToken,
   verifyResetToken,
   resetPassword,
@@ -21,7 +22,14 @@ const router = Router();
 // Create user (signup)
 router.post('/', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, password, ship_to_country, timezone } = req.body;
+    const { 
+      email, 
+      password, 
+      ship_to_country, 
+      timezone,
+      weekly_digest_enabled,
+      still_available_reminders,
+    } = req.body;
 
     if (!email || !password) {
       res.status(400).json({
@@ -43,6 +51,8 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       password,  // Plain password - service will hash it
       ship_to_country,
       timezone,
+      weekly_digest_enabled: weekly_digest_enabled ?? true,  // Default ON
+      still_available_reminders: still_available_reminders ?? false,  // Default OFF
     });
 
     const { password_hash: _, reset_token: _rt, reset_token_expires: _rte, ...safeUser } = user;
@@ -273,6 +283,7 @@ router.delete('/:id/telegram', async (req: Request, res: Response): Promise<void
   }
 });
 
+// Update location - now resets notifications when country changes
 router.patch('/:id/location', async (req: Request, res: Response): Promise<void> => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -322,7 +333,7 @@ router.patch('/:id/quiet-hours', async (req: Request, res: Response): Promise<vo
 });
 
 
-// Update user settings (generic PATCH)
+// Update user settings (generic PATCH) - now uses service with proper country change handling
 router.patch('/:id', async (req: Request, res: Response): Promise<void> => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -338,46 +349,29 @@ router.patch('/:id', async (req: Request, res: Response): Promise<void> => {
       still_available_reminders 
     } = req.body;
 
-    const updates: string[] = [];
-    const values: (string | boolean | number)[] = [];
-    let paramCount = 1;
-
-    if (ship_to_country !== undefined) {
-      updates.push(`ship_to_country = $${paramCount++}`);
-      values.push(ship_to_country);
-    }
-    if (timezone !== undefined) {
-      updates.push(`timezone = $${paramCount++}`);
-      values.push(timezone);
-    }
-    if (weekly_digest_enabled !== undefined) {
-      updates.push(`weekly_digest_enabled = $${paramCount++}`);
-      values.push(weekly_digest_enabled);
-    }
-    if (still_available_reminders !== undefined) {
-      updates.push(`still_available_reminders = $${paramCount++}`);
-      values.push(still_available_reminders);
-    }
-
-    if (updates.length === 0) {
+    // Check if there's anything to update
+    if (ship_to_country === undefined && 
+        timezone === undefined && 
+        weekly_digest_enabled === undefined && 
+        still_available_reminders === undefined) {
       res.status(400).json({ error: 'No fields to update' });
       return;
     }
 
-    updates.push('updated_at = NOW()');
-    values.push(id);
+    // Use the service function which handles country change logic
+    const user = await updateUserSettings(id, {
+      ship_to_country,
+      timezone,
+      weekly_digest_enabled,
+      still_available_reminders,
+    });
 
-    const result = await query(
-      `UPDATE users SET ${updates.join(', ')} WHERE id = $${paramCount} AND deleted_at IS NULL RETURNING *`,
-      values
-    );
-
-    if (result.rows.length === 0) {
+    if (!user) {
       res.status(404).json({ error: 'User not found' });
       return;
     }
 
-    const { password_hash: _, reset_token: _rt, reset_token_expires: _rte, ...safeUser } = result.rows[0] as Record<string, unknown>;
+    const { password_hash: _, reset_token: _rt, reset_token_expires: _rte, ...safeUser } = user;
     res.json(safeUser);
   } catch (error) {
     console.error('Update user settings error:', error);
