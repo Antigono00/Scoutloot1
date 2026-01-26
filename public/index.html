@@ -6,6 +6,20 @@
   <title>ScoutLoot — LEGO Deal Radar</title>
   <meta name="description" content="Get instant Telegram alerts when LEGO sets drop below your target price. Track deals across eBay in USA, Canada, UK, and Europe.">
   
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://scoutloot.com/">
+  <meta property="og:title" content="ScoutLoot — Never Miss a LEGO Deal Again">
+  <meta property="og:description" content="Set your target price, get instant alerts when LEGO deals drop. Available in USA, Canada, UK, and Europe.">
+  <meta property="og:image" content="https://scoutloot.com/og-image.png">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://scoutloot.com/">
+  <meta property="twitter:title" content="ScoutLoot — Never Miss a LEGO Deal Again">
+  <meta property="twitter:description" content="Set your target price, get instant alerts when LEGO deals drop.">
+  <meta property="twitter:image" content="https://scoutloot.com/og-image.png">
+  
   <!-- PWA Manifest -->
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#0A0A0F">
@@ -157,11 +171,25 @@
     .btn-push:hover { background: #FF9933; }
     
     .btn-danger { background: var(--error); color: white; }
-    .btn-danger:hover { background: #DC2626; }
+    .btn-danger:hover:not(:disabled) { background: #DC2626; }
+
+    .btn-outline-danger {
+      background: transparent;
+      color: var(--error);
+      border: 1px solid var(--error);
+    }
+    .btn-outline-danger:hover {
+      background: rgba(239, 68, 68, 0.1);
+    }
 
     .btn:disabled {
       opacity: 0.6;
       cursor: not-allowed;
+    }
+
+    .btn-sm {
+      padding: 8px 20px;
+      font-size: 0.85rem;
     }
 
     /* Hero Section */
@@ -566,6 +594,31 @@
       margin-right: auto;
     }
 
+    /* About Creator */
+    .about-creator {
+      text-align: center;
+      padding: 32px 24px;
+      background: var(--bg-tertiary);
+      border-radius: 12px;
+      max-width: 600px;
+      margin: 0 auto 40px;
+    }
+
+    .about-creator p {
+      margin: 8px 0;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    .about-creator a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .about-creator a:hover {
+      text-decoration: underline;
+    }
+
     /* Footer */
     footer {
       background: var(--bg-secondary);
@@ -733,7 +786,6 @@
     
     .form-group input::placeholder { color: var(--text-muted); }
 
-    /* Checkbox styling */
     .checkbox-group {
       display: flex;
       align-items: flex-start;
@@ -749,9 +801,7 @@
       flex-shrink: 0;
     }
 
-    .checkbox-group .checkbox-label {
-      flex: 1;
-    }
+    .checkbox-group .checkbox-label { flex: 1; }
 
     .checkbox-group .checkbox-title {
       font-weight: 500;
@@ -844,7 +894,6 @@
       font-weight: 700;
     }
 
-    /* Dashboard Tabs */
     .dashboard-tabs {
       display: flex;
       gap: 8px;
@@ -890,7 +939,6 @@
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    /* Watches Section */
     .watches-section {
       background: var(--bg-card);
       border: 1px solid rgba(255,255,255,0.05);
@@ -1039,7 +1087,6 @@
       opacity: 0.5;
     }
 
-    /* Notifications Inbox */
     .inbox-section {
       background: var(--bg-card);
       border: 1px solid rgba(255,255,255,0.05);
@@ -1151,7 +1198,6 @@
       text-align: center;
     }
 
-    /* Autocomplete */
     .autocomplete-container { position: relative; }
     
     .autocomplete-results {
@@ -1215,7 +1261,6 @@
       color: var(--text-muted);
     }
 
-    /* User Menu */
     .user-menu { position: relative; }
     
     .user-btn {
@@ -1288,7 +1333,6 @@
     
     .user-dropdown .logout-btn { color: var(--error); }
 
-    /* Toast */
     .toast-container {
       position: fixed;
       bottom: 24px; right: 24px;
@@ -1313,6 +1357,7 @@
     
     .toast.success { border-color: var(--success); }
     .toast.error { border-color: var(--error); }
+    .toast.info { border-color: var(--accent); }
     
     .toast-icon { font-size: 1.25rem; }
     .toast-message { flex: 1; font-size: 0.95rem; }
@@ -1322,14 +1367,12 @@
       to { transform: translateX(0); opacity: 1; }
     }
 
-    /* Form Row */
     .form-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 16px;
     }
 
-    /* Push Status */
     .push-status-box {
       padding: 16px;
       background: var(--bg-tertiary);
@@ -1360,7 +1403,6 @@
     .push-status-dot.active { background: var(--success); }
     .push-status-dot.inactive { background: var(--text-muted); }
 
-    /* iOS Instructions */
     .ios-instructions {
       background: rgba(255, 213, 0, 0.1);
       border: 1px solid rgba(255, 213, 0, 0.3);
@@ -1385,7 +1427,6 @@
     
     .ios-instructions li { margin-bottom: 4px; }
 
-    /* Setup Options */
     .setup-options {
       display: flex;
       flex-direction: column;
@@ -1413,9 +1454,7 @@
       margin-bottom: 8px;
     }
 
-    .setup-option-icon {
-      font-size: 1.5rem;
-    }
+    .setup-option-icon { font-size: 1.5rem; }
 
     .setup-option-title {
       font-weight: 600;
@@ -1437,6 +1476,82 @@
       content: ' ✓';
       color: var(--success);
     }
+
+    /* GDPR Danger Zone */
+    .danger-zone {
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .danger-zone h3 {
+      color: var(--error);
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+    }
+
+    .danger-description {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+    }
+
+    .danger-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .danger-icon { font-size: 2rem; }
+
+    .delete-warning-list {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 8px;
+      padding: 16px 16px 16px 36px;
+      margin: 16px 0 24px;
+      color: var(--text-secondary);
+    }
+
+    .delete-warning-list li { margin: 8px 0; }
+
+    /* Cookie Banner */
+    .cookie-banner {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg-card);
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding: 16px 24px;
+      z-index: 2500;
+      display: none;
+    }
+
+    .cookie-banner.show { display: block; }
+
+    .cookie-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .cookie-content p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .cookie-content a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .cookie-content a:hover { text-decoration: underline; }
 
     /* Responsive */
     @media (max-width: 1024px) {
@@ -1465,6 +1580,7 @@
       .watch-price { text-align: left; margin-right: 0; }
       .inbox-item { flex-wrap: wrap; }
       .inbox-item-actions { width: 100%; justify-content: flex-end; margin-top: 8px; }
+      .cookie-content { flex-direction: column; text-align: center; }
     }
   </style>
 </head>
@@ -1541,20 +1657,20 @@
     <div class="stats-bar">
       <div class="stats-grid">
         <div class="stat">
-          <span class="stat-value">10,000+</span>
-          <span class="stat-label">LEGO Sets Tracked</span>
+          <span class="stat-value">🌍</span>
+          <span class="stat-label">USA, Canada, UK & EU</span>
         </div>
         <div class="stat">
-          <span class="stat-value">4</span>
-          <span class="stat-label">Regions Covered</span>
+          <span class="stat-value">⚡</span>
+          <span class="stat-label">Instant Alerts</span>
         </div>
         <div class="stat">
-          <span class="stat-value">&lt;1min</span>
-          <span class="stat-label">Alert Speed</span>
+          <span class="stat-value">🔒</span>
+          <span class="stat-label">GDPR Compliant</span>
         </div>
         <div class="stat">
-          <span class="stat-value">24/7</span>
-          <span class="stat-label">Monitoring</span>
+          <span class="stat-value">🧱</span>
+          <span class="stat-label">Built by Collectors</span>
         </div>
       </div>
     </div>
@@ -1736,6 +1852,14 @@
       <button class="btn btn-primary btn-large" onclick="openModal('signup')">
         🔔 Start Tracking for Free
       </button>
+    </section>
+    
+    <!-- About Creator -->
+    <section class="section" style="padding-top: 0;">
+      <div class="about-creator">
+        <p>🧱 Built with love by a fellow LEGO collector in Europe.</p>
+        <p>Questions? <a href="mailto:support@scoutloot.com">support@scoutloot.com</a></p>
+      </div>
     </section>
     
     <!-- Footer -->
@@ -2067,7 +2191,7 @@
             <option value="used">Used Only</option>
           </select>
         </div>
-        <button type="submit" class="btn btn-primary" style="width: 100%;">Start Tracking</button>
+        <button type="submit" class="btn btn-primary" style="width: 100%;" id="add-watch-submit-btn">Start Tracking</button>
       </form>
     </div>
   </div>
@@ -2102,7 +2226,7 @@
             <option value="used">Used Only</option>
           </select>
         </div>
-        <button type="submit" class="btn btn-primary" style="width: 100%;">Save Changes</button>
+        <button type="submit" class="btn btn-primary" style="width: 100%;" id="edit-watch-submit-btn">Save Changes</button>
       </form>
     </div>
   </div>
@@ -2271,7 +2395,27 @@
         </div>
         
         <div style="margin-top: 24px;">
-          <button type="submit" class="btn btn-primary" style="width: 100%;">Save Settings</button>
+          <button type="submit" class="btn btn-primary" style="width: 100%;" id="settings-submit-btn">Save Settings</button>
+        </div>
+
+        <div class="form-divider">Security</div>
+
+        <button type="button" class="btn btn-secondary" style="width: 100%;" onclick="switchModal('settings', 'change-password')">
+          🔐 Change Password
+        </button>
+
+        <div class="danger-zone">
+          <h3>⚠️ Danger Zone</h3>
+          <p class="danger-description">Export your data or permanently delete your account.</p>
+          
+          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="exportUserData()">
+              📥 Export My Data
+            </button>
+            <button type="button" class="btn btn-outline-danger btn-sm" onclick="switchModal('settings', 'delete-account')">
+              🗑️ Delete Account
+            </button>
+          </div>
         </div>
       </form>
     </div>
@@ -2319,6 +2463,75 @@
     </div>
   </div>
 
+  <!-- Change Password Modal (GDPR) -->
+  <div class="modal-overlay" id="modal-change-password">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal('change-password'); openModal('settings');">×</button>
+      <h2>Change Password</h2>
+      <p class="modal-subtitle">Enter your current password and choose a new one</p>
+      
+      <form onsubmit="handleChangePassword(event)">
+        <div class="form-group">
+          <label for="current-password">Current Password</label>
+          <input type="password" id="current-password" placeholder="••••••••" required>
+        </div>
+        <div class="form-group">
+          <label for="new-password">New Password</label>
+          <input type="password" id="new-password" placeholder="••••••••" minlength="8" required>
+        </div>
+        <div class="form-group">
+          <label for="confirm-new-password">Confirm New Password</label>
+          <input type="password" id="confirm-new-password" placeholder="••••••••" minlength="8" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;" id="change-password-btn">Update Password</button>
+      </form>
+      
+      <div class="modal-footer">
+        <a href="#" onclick="closeModal('change-password'); openModal('settings'); return false;">← Back to Settings</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Account Modal (GDPR) -->
+  <div class="modal-overlay" id="modal-delete-account">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal('delete-account'); openModal('settings');">×</button>
+      
+      <div class="danger-header">
+        <span class="danger-icon">⚠️</span>
+        <div>
+          <h2 style="color: var(--error);">Delete Account</h2>
+          <p class="modal-subtitle" style="margin-bottom: 0;">This action cannot be undone</p>
+        </div>
+      </div>
+      
+      <p style="margin-top: 16px; color: var(--text-secondary);">
+        This will permanently delete your ScoutLoot account and all associated data:
+      </p>
+      
+      <ul class="delete-warning-list">
+        <li>Your profile and email address</li>
+        <li>All your watches and settings</li>
+        <li>All push notification subscriptions</li>
+        <li>Your alert history</li>
+      </ul>
+      
+      <form onsubmit="handleDeleteAccount(event)">
+        <div class="form-group">
+          <label for="delete-confirm-input">Type <strong>DELETE</strong> to confirm</label>
+          <input type="text" id="delete-confirm-input" placeholder="DELETE" autocomplete="off" required>
+        </div>
+        <button type="submit" class="btn btn-danger" style="width: 100%;" id="delete-account-btn" disabled>
+          Delete My Account Permanently
+        </button>
+      </form>
+      
+      <div class="modal-footer">
+        <a href="#" onclick="closeModal('delete-account'); openModal('settings'); return false;">← Cancel, keep my account</a>
+      </div>
+    </div>
+  </div>
+
   <!-- Alert Detail Modal -->
   <div class="modal-overlay" id="modal-alert-detail">
     <div class="modal">
@@ -2336,6 +2549,17 @@
         </a>
         <button class="btn btn-secondary" onclick="closeModal('alert-detail')">Close</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Cookie Banner (GDPR) -->
+  <div class="cookie-banner" id="cookie-banner">
+    <div class="cookie-content">
+      <p>
+        🍪 We use cookies to improve your experience. By using ScoutLoot, you agree to our 
+        <a href="/privacy">Privacy Policy</a> and <a href="/terms">Terms of Service</a>.
+      </p>
+      <button class="btn btn-primary btn-sm" onclick="acceptCookies()">Accept</button>
     </div>
   </div>
 
@@ -2376,6 +2600,22 @@
     function clearStorage() {
       localStorage.removeItem('scoutloot_user');
       localStorage.removeItem('scoutloot_token');
+    }
+    
+    // ===========================================
+    // COOKIE CONSENT (GDPR)
+    // ===========================================
+    
+    function checkCookieConsent() {
+      const consent = localStorage.getItem('scoutloot_cookie_consent');
+      if (!consent) {
+        document.getElementById('cookie-banner').classList.add('show');
+      }
+    }
+    
+    function acceptCookies() {
+      localStorage.setItem('scoutloot_cookie_consent', 'accepted');
+      document.getElementById('cookie-banner').classList.remove('show');
     }
     
     // ===========================================
@@ -2587,7 +2827,13 @@
       const minPrice = parseFloat(document.getElementById('watch-min').value) || 0;
       const condition = document.getElementById('watch-condition').value;
       
+      const submitBtn = document.getElementById('add-watch-submit-btn');
+      const originalText = submitBtn.textContent;
+      
       try {
+        submitBtn.textContent = 'Adding...';
+        submitBtn.disabled = true;
+        
         const watch = await apiCall('/watches', {
           method: 'POST',
           body: JSON.stringify({
@@ -2609,6 +2855,9 @@
         selectedSetNumber = null;
       } catch (error) {
         showToast(error.message || 'Failed to add watch', 'error');
+      } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
       }
     }
     
@@ -2700,7 +2949,13 @@
       const minPrice = parseFloat(document.getElementById('edit-watch-min').value) || 0;
       const condition = document.getElementById('edit-watch-condition').value;
       
+      const submitBtn = document.getElementById('edit-watch-submit-btn');
+      const originalText = submitBtn.textContent;
+      
       try {
+        submitBtn.textContent = 'Saving...';
+        submitBtn.disabled = true;
+        
         const updated = await apiCall(`/watches/${editingWatchId}`, {
           method: 'PATCH',
           body: JSON.stringify({
@@ -2721,6 +2976,9 @@
         editingWatchId = null;
       } catch (error) {
         showToast(error.message || 'Failed to update watch', 'error');
+      } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
       }
     }
 
@@ -2993,6 +3251,15 @@
           results.classList.add('active');
         }
       });
+      
+      // Delete account confirmation input validation
+      const deleteInput = document.getElementById('delete-confirm-input');
+      const deleteBtn = document.getElementById('delete-account-btn');
+      if (deleteInput && deleteBtn) {
+        deleteInput.addEventListener('input', (e) => {
+          deleteBtn.disabled = e.target.value !== 'DELETE';
+        });
+      }
     });
     
     async function searchSets(query) {
@@ -3256,7 +3523,13 @@
       const weeklyDigest = document.getElementById('settings-weekly-digest').checked;
       const reminders = document.getElementById('settings-still-available').checked;
       
+      const submitBtn = document.getElementById('settings-submit-btn');
+      const originalText = submitBtn.textContent;
+      
       try {
+        submitBtn.textContent = 'Saving...';
+        submitBtn.disabled = true;
+        
         // Use the generic PATCH endpoint which handles country change logic
         const user = await apiCall(`/users/${state.user.id}`, {
           method: 'PATCH',
@@ -3284,6 +3557,9 @@
         }
       } catch (error) {
         showToast('Failed to save settings', 'error');
+      } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
       }
     }
     
@@ -3292,6 +3568,126 @@
       const startParam = state.user ? `start=${state.user.id}` : '';
       window.open(`https://t.me/${botUsername}?${startParam}`, '_blank');
       showToast('Opening Telegram... Send /start to connect', 'success');
+    }
+
+    // ===========================================
+    // GDPR FUNCTIONS
+    // ===========================================
+    
+    async function handleChangePassword(event) {
+      event.preventDefault();
+      
+      if (!state.user) return;
+      
+      const currentPassword = document.getElementById('current-password').value;
+      const newPassword = document.getElementById('new-password').value;
+      const confirmPassword = document.getElementById('confirm-new-password').value;
+      
+      // Validation
+      if (newPassword.length < 8) {
+        showToast('New password must be at least 8 characters', 'error');
+        return;
+      }
+      
+      if (newPassword !== confirmPassword) {
+        showToast('New passwords do not match', 'error');
+        return;
+      }
+      
+      const btn = document.getElementById('change-password-btn');
+      const originalText = btn.textContent;
+      
+      try {
+        btn.textContent = 'Updating...';
+        btn.disabled = true;
+        
+        await apiCall(`/users/${state.user.id}/password`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            oldPassword: currentPassword,
+            newPassword: newPassword,
+          }),
+        });
+        
+        // Clear form
+        document.getElementById('current-password').value = '';
+        document.getElementById('new-password').value = '';
+        document.getElementById('confirm-new-password').value = '';
+        
+        closeModal('change-password');
+        openModal('settings');
+        showToast('Password changed successfully! 🔐', 'success');
+      } catch (error) {
+        showToast(error.message || 'Failed to change password. Is your current password correct?', 'error');
+      } finally {
+        btn.textContent = originalText;
+        btn.disabled = false;
+      }
+    }
+    
+    async function exportUserData() {
+      if (!state.user) return;
+      
+      showToast('Preparing your data export...', 'info');
+      
+      try {
+        const response = await fetch(`/api/users/${state.user.id}/export`);
+        
+        if (!response.ok) {
+          throw new Error('Export failed');
+        }
+        
+        const data = await response.json();
+        
+        // Create and download file
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `scoutloot-data-${state.user.id}-${Date.now()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        showToast('Data exported successfully! 📥', 'success');
+      } catch (error) {
+        showToast('Failed to export data', 'error');
+      }
+    }
+    
+    async function handleDeleteAccount(event) {
+      event.preventDefault();
+      
+      if (!state.user) return;
+      
+      const confirmInput = document.getElementById('delete-confirm-input').value;
+      
+      if (confirmInput !== 'DELETE') {
+        showToast('Please type DELETE to confirm', 'error');
+        return;
+      }
+      
+      const btn = document.getElementById('delete-account-btn');
+      const originalText = btn.textContent;
+      
+      try {
+        btn.textContent = 'Deleting...';
+        btn.disabled = true;
+        
+        await apiCall(`/users/${state.user.id}`, {
+          method: 'DELETE',
+        });
+        
+        // Clear everything and log out
+        closeModal('delete-account');
+        logout();
+        showToast('Your account has been deleted. Goodbye! 👋', 'success');
+      } catch (error) {
+        showToast(error.message || 'Failed to delete account', 'error');
+        btn.textContent = originalText;
+        btn.disabled = false;
+      }
     }
     
     // ===========================================
@@ -3520,6 +3916,15 @@
     
     function closeModal(name) {
       document.getElementById(`modal-${name}`).classList.remove('active');
+      
+      // Reset delete confirmation input when closing
+      if (name === 'delete-account') {
+        const input = document.getElementById('delete-confirm-input');
+        if (input) {
+          input.value = '';
+          document.getElementById('delete-account-btn').disabled = true;
+        }
+      }
     }
     
     function switchModal(from, to) {
@@ -3549,8 +3954,13 @@
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
       toast.className = `toast ${type}`;
+      
+      let icon = '✔';
+      if (type === 'error') icon = '✕';
+      if (type === 'info') icon = 'ℹ';
+      
       toast.innerHTML = `
-        <span class="toast-icon">${type === 'success' ? '✔' : type === 'error' ? '✕' : 'ℹ'}</span>
+        <span class="toast-icon">${icon}</span>
         <span class="toast-message">${message}</span>
       `;
       container.appendChild(toast);
@@ -3574,6 +3984,9 @@
     // ===========================================
     
     async function init() {
+      // Check cookie consent
+      checkCookieConsent();
+      
       const savedUser = loadFromStorage('user');
       if (savedUser) {
         try {
