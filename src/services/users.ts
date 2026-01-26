@@ -1,4 +1,5 @@
 import { query } from '../db/index.js';
+import { updateUserWatchesShipFrom } from './watches.js';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 
@@ -361,6 +362,8 @@ export async function updateUserLocation(
   if (countryChanged) {
     console.log(`[USER] Country changed for user ${userId}: ${currentUser.ship_to_country} -> ${newCountry}`);
     await resetNotificationsForUser(userId, currentUser.ship_to_country);
+    await updateUserWatchesShipFrom(userId, newCountry);
+    console.log(`[USER] Updated ship_from_countries for all watches to match new country ${newCountry}`);
   }
   
   return updatedUser;
