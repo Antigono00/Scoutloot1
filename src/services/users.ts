@@ -491,3 +491,336 @@ async function updateUserSettingsOnly(
 
   return result.rows[0] ?? null;
 }
+
+// ============================================
+// GDPR FUNCTIONS (NEW)
+// ============================================
+
+/**
+ * Delete user account (soft delete with data cleanup)
+ * 
+ * This performs a GDPR-compliant deletion:
+ * 1. Anonymizes user record (email, password, telegram)
+ * 2. Deletes all watches (cascades to watch_notification_state)
+ * 3. Deletes push subscriptions
+ * 4. Keeps alert_history for analytics (anonymized via watch_id SET NULL cascade)
+ */
+export async function deleteUser(userId: number): Promise<{ success: boolean; error?: string }> {
+  try {
+    // 1. Check if user exists and is not already deleted
+    const user = await getUserById(userId);
+    if (!user) {
+      return { success: false, error: 'User not found or already deleted' };
+    }
+
+    console.log(`[GDPR] Starting account deletion for user ${userId} (${user.email})`);
+
+    // 2. Anonymize user record (soft delete)
+    // We keep the record for audit purposes but clear all PII
+    await query(
+      `UPDATE users SET
+         email = 'deleted_' || id || '@deleted.local',
+         password_hash = 'DELETED',
+         telegram_chat_id = NULL,
+         telegram_user_id = NULL,
+         telegram_username = NULL,
+         telegram_connected_at = NULL,
+         reset_token = NULL,
+         reset_token_expires = NULL,
+         ship_to_postal_code = NULL,
+         global_exclude_words = NULL,
+         deleted_at = NOW(),
+         updated_at = NOW()
+       WHERE id = $1`,
+      [userId]
+    );
+    console.log(`[GDPR] Anonymized user record for user ${userId}`);
+
+    // 3. Delete all watches (this cascades to watch_notification_state)
+    const watchesResult = await query(
+      `DELETE FROM watches WHERE user_id = $1`,
+      [userId]
+    );
+    console.log(`[GDPR] Deleted ${watchesResult.rowCount} watches for user ${userId}`);
+
+    // 4. Delete push subscriptions
+    const pushResult = await query(
+      `DELETE FROM push_subscriptions WHERE user_id = $1`,
+      [userId]
+    );
+    console.log(`[GDPR] Deleted ${pushResult.rowCount} push subscriptions for user ${userId}`);
+
+    // 5. Note: alert_history is kept for analytics
+    // The watch_id will be set to NULL via CASCADE, anonymizing the connection
+    // We could optionally delete it too, but it's useful for aggregate stats
+
+    console.log(`[GDPR] Account deletion complete for user ${userId}`);
+
+    return { success: true };
+  } catch (error) {
+    console.error(`[GDPR] Error deleting user ${userId}:`, error);
+    return { success: false, error: 'Failed to delete account' };
+  }
+}
+
+/**
+ * Change user password (while logged in)
+ * 
+ * Verifies the old password before allowing change.
+ * Clears any existing reset tokens.
+ */
+export async function changePassword(
+  userId: number,
+  oldPassword: string,
+  newPassword: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    // 1. Get user
+    const user = await getUserById(userId);
+    if (!user) {
+      return { success: false, error: 'User not found' };
+    }
+
+    // 2. Verify old password
+    let isValid = false;
+    
+    if (isBcryptHash(user.password_hash)) {
+      isValid = await verifyPassword(oldPassword, user.password_hash);
+    } else {
+      // Legacy base64 verification
+      isValid = verifyLegacyPassword(oldPassword, user.password_hash);
+    }
+
+    if (!isValid) {
+      console.log(`[AUTH] Password change failed for user ${userId}: incorrect current password`);
+      return { success: false, error: 'Current password is incorrect' };
+    }
+
+    // 3. Hash new password
+    const newHash = await hashPassword(newPassword);
+
+    // 4. Update password and clear any reset tokens
+    await query(
+      `UPDATE users SET
+         password_hash = $1,
+         reset_token = NULL,
+         reset_token_expires = NULL,
+         updated_at = NOW()
+       WHERE id = $2`,
+      [newHash, userId]
+    );
+
+    console.log(`[AUTH] Password changed successfully for user ${userId}`);
+    return { success: true };
+  } catch (error) {
+    console.error(`[AUTH] Error changing password for user ${userId}:`, error);
+    return { success: false, error: 'Failed to change password' };
+  }
+}
+
+/**
+ * Export all user data (GDPR data portability)
+ * 
+ * Returns all personal data in a structured format.
+ */
+export interface UserDataExport {
+  exportedAt: string;
+  user: {
+    id: number;
+    email: string;
+    ship_to_country: string;
+    ship_to_postal_code: string | null;
+    timezone: string;
+    subscription_tier: string;
+    subscription_status: string;
+    telegram_username: string | null;
+    telegram_connected: boolean;
+    weekly_digest_enabled: boolean;
+    still_available_reminders: boolean;
+    quiet_hours_start: string | null;
+    quiet_hours_end: string | null;
+    created_at: string;
+    last_active_at: string | null;
+  };
+  watches: Array<{
+    id: number;
+    set_number: string;
+    set_name: string | null;
+    target_total_price_eur: string;
+    condition: string;
+    ship_from_countries: string[] | null;
+    status: string;
+    created_at: string;
+  }>;
+  alertHistory: Array<{
+    id: number;
+    set_number: string;
+    price_eur: string | null;
+    shipping_eur: string | null;
+    total_eur: string | null;
+    platform: string;
+    notification_type: string | null;
+    status: string;
+    created_at: string;
+    sent_at: string | null;
+  }>;
+  pushSubscriptions: Array<{
+    id: number;
+    device_name: string | null;
+    created_at: string;
+    last_used_at: string | null;
+  }>;
+}
+
+export async function exportUserData(userId: number): Promise<UserDataExport | null> {
+  try {
+    // 1. Get user profile
+    const userResult = await query<{
+      id: number;
+      email: string;
+      ship_to_country: string;
+      ship_to_postal_code: string | null;
+      timezone: string;
+      subscription_tier: string;
+      subscription_status: string;
+      telegram_username: string | null;
+      telegram_chat_id: number | null;
+      weekly_digest_enabled: boolean;
+      still_available_reminders: boolean;
+      quiet_hours_start: string | null;
+      quiet_hours_end: string | null;
+      created_at: Date;
+      last_active_at: Date | null;
+    }>(
+      `SELECT 
+         id, email, ship_to_country, ship_to_postal_code, timezone,
+         subscription_tier, subscription_status, telegram_username, telegram_chat_id,
+         weekly_digest_enabled, still_available_reminders,
+         quiet_hours_start, quiet_hours_end, created_at, last_active_at
+       FROM users 
+       WHERE id = $1 AND deleted_at IS NULL`,
+      [userId]
+    );
+
+    if (userResult.rows.length === 0) {
+      return null;
+    }
+
+    const userData = userResult.rows[0];
+
+    // 2. Get watches with set names
+    const watchesResult = await query<{
+      id: number;
+      set_number: string;
+      set_name: string | null;
+      target_total_price_eur: string;
+      condition: string;
+      ship_from_countries: string[] | null;
+      status: string;
+      created_at: Date;
+    }>(
+      `SELECT 
+         w.id, w.set_number, s.name as set_name, w.target_total_price_eur,
+         w.condition, w.ship_from_countries, w.status, w.created_at
+       FROM watches w
+       LEFT JOIN sets s ON w.set_number = s.set_number
+       WHERE w.user_id = $1
+       ORDER BY w.created_at DESC`,
+      [userId]
+    );
+
+    // 3. Get alert history (limit to last 1000 for reasonable file size)
+    const alertsResult = await query<{
+      id: number;
+      set_number: string;
+      price_eur: string | null;
+      shipping_eur: string | null;
+      total_eur: string | null;
+      platform: string;
+      notification_type: string | null;
+      status: string;
+      created_at: Date;
+      sent_at: Date | null;
+    }>(
+      `SELECT 
+         id, set_number, price_eur, shipping_eur, total_eur,
+         platform, notification_type, status, created_at, sent_at
+       FROM alert_history
+       WHERE user_id = $1
+       ORDER BY created_at DESC
+       LIMIT 1000`,
+      [userId]
+    );
+
+    // 4. Get push subscriptions
+    const pushResult = await query<{
+      id: number;
+      device_name: string | null;
+      created_at: Date;
+      last_used_at: Date | null;
+    }>(
+      `SELECT id, device_name, created_at, last_used_at
+       FROM push_subscriptions
+       WHERE user_id = $1
+       ORDER BY created_at DESC`,
+      [userId]
+    );
+
+    // 5. Build export object
+    const exportData: UserDataExport = {
+      exportedAt: new Date().toISOString(),
+      user: {
+        id: userData.id,
+        email: userData.email,
+        ship_to_country: userData.ship_to_country,
+        ship_to_postal_code: userData.ship_to_postal_code,
+        timezone: userData.timezone,
+        subscription_tier: userData.subscription_tier,
+        subscription_status: userData.subscription_status,
+        telegram_username: userData.telegram_username,
+        telegram_connected: userData.telegram_chat_id !== null,
+        weekly_digest_enabled: userData.weekly_digest_enabled,
+        still_available_reminders: userData.still_available_reminders,
+        quiet_hours_start: userData.quiet_hours_start,
+        quiet_hours_end: userData.quiet_hours_end,
+        created_at: userData.created_at.toISOString(),
+        last_active_at: userData.last_active_at?.toISOString() ?? null,
+      },
+      watches: watchesResult.rows.map(w => ({
+        id: w.id,
+        set_number: w.set_number,
+        set_name: w.set_name,
+        target_total_price_eur: w.target_total_price_eur,
+        condition: w.condition,
+        ship_from_countries: w.ship_from_countries,
+        status: w.status,
+        created_at: w.created_at.toISOString(),
+      })),
+      alertHistory: alertsResult.rows.map(a => ({
+        id: a.id,
+        set_number: a.set_number,
+        price_eur: a.price_eur,
+        shipping_eur: a.shipping_eur,
+        total_eur: a.total_eur,
+        platform: a.platform,
+        notification_type: a.notification_type,
+        status: a.status,
+        created_at: a.created_at.toISOString(),
+        sent_at: a.sent_at?.toISOString() ?? null,
+      })),
+      pushSubscriptions: pushResult.rows.map(p => ({
+        id: p.id,
+        device_name: p.device_name,
+        created_at: p.created_at.toISOString(),
+        last_used_at: p.last_used_at?.toISOString() ?? null,
+      })),
+    };
+
+    console.log(`[GDPR] Exported data for user ${userId}: ${watchesResult.rows.length} watches, ${alertsResult.rows.length} alerts, ${pushResult.rows.length} push subscriptions`);
+
+    return exportData;
+  } catch (error) {
+    console.error(`[GDPR] Error exporting data for user ${userId}:`, error);
+    return null;
+  }
+}

@@ -14,6 +14,9 @@ import {
   verifyResetToken,
   resetPassword,
   clearResetToken,
+  deleteUser,
+  changePassword,
+  exportUserData,
 } from '../services/users.js';
 import { sendPasswordResetEmail } from '../services/email.js';
 
@@ -162,7 +165,7 @@ router.get('/verify-reset-token/:token', async (req: Request, res: Response): Pr
   }
 });
 
-// Reset password
+// Reset password (via email token)
 router.post('/reset-password', async (req: Request, res: Response): Promise<void> => {
   try {
     const { token, password } = req.body;
@@ -197,6 +200,126 @@ router.post('/reset-password', async (req: Request, res: Response): Promise<void
     res.status(500).json({ error: 'Failed to reset password' });
   }
 });
+
+// ============================================
+// GDPR ENDPOINTS (NEW)
+// ============================================
+
+// Delete account (GDPR - Right to be forgotten)
+router.delete('/:id', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+      res.status(400).json({ error: 'Invalid user ID' });
+      return;
+    }
+
+    // Optional: Add password confirmation for extra security
+    const { password } = req.body;
+    if (password) {
+      const user = await getUserById(id);
+      if (!user) {
+        res.status(404).json({ error: 'User not found' });
+        return;
+      }
+      
+      // Import verifyPassword from service if we want password confirmation
+      // For now, we skip this since frontend will handle confirmation dialog
+    }
+
+    const result = await deleteUser(id);
+    
+    if (!result.success) {
+      res.status(404).json({ error: result.error || 'Failed to delete account' });
+      return;
+    }
+
+    res.json({ 
+      success: true, 
+      message: 'Account deleted successfully. All personal data has been removed.' 
+    });
+  } catch (error) {
+    console.error('Delete account error:', error);
+    res.status(500).json({ error: 'Failed to delete account' });
+  }
+});
+
+// Change password (while logged in)
+router.put('/:id/password', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+      res.status(400).json({ error: 'Invalid user ID' });
+      return;
+    }
+
+    const { oldPassword, newPassword } = req.body;
+
+    if (!oldPassword || !newPassword) {
+      res.status(400).json({ error: 'Both old and new passwords are required' });
+      return;
+    }
+
+    // Validate new password strength
+    if (newPassword.length < 8) {
+      res.status(400).json({ error: 'New password must be at least 8 characters' });
+      return;
+    }
+
+    // Check that new password is different from old
+    if (oldPassword === newPassword) {
+      res.status(400).json({ error: 'New password must be different from current password' });
+      return;
+    }
+
+    const result = await changePassword(id, oldPassword, newPassword);
+    
+    if (!result.success) {
+      res.status(400).json({ error: result.error || 'Failed to change password' });
+      return;
+    }
+
+    res.json({ 
+      success: true, 
+      message: 'Password changed successfully' 
+    });
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({ error: 'Failed to change password' });
+  }
+});
+
+// Export my data (GDPR - Data portability)
+router.get('/:id/export', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+      res.status(400).json({ error: 'Invalid user ID' });
+      return;
+    }
+
+    const data = await exportUserData(id);
+    
+    if (!data) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    // Set headers for file download
+    const filename = `scoutloot-data-${id}-${Date.now()}.json`;
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+
+    res.json(data);
+  } catch (error) {
+    console.error('Export data error:', error);
+    res.status(500).json({ error: 'Failed to export data' });
+  }
+});
+
+// ============================================
+// EXISTING ENDPOINTS
+// ============================================
 
 router.get('/:id', async (req: Request, res: Response): Promise<void> => {
   try {

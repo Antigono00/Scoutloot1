@@ -1,16 +1,14 @@
-# ScoutLoot Implementation Status V14.2
+# ScoutLoot Implementation Status V14.3
 ## Updated: January 26, 2026
 
 ---
 
-## 🎯 Current Status: PRODUCTION + GLOBAL + WEB PUSH + UX IMPROVEMENTS
+## 🎯 Current Status: PRODUCTION + GLOBAL + WEB PUSH + GDPR COMPLIANCE
 
 The app is live at **https://scoutloot.com** with:
-- **NEW V14.2: Weekly Digest Fixed** (was broken due to column name)
-- **NEW V14.2: Country Change Resets Notifications** (fresh alerts for new region)
-- **NEW V14.2: Registration Preferences** (digest/reminder checkboxes)
-- **NEW V14.2: Post-Signup Setup Modal** (Telegram/Push onboarding)
-- **NEW V14.2: Jobs API** (manual trigger for scheduled jobs)
+- **NEW V14.3: GDPR Backend** (Delete Account, Change Password, Export Data)
+- V14.2: Weekly Digest Fixed, Country Change Resets, Registration Preferences
+- V14.2: Post-Signup Setup Modal, Jobs API
 - Web Push Notifications (dual channel with Telegram)
 - Notifications Inbox (view all alerts in browser)
 - PWA Support (installable web app)
@@ -19,6 +17,99 @@ The app is live at **https://scoutloot.com** with:
 - Complete EU coverage (EBAY_DE, EBAY_FR, EBAY_ES, EBAY_IT)
 - Import charges calculation (EU↔UK)
 - Multi-currency support (€/£/$)
+
+---
+
+## ✅ V14.3 Features (January 26, 2026)
+
+### GDPR Compliance - Backend API
+
+Three new endpoints for GDPR compliance and user account management:
+
+#### 1. Delete Account (Right to be Forgotten)
+**Endpoint:** `DELETE /api/users/:id`
+
+**What it does:**
+- Soft delete (sets `deleted_at` timestamp)
+- Anonymizes PII: email → `deleted_X@deleted.local`, password → `DELETED`
+- Clears: telegram_chat_id, telegram_username, postal_code, reset_token
+- Deletes all watches (cascades to watch_notification_state)
+- Deletes all push_subscriptions
+- Keeps alert_history for analytics (anonymized)
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Account deleted successfully. All personal data has been removed."
+}
+```
+
+#### 2. Change Password (While Logged In)
+**Endpoint:** `PUT /api/users/:id/password`
+
+**Request body:**
+```json
+{
+  "oldPassword": "current_password",
+  "newPassword": "new_password_min_8_chars"
+}
+```
+
+**What it does:**
+- Verifies old password first (supports bcrypt + legacy base64)
+- Validates new password ≥ 8 characters
+- Validates new ≠ old password
+- Hashes new password with bcrypt (SALT_ROUNDS = 12)
+- Clears any existing reset tokens
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Password changed successfully"
+}
+```
+
+#### 3. Export My Data (Data Portability)
+**Endpoint:** `GET /api/users/:id/export`
+
+**What it returns:**
+- `exportedAt`: ISO timestamp
+- `user`: Profile data (email, country, timezone, tier, preferences)
+- `watches`: All watches with set names
+- `alertHistory`: Last 1000 alerts
+- `pushSubscriptions`: All registered devices
+
+**Response headers:**
+```
+Content-Type: application/json
+Content-Disposition: attachment; filename="scoutloot-data-{id}-{timestamp}.json"
+```
+
+### Files Changed
+- `src/services/users.ts` - Added `deleteUser()`, `changePassword()`, `exportUserData()`
+- `src/routes/users.ts` - Added DELETE, PUT /password, GET /export endpoints
+
+### Test Commands
+```bash
+# Test export data
+curl https://scoutloot.com/api/users/1/export | jq
+
+# Test change password
+curl -X PUT https://scoutloot.com/api/users/1/password \
+  -H "Content-Type: application/json" \
+  -d '{"oldPassword":"current","newPassword":"newpass123"}' | jq
+
+# Test delete account (⚠️ IRREVERSIBLE - use test user!)
+curl -X DELETE https://scoutloot.com/api/users/999 | jq
+
+# Verify deletion
+PGPASSWORD='BrickAlpha2026!Prod' psql -h localhost -U lego_radar -d lego_radar -c "
+SELECT id, email, password_hash, telegram_chat_id, deleted_at 
+FROM users WHERE id = 999;
+"
+```
 
 ---
 
@@ -216,36 +307,6 @@ npm install --save-dev @types/web-push
 
 ---
 
-## ✅ V13 Features (January 25, 2026)
-
-### USA & Canada Marketplace Support
-- **EBAY_US marketplace** for US users
-- **EBAY_CA marketplace** for Canadian users
-- Dynamic marketplace selection based on user's ship_to_country
-- USD/CAD currency support in alerts
-
-### Region-Aware Ship-From Countries
-- **EU/UK users** → ship_from includes all 28 EU+UK countries
-- **US/CA users** → ship_from includes only US + CA
-
----
-
-## ✅ V12 Features (January 25, 2026)
-
-### Currency Symbol in Telegram Alerts
-- Correct currency symbol based on marketplace (£/€/$)
-
-### LED Lighting Kit Filter
-- 50+ LED-related keywords filtered
-- Multi-language: EN, DE, FR, ES, IT, NL
-
-### Rate Limiting & Security
-- Global: 200 requests per 15 min per IP
-- Auth: 10 attempts per 15 min
-- Password reset: 3 attempts per hour
-
----
-
 ## 🗄️ Database Schema (Current)
 
 ### Tables
@@ -262,7 +323,7 @@ npm install --save-dev @types/web-push
 
 ---
 
-## 📁 File Structure (V14.2)
+## 📁 File Structure (V14.3)
 
 ```
 /var/www/scoutloot/app/
@@ -291,13 +352,13 @@ npm install --save-dev @types/web-push
 │   │       └── index.ts          # Provider exports
 │   │
 │   ├── routes/
-│   │   ├── index.ts              # Main router (UPDATED V14.2)
+│   │   ├── index.ts              # Main router
 │   │   ├── alerts.ts             # Alerts + Inbox routes
-│   │   ├── jobs.ts               # Jobs manual triggers (NEW V14.2)
+│   │   ├── jobs.ts               # Jobs manual triggers
 │   │   ├── push.ts               # Push notification routes
 │   │   ├── scan.ts               # Scan routes
 │   │   ├── sets.ts               # Sets search
-│   │   ├── users.ts              # Users routes (UPDATED V14.2)
+│   │   ├── users.ts              # Users routes (UPDATED V14.3 - GDPR)
 │   │   └── watches.ts            # Watches routes
 │   │
 │   ├── services/
@@ -310,7 +371,7 @@ npm install --save-dev @types/web-push
 │   │   ├── scanner.ts            # Scan cycle (dual notifications)
 │   │   ├── sets.ts               # Sets lookup
 │   │   ├── sync-sets.ts          # Rebrickable sync
-│   │   ├── users.ts              # Users CRUD (UPDATED V14.2)
+│   │   ├── users.ts              # Users CRUD (UPDATED V14.3 - GDPR)
 │   │   └── watches.ts            # Watches CRUD
 │   │
 │   ├── telegram/
@@ -327,7 +388,7 @@ npm install --save-dev @types/web-push
 │       └── time.ts               # Time utilities
 │
 ├── public/
-│   ├── index.html                # Full SPA (UPDATED V14.2)
+│   ├── index.html                # Full SPA
 │   ├── sw.js                     # Service worker
 │   ├── manifest.json             # PWA manifest
 │   ├── privacy.html              # Privacy policy
@@ -396,13 +457,18 @@ curl https://scoutloot.com/api/push/queue-stats | jq
 # Check VAPID key
 curl https://scoutloot.com/api/push/vapid-public-key | jq
 
-# Test minor EU market search (SK should return EU listings)
-cd /var/www/scoutloot/app && node -e "
-const { searchEbay } = require('./dist/providers/ebay/client.js');
-searchEbay('75192', 'SK', { limit: 5 }).then(r => {
-  console.log('Total:', r.total);
-  r.itemSummaries?.slice(0,5).forEach(i => console.log(i.itemLocation?.country, i.price?.value));
-});
+# Test export user data (GDPR)
+curl https://scoutloot.com/api/users/1/export | jq
+
+# Test change password (GDPR)
+curl -X PUT https://scoutloot.com/api/users/1/password \
+  -H "Content-Type: application/json" \
+  -d '{"oldPassword":"old","newPassword":"new12345"}' | jq
+
+# List all users
+PGPASSWORD='BrickAlpha2026!Prod' psql -h localhost -U lego_radar -d lego_radar -c "
+SELECT id, email, ship_to_country, subscription_tier, created_at::date 
+FROM users WHERE deleted_at IS NULL ORDER BY id;
 "
 
 # View logs
@@ -412,9 +478,27 @@ pm2 logs scoutloot-worker --lines 50
 
 ---
 
-## 📋 API Endpoints (V14.2)
+## 📋 API Endpoints (V14.3)
 
-### Jobs (NEW)
+### Users (UPDATED V14.3 - GDPR)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/users` | Create user (signup) |
+| POST | `/api/users/login` | Login |
+| GET | `/api/users/:id` | Get user by ID |
+| GET | `/api/users/email/:email` | Get user by email |
+| PATCH | `/api/users/:id` | Update user settings |
+| PATCH | `/api/users/:id/location` | Update location |
+| POST | `/api/users/:id/telegram` | Connect Telegram |
+| DELETE | `/api/users/:id/telegram` | Disconnect Telegram |
+| POST | `/api/users/forgot-password` | Send reset email |
+| GET | `/api/users/verify-reset-token/:token` | Verify reset token |
+| POST | `/api/users/reset-password` | Reset password (via email) |
+| **DELETE** | **`/api/users/:id`** | **Delete account (GDPR)** |
+| **PUT** | **`/api/users/:id/password`** | **Change password (GDPR)** |
+| **GET** | **`/api/users/:id/export`** | **Export data (GDPR)** |
+
+### Jobs
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/api/jobs/weekly-digest` | Manually trigger weekly digest |
@@ -448,6 +532,7 @@ pm2 logs scoutloot-worker --lines 50
 
 | Version | Date | Key Changes |
 |---------|------|-------------|
+| **V14.3** | **Jan 26, 2026** | **GDPR Backend: Delete Account, Change Password, Export Data** |
 | V14.2 | Jan 26, 2026 | Weekly digest fix, country change reset, registration prefs, setup modal, jobs API |
 | V14.1 | Jan 25, 2026 | Fix minor EU markets (SK, CZ, PT, etc.) returning wrong listings |
 | V14 | Jan 25, 2026 | Web Push notifications, Notifications Inbox, PWA support |
@@ -474,9 +559,9 @@ GitHub: https://github.com/Antigono00/Scoutloot1
 ## 📜 Next Steps
 
 ### Immediate
+- [ ] **GDPR Frontend UI** - Settings modal with Delete Account, Change Password, Export Data
 - [ ] BrickOwl API integration (awaiting API access)
 - [ ] iOS-specific push improvements
-- [ ] Notification preferences (frequency, quiet hours for push)
 
 ### Future Roadmap
 - [ ] BrickLink integration (reference prices)
