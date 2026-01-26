@@ -3,30 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <!-- Primary SEO -->
-  <title>LEGO Deal Alerts & Price Tracker | ScoutLoot - USA, UK, Europe</title>
-  <meta name="description" content="Free LEGO deal alerts & price tracker. Get instant notifications when LEGO sets hit your target price on eBay. Track deals in USA, Canada, UK & Europe. Never miss a LEGO bargain!">
-  <meta name="keywords" content="LEGO deal alerts, LEGO price tracker, LEGO deals, eBay LEGO, cheap LEGO sets, LEGO price alerts, LEGO bargains, LEGO discount finder">
-  <meta name="author" content="ScoutLoot">
-  <meta name="robots" content="index, follow, max-image-preview:large">
-  <link rel="canonical" href="https://scoutloot.com/">
+  <title>ScoutLoot — LEGO Deal Radar</title>
+  <meta name="description" content="Get instant Telegram alerts when LEGO sets drop below your target price. Track deals across eBay in USA, Canada, UK, and Europe.">
   
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://scoutloot.com/">
-  <meta property="og:title" content="LEGO Deal Alerts & Price Tracker | ScoutLoot">
-  <meta property="og:description" content="Free LEGO price alerts. Set your target price, get instant notifications when deals drop on eBay. USA, Canada, UK & Europe.">
+  <meta property="og:title" content="ScoutLoot — Never Miss a LEGO Deal Again">
+  <meta property="og:description" content="Set your target price, get instant alerts when LEGO deals drop. Available in USA, Canada, UK, and Europe.">
   <meta property="og:image" content="https://scoutloot.com/og-image.png">
-  <meta property="og:site_name" content="ScoutLoot">
-  <meta property="og:locale" content="en_US">
 
   <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:url" content="https://scoutloot.com/">
-  <meta name="twitter:title" content="LEGO Deal Alerts & Price Tracker | ScoutLoot">
-  <meta name="twitter:description" content="Free LEGO price alerts. Get notified when sets hit your target price on eBay.">
-  <meta name="twitter:image" content="https://scoutloot.com/og-image.png">
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://scoutloot.com/">
+  <meta property="twitter:title" content="ScoutLoot — Never Miss a LEGO Deal Again">
+  <meta property="twitter:description" content="Set your target price, get instant alerts when LEGO deals drop.">
+  <meta property="twitter:image" content="https://scoutloot.com/og-image.png">
   
   <!-- PWA Manifest -->
   <link rel="manifest" href="/manifest.json">
@@ -41,52 +33,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Favicon -->
-  <link rel="icon" href="/favicon.ico" type="image/x-icon">
-  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="apple-touch-icon" href="/icon-192.png">
   
-  <!-- Structured Data - WebApplication -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": "ScoutLoot",
-    "alternateName": "LEGO Deal Alerts",
-    "description": "LEGO deal alerts and price tracker. Get instant notifications when LEGO sets hit your target price on eBay.",
-    "url": "https://scoutloot.com",
-    "applicationCategory": "ShoppingApplication",
-    "operatingSystem": "Web Browser",
-    "browserRequirements": "Requires JavaScript",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD",
-      "description": "Free tier available"
-    },
-    "featureList": [
-      "LEGO price alerts",
-      "eBay deal tracking", 
-      "Telegram notifications",
-      "Push notifications",
-      "USA, Canada, UK & Europe support",
-      "Multi-currency tracking"
-    ]
-  }
-  </script>
-  
-  <!-- Structured Data - Organization -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "ScoutLoot",
-    "url": "https://scoutloot.com",
-    "logo": "https://scoutloot.com/icon-512.png",
-    "description": "LEGO deal alerts and price tracking service"
-  }
-  </script>
-  
-  <!-- Styles -->
+  <!-- Styles (EXTRACTED) -->
   <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
