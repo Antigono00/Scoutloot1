@@ -5,6 +5,8 @@
  * - Telegram message queue processing
  * - Push notification queue processing
  * - Scheduled cron jobs:
+ *   - Daily Price Snapshot: 00:05 UTC - aggregates current deals into history
+ *   - Expired Deals Cleanup: 00:10 UTC - removes stale current deals
  *   - Weekly Digest: Sunday 9:00 AM UTC
  *   - Still-Available Reminders: Daily 10:00 AM UTC
  */
@@ -12,7 +14,12 @@
 import { config } from './config.js';
 import { createTelegramWorker } from './jobs/telegramWorker.js';
 import { createPushWorker } from './jobs/pushWorker.js';
-import { runWeeklyDigest, runStillAvailableReminders } from './jobs/scheduledJobs.js';
+import { 
+  runWeeklyDigest, 
+  runStillAvailableReminders,
+  runDailyPriceSnapshot,
+  runExpiredDealsCleanup
+} from './jobs/scheduledJobs.js';
 import { closeRedis } from './db/redis.js';
 import { closePool } from './db/index.js';
 
@@ -47,6 +54,21 @@ interface ScheduledJob {
 }
 
 const scheduledJobs: ScheduledJob[] = [
+  // NEW: Daily price snapshot at 00:05 UTC
+  {
+    name: 'Daily Price Snapshot',
+    cronHour: 0,
+    cronMinute: 5,
+    handler: runDailyPriceSnapshot,
+  },
+  // NEW: Expired deals cleanup at 00:10 UTC
+  {
+    name: 'Expired Deals Cleanup',
+    cronHour: 0,
+    cronMinute: 10,
+    handler: runExpiredDealsCleanup,
+  },
+  // Weekly digest on Sunday at 9:00 AM UTC
   {
     name: 'Weekly Digest',
     cronHour: 9,
@@ -54,6 +76,7 @@ const scheduledJobs: ScheduledJob[] = [
     cronDayOfWeek: 0, // Sunday
     handler: runWeeklyDigest,
   },
+  // Still-available reminders at 10:00 AM UTC daily
   {
     name: 'Still-Available Reminders',
     cronHour: 10,

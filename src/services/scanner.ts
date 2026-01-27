@@ -22,6 +22,23 @@ import {
   decideNotification,
   NotificationDecision 
 } from './notificationState.js';
+import { updateSetCurrentDeals } from './currentDeals.js';
+
+// ============================================
+// RATE LIMITING CONFIG
+// ============================================
+
+// Delay between eBay API calls (milliseconds)
+// eBay allows ~5000 calls/day = ~3.5 calls/minute sustained
+// But burst can trigger 429s, so we add delays
+const DELAY_BETWEEN_SCANS_MS = 1500; // 1.5 seconds between each scan group
+
+/**
+ * Sleep helper for rate limiting
+ */
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 /**
  * Check if scanning should be active
@@ -70,6 +87,7 @@ export interface ScanResult {
   filteredByQuality: number;
   filteredByShipping: number;
   filteredByCondition: number;
+  currentDealsUpdated: number;
   errors: string[];
   durationMs: number;
 }
@@ -92,6 +110,7 @@ export async function runScanCycle(): Promise<ScanResult> {
       filteredByQuality: 0,
       filteredByShipping: 0,
       filteredByCondition: 0,
+      currentDealsUpdated: 0,
       errors: [],
       durationMs: 0,
     };
@@ -115,6 +134,7 @@ export async function runScanCycle(): Promise<ScanResult> {
     filteredByQuality: 0,
     filteredByShipping: 0,
     filteredByCondition: 0,
+    currentDealsUpdated: 0,
     errors: [],
     durationMs: 0,
   };
@@ -123,16 +143,29 @@ export async function runScanCycle(): Promise<ScanResult> {
 
   try {
     const scanGroups = await getActiveScanGroups();
-    console.log(`[${requestId}] Found ${scanGroups.length} scan groups`);
+    console.log(`[${requestId}] Found ${scanGroups.length} scan groups (${DELAY_BETWEEN_SCANS_MS}ms delay between calls)`);
 
-    for (const group of scanGroups) {
+    for (let i = 0; i < scanGroups.length; i++) {
+      const group = scanGroups[i];
+      
       try {
         await processScanGroup(group.set_number, group.ship_to_country, requestId, result);
         result.groupsScanned++;
+        
+        // Rate limiting: delay between API calls (except after last one)
+        if (i < scanGroups.length - 1) {
+          await sleep(DELAY_BETWEEN_SCANS_MS);
+        }
       } catch (error) {
         const errorMsg = `Error scanning ${group.set_number}/${group.ship_to_country}: ${error}`;
         console.error(`[${requestId}] ${errorMsg}`);
         result.errors.push(errorMsg);
+        
+        // If we hit rate limits (429), add extra delay
+        if (String(error).includes('429')) {
+          console.log(`[${requestId}] Rate limited - adding 5s cooldown`);
+          await sleep(5000);
+        }
       }
     }
 
@@ -177,6 +210,10 @@ async function processScanGroup(
 
   const activeIds = normalizedListings.map((l) => l.id);
   await markListingsInactive(setNumber, shipToCountry, activeIds);
+
+  // NOTE: updateSetCurrentDeals is now called INSIDE processWatchMatches
+  // AFTER all filtering is applied (same filters as notifications)
+  // This ensures set pages show the same quality deals as alerts
 
   const watches = await getWatchesForScanGroup(setNumber, shipToCountry);
   console.log(`[${requestId}] Found ${watches.length} watches for ${setNumber}/${shipToCountry}`);
@@ -228,7 +265,9 @@ async function processWatchMatches(
 ): Promise<void> {
   let filtered = listings;
 
-  // Quality filter
+  // ============================================
+  // FILTER 1: Quality filter (minifigs, parts, junk)
+  // ============================================
   const beforeQualityFilter = filtered.length;
   filtered = filtered.filter((l) => {
     const filterResult = filterListing(
@@ -251,25 +290,35 @@ async function processWatchMatches(
     console.log(`[${requestId}] Quality filter removed ${filteredByQuality} of ${beforeQualityFilter} listings`);
   }
 
-  // Filter by ship_from_countries
+  // ============================================
+  // FILTER 2: Ship from countries
+  // ============================================
   filtered = filterByShipFrom(filtered, watch.ship_from_countries);
 
-  // Filter by seller rating
+  // ============================================
+  // FILTER 3: Seller rating
+  // ============================================
   filtered = filtered.filter((l) => 
     l.seller_rating === null || l.seller_rating >= Number(watch.min_seller_rating)
   );
 
-  // Filter by seller feedback count
+  // ============================================
+  // FILTER 4: Seller feedback count
+  // ============================================
   filtered = filtered.filter((l) => 
     l.seller_feedback === null || l.seller_feedback >= watch.min_seller_feedback
   );
 
-  // Filter by user's custom exclude words
+  // ============================================
+  // FILTER 5: User's custom exclude words
+  // ============================================
   if (watch.exclude_words && watch.exclude_words.length > 0) {
     filtered = filtered.filter((l) => !containsExcludeWord(l.title, watch.exclude_words!));
   }
 
-  // Filter by minimum price
+  // ============================================
+  // FILTER 6: Minimum price
+  // ============================================
   const minTotalEur = Number(watch.min_total_eur) || 0;
   if (minTotalEur > 0) {
     const beforeMinPrice = filtered.length;
@@ -280,7 +329,9 @@ async function processWatchMatches(
     }
   }
 
-  // Filter out suspicious zero shipping
+  // ============================================
+  // FILTER 7: Valid shipping (no suspicious €0 shipping)
+  // ============================================
   const beforeShippingFilter = filtered.length;
   filtered = filtered.filter((l) => hasValidShipping(l, shipToCountry));
   const filteredByShipping = beforeShippingFilter - filtered.length;
@@ -289,7 +340,25 @@ async function processWatchMatches(
     console.log(`[${requestId}] Filtered out ${filteredByShipping} listings with no shipping to ${shipToCountry}`);
   }
 
-  // Filter by target price
+  // ============================================
+  // UPDATE SET CURRENT DEALS (AFTER ALL FILTERS!)
+  // These are the same quality listings that would be eligible for notifications
+  // Only price threshold is NOT applied (so we show best available, not just under target)
+  // ============================================
+  if (filtered.length > 0) {
+    try {
+      await updateSetCurrentDeals(watch.set_number, filtered, shipToCountry);
+      result.currentDealsUpdated++;
+      console.log(`[${requestId}] Updated current deals for ${watch.set_number} with ${filtered.length} filtered listings`);
+    } catch (error) {
+      console.error(`[${requestId}] Failed to update current deals for ${watch.set_number}:`, error);
+      // Don't fail the scan, just log the error
+    }
+  }
+
+  // ============================================
+  // FILTER 8: Target price (for notifications only)
+  // ============================================
   const matches = filtered.filter((l) => l.total_eur <= Number(watch.target_total_price_eur));
 
   result.matchesFound += matches.length;

@@ -4,6 +4,8 @@
  * Contains:
  * - Weekly Digest: Sunday 9:00 AM UTC - summarizes all watches
  * - Still-Available Reminders: Daily check for 3-day-old deals >20% off
+ * - Daily Price Snapshot: 00:05 UTC - aggregates current deals into history
+ * - Expired Deals Cleanup: 00:10 UTC - removes stale current deals
  */
 
 import { query } from '../db/index.js';
@@ -15,6 +17,7 @@ import {
   formatStillAvailableReminder 
 } from '../telegram/escape.js';
 import { searchEbay, normalizeEbayListing } from '../providers/ebay/index.js';
+import { snapshotDailyPrices, cleanupExpiredDeals } from '../services/currentDeals.js';
 
 // ============================================
 // TYPES
@@ -432,4 +435,73 @@ export async function runStillAvailableReminders(): Promise<{
   
   console.log(`[Still-Available Reminders] Complete - ${result.remindersSent} sent (${result.stillAvailable} still available)`);
   return result;
+}
+
+// ============================================
+// DAILY PRICE SNAPSHOT JOB (NEW)
+// ============================================
+
+/**
+ * Run the daily price snapshot job
+ * Aggregates current deals into historical price data
+ */
+export async function runDailyPriceSnapshot(): Promise<{
+  setsProcessed: number;
+  rowsInserted: number;
+  error: string | null;
+}> {
+  console.log('[Daily Price Snapshot] Starting...');
+  
+  try {
+    const result = await snapshotDailyPrices();
+    
+    console.log(`[Daily Price Snapshot] Complete - ${result.setsProcessed} sets, ${result.rowsInserted} rows`);
+    
+    return {
+      setsProcessed: result.setsProcessed,
+      rowsInserted: result.rowsInserted,
+      error: null,
+    };
+  } catch (error) {
+    const errorMsg = `Error: ${error}`;
+    console.error(`[Daily Price Snapshot] ${errorMsg}`);
+    return {
+      setsProcessed: 0,
+      rowsInserted: 0,
+      error: errorMsg,
+    };
+  }
+}
+
+// ============================================
+// EXPIRED DEALS CLEANUP JOB (NEW)
+// ============================================
+
+/**
+ * Run the expired deals cleanup job
+ * Removes stale current deals that have expired
+ */
+export async function runExpiredDealsCleanup(): Promise<{
+  dealsRemoved: number;
+  error: string | null;
+}> {
+  console.log('[Expired Deals Cleanup] Starting...');
+  
+  try {
+    const dealsRemoved = await cleanupExpiredDeals();
+    
+    console.log(`[Expired Deals Cleanup] Complete - removed ${dealsRemoved} expired deals`);
+    
+    return {
+      dealsRemoved,
+      error: null,
+    };
+  } catch (error) {
+    const errorMsg = `Error: ${error}`;
+    console.error(`[Expired Deals Cleanup] ${errorMsg}`);
+    return {
+      dealsRemoved: 0,
+      error: errorMsg,
+    };
+  }
 }
