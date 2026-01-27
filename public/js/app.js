@@ -1444,3 +1444,126 @@ async function init() {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+// ===========================================
+// SET EXPLORER (V20) - Navigate to set pages
+// ===========================================
+
+let explorerDebounceTimer = null;
+
+function initSetExplorer() {
+  // Hero search
+  const heroInput = document.getElementById('hero-search-input');
+  const heroResults = document.getElementById('hero-search-results');
+  
+  if (heroInput) {
+    heroInput.addEventListener('input', (e) => {
+      const query = e.target.value.trim();
+      
+      clearTimeout(explorerDebounceTimer);
+      
+      if (query.length < 2) {
+        heroResults.classList.remove('active');
+        return;
+      }
+      
+      explorerDebounceTimer = setTimeout(() => {
+        searchSetsForExplorer(query, heroResults);
+      }, 300);
+    });
+    
+    document.addEventListener('click', (e) => {
+      if (!heroInput.contains(e.target) && !heroResults.contains(e.target)) {
+        heroResults.classList.remove('active');
+      }
+    });
+    
+    heroInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const firstResult = heroResults.querySelector('.explorer-item');
+        if (firstResult) {
+          window.location.href = firstResult.href;
+        }
+      }
+    });
+  }
+  
+  // Dashboard search
+  const dashInput = document.getElementById('dashboard-search-input');
+  const dashResults = document.getElementById('dashboard-search-results');
+  
+  if (dashInput) {
+    dashInput.addEventListener('input', (e) => {
+      const query = e.target.value.trim();
+      
+      clearTimeout(explorerDebounceTimer);
+      
+      if (query.length < 2) {
+        dashResults.classList.remove('active');
+        return;
+      }
+      
+      explorerDebounceTimer = setTimeout(() => {
+        searchSetsForExplorer(query, dashResults);
+      }, 300);
+    });
+    
+    document.addEventListener('click', (e) => {
+      if (!dashInput.contains(e.target) && !dashResults.contains(e.target)) {
+        dashResults.classList.remove('active');
+      }
+    });
+    
+    dashInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const firstResult = dashResults.querySelector('.explorer-item');
+        if (firstResult) {
+          window.location.href = firstResult.href;
+        }
+      }
+    });
+  }
+}
+
+async function searchSetsForExplorer(query, resultsContainer) {
+  resultsContainer.innerHTML = '<div class="explorer-loading"><span>🔍</span> Searching...</div>';
+  resultsContainer.classList.add('active');
+  
+  try {
+    const response = await fetch('/api/sets/search?q=' + encodeURIComponent(query));
+    const data = await response.json();
+    
+    if (!data.results || data.results.length === 0) {
+      resultsContainer.innerHTML = '<div class="explorer-empty">No sets found for "' + escapeHtml(query) + '"</div>';
+      return;
+    }
+    
+    resultsContainer.innerHTML = data.results.map(function(set) {
+      return '<a href="/set/' + set.set_num + '" class="explorer-item">' +
+        '<div class="explorer-item-image">' +
+        (set.set_img_url 
+          ? '<img src="' + set.set_img_url + '" alt="' + escapeHtml(set.name) + '" onerror="this.parentElement.innerHTML=\'<span class=placeholder>🧱</span>\'">'
+          : '<span class="placeholder">🧱</span>') +
+        '</div>' +
+        '<div class="explorer-item-info">' +
+        '<div class="explorer-item-name">' + escapeHtml(set.name) + '</div>' +
+        '<div class="explorer-item-meta">#' + set.set_num + ' • ' + set.year + ' • ' + (set.num_parts || '?') + ' pieces</div>' +
+        '</div>' +
+        '<span class="explorer-item-arrow">→</span>' +
+        '</a>';
+    }).join('');
+    
+  } catch (error) {
+    console.error('Explorer search error:', error);
+    resultsContainer.innerHTML = '<div class="explorer-empty">Search failed. Please try again.</div>';
+  }
+}
+
+// Auto-init on page load
+(function() {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSetExplorer);
+  } else {
+    initSetExplorer();
+  }
+})();

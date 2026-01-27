@@ -1,3 +1,9 @@
+/**
+ * ScoutLoot - Express Server Entry Point
+ * 
+ * V20: Set Pages Phase 3 - Frontend route handler
+ */
+
 import express, { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
 import path from 'path';
@@ -25,7 +31,7 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],  // Added jsdelivr for Chart.js
       scriptSrcAttr: ["'unsafe-inline'"],  // Needed for inline onclick handlers
       imgSrc: ["'self'", "data:", "https:"],
       connectSrc: ["'self'", "https://api.resend.com"],
@@ -220,6 +226,26 @@ app.get('/cookies', (_req, res) => {
 });
 
 // ============================================
+// SET DETAIL PAGE ROUTE (V20)
+// Serves set.html for /set/:setNumber URLs
+// ============================================
+app.get('/set/:setNumber', (req, res) => {
+  const { setNumber } = req.params;
+  
+  // Normalize set number (remove -1 suffix if present)
+  const normalizedSetNumber = setNumber.replace(/-\d+$/, '');
+  
+  // Redirect if URL has suffix (e.g., /set/75192-1 -> /set/75192)
+  if (setNumber !== normalizedSetNumber) {
+    res.redirect(301, `/set/${normalizedSetNumber}`);
+    return;
+  }
+  
+  // Serve the set detail page
+  res.sendFile(path.join(publicPath, 'set.html'));
+});
+
+// ============================================
 // CATCH-ALL ROUTE (SPA)
 // ============================================
 app.get('*', (req, res) => {
@@ -255,6 +281,7 @@ app.listen(config.port, () => {
   console.log(`   Frontend: http://localhost:${config.port}/`);
   console.log(`   Health check: http://localhost:${config.port}/health`);
   console.log(`   API base: http://localhost:${config.port}/api`);
+  console.log(`   Set pages: http://localhost:${config.port}/set/:setNumber`);
 });
 
 export default app;

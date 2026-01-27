@@ -155,6 +155,16 @@
             Learn More →
           </button>
         </div>
+
+        <!-- Set Explorer Search -->
+        <div class="hero-search">
+          <span class="hero-search-label">or explore a set</span>
+          <div class="hero-search-container">
+            <span class="hero-search-icon">🔍</span>
+            <input type="text" id="hero-search-input" class="hero-search-input" placeholder="Search any LEGO set... e.g. Millennium Falcon, 75192" autocomplete="off">
+            <div id="hero-search-results" class="hero-search-results"></div>
+          </div>
+        </div>
       </div>
     </section>
     
@@ -434,6 +444,16 @@
   <!-- Dashboard -->
   <div class="dashboard">
     <div class="dashboard-container">
+
+      <!-- Set Explorer for Dashboard -->
+      <div class="dashboard-search">
+        <div class="dashboard-search-header"><h3>🔍 Explore Sets</h3></div>
+        <div class="dashboard-search-container">
+          <span class="dashboard-search-icon">🔍</span>
+          <input type="text" id="dashboard-search-input" class="dashboard-search-input" placeholder="Search for any LEGO set to view prices and deals..." autocomplete="off">
+          <div id="dashboard-search-results" class="dashboard-search-results"></div>
+        </div>
+      </div>
       <div class="dashboard-header">
         <h1>Dashboard</h1>
         <button class="btn btn-primary" onclick="openModal('add-watch')">
