@@ -1,0 +1,213 @@
+{
+  "meta": {
+    "title": "LEGO Resale Market Alerts | Track Retired Sets on eBay | ScoutLoot",
+    "description": "The only alert system for the LEGO secondary market. Get instant notifications when retired sets, rare collectibles, and mispriced deals appear on eBay. Track prices across USA, Canada, UK & Europe.",
+    "keywords": "LEGO resale alerts, retired LEGO sets, secondary market LEGO, eBay LEGO deals, LEGO collector alerts, discontinued LEGO tracker"
+  },
+
+  "nav": {
+    "how_it_works": "How It Works",
+    "features": "Features", 
+    "pricing": "Pricing",
+    "login": "Log In",
+    "get_started": "Get Started"
+  },
+
+  "hero": {
+    "badge": "The First Secondary Market Alert System",
+    "title_line1": "Track the",
+    "title_highlight": "LEGO Resale Market",
+    "title_line2": "Like a Pro",
+    "subtitle": "Get instant alerts when retired sets, rare collectibles, and mispriced deals appear on eBay and other marketplaces. Find listings from sellers who don't know what they have, need to sell fast, or simply priced it wrong. The only tool built for collectors hunting the secondary market.",
+    "cta_primary": "Start Tracking Deals",
+    "cta_secondary": "See How It Works",
+    "search_label": "or search for any set"
+  },
+
+  "stats_bar": {
+    "stat1_value": "🌍",
+    "stat1_label": "USA, Canada, UK & Europe",
+    "stat2_value": "⚡",
+    "stat2_label": "Alerts in Seconds",
+    "stat3_value": "📦",
+    "stat3_label": "Shipping Included",
+    "stat4_value": "🧱",
+    "stat4_label": "Built by Collectors"
+  },
+
+  "unique_value": {
+    "section_title": "Why Collectors Choose ScoutLoot",
+    "section_subtitle": "We're not another retail price tracker. We monitor the secondary market where the real deals happen.",
+    
+    "point1_icon": "🎯",
+    "point1_title": "Secondary Market Focus",
+    "point1_desc": "While others track retail stores, we monitor eBay and resale marketplaces where collectors sell to collectors. Find mispriced listings from sellers who don't know the market value, need quick cash, or simply made a pricing mistake.",
+    
+    "point2_icon": "📦",
+    "point2_title": "Retired & Discontinued Sets",
+    "point2_desc": "Looking for that UCS set that retired 3 years ago? We track sets that are no longer in stores — the ones collectors actually want and retail trackers can't help you find.",
+    
+    "point3_icon": "💰",
+    "point3_title": "True Total Price",
+    "point3_desc": "Every alert shows the real cost: item price + shipping to your country. No surprises, no hidden costs. Know exactly what you'll pay before you click.",
+    
+    "point4_icon": "🌍",
+    "point4_title": "Multi-Region Coverage",
+    "point4_desc": "We scan 9 eBay marketplaces — US, CA, UK, DE, FR, ES, IT, NL, BE — with delivery across all of Europe, USA, and Canada. Find deals from sellers worldwide, shipped to your door."
+  },
+
+  "how_it_works": {
+    "section_title": "How It Works",
+    "section_subtitle": "Three steps to never overpay on the secondary market again",
+    
+    "step1_number": "1",
+    "step1_title": "Pick Your Sets",
+    "step1_desc": "Search by set number or name. Set your target price — the maximum you're willing to pay including shipping. Add filters for condition, seller rating, and ship-from country.",
+    
+    "step2_number": "2",
+    "step2_title": "We Hunt 24/7",
+    "step2_desc": "Our system scans eBay and other marketplaces continuously, looking for mispriced listings and below-market deals. We calculate total cost with shipping and check every listing against your criteria.",
+    
+    "step3_number": "3",
+    "step3_title": "Get Instant Alerts",
+    "step3_desc": "When a deal matches, get notified instantly via Telegram, push notification, or email — your choice. All the details you need to decide fast, because mispriced deals don't last long."
+  },
+
+  "features": {
+    "section_title": "Built for Serious Collectors",
+    "section_subtitle": "Everything you need to hunt the secondary market effectively",
+    
+    "feature1_icon": "🌍",
+    "feature1_title": "Multi-Region Search",
+    "feature1_desc": "Scan 9 eBay marketplaces across USA, Canada, UK & Europe. Find mispriced deals that local searchers miss.",
+    
+    "feature2_icon": "📦",
+    "feature2_title": "Shipping Calculated",
+    "feature2_desc": "Every price includes shipping to your country. For UK buyers, we even estimate import charges. True cost, always.",
+    
+    "feature3_icon": "⚡",
+    "feature3_title": "Instant Alerts",
+    "feature3_desc": "Telegram, push notifications, or email — you choose. Be the first to see new listings. Speed wins when you're hunting mispriced deals.",
+    
+    "feature4_icon": "🎯",
+    "feature4_title": "Smart Filters",
+    "feature4_desc": "Filter by condition (new/used), minimum seller rating, ship-from country, and exclude keywords. No junk, no minifig-only listings.",
+    
+    "feature5_icon": "🛡️",
+    "feature5_title": "No Alert Spam",
+    "feature5_desc": "One alert per listing, best deal per set per day. Quality over quantity — we respect your notification inbox.",
+    
+    "feature6_icon": "📊",
+    "feature6_title": "Price History",
+    "feature6_desc": "See what sets have sold for recently. Track market trends. Know when a deal is actually a deal."
+  },
+
+  "target_audience": {
+    "section_title": "Who Uses ScoutLoot",
+    "section_subtitle": "Built for collectors who take the secondary market seriously",
+    
+    "audience1_icon": "🧱",
+    "audience1_title": "Collectors",
+    "audience1_desc": "Track retired sets you've been hunting for years. Get alerts the moment a mispriced listing appears.",
+    
+    "audience2_icon": "📈",
+    "audience2_title": "Investors",
+    "audience2_desc": "Monitor discontinued sets for below-market opportunities. Catch sellers who don't know what they have.",
+    
+    "audience3_icon": "👨‍👩‍👧‍👦",
+    "audience3_title": "Parents",
+    "audience3_desc": "Find that specific set your kid wants — even if it's been retired for years. No more overpaying on resale."
+  },
+
+  "demo_alert": {
+    "section_title": "What You'll Receive",
+    "section_subtitle": "A real alert with everything you need to decide"
+  },
+
+  "pricing": {
+    "section_title": "Simple Pricing",
+    "section_subtitle": "Start free, upgrade when you need more watches and faster alerts",
+    
+    "free_name": "Free",
+    "free_price": "€0",
+    "free_period": "/month",
+    "free_feature1": "3 active watches",
+    "free_feature2": "Telegram, Push & Email",
+    "free_feature3": "Basic filters",
+    "free_feature4": "All regions included",
+    "free_feature5": "Standard scanning",
+    "free_cta": "Get Started",
+    
+    "collector_badge": "Most Popular",
+    "collector_name": "Collector",
+    "collector_price": "€6.99",
+    "collector_period": "/month",
+    "collector_feature1": "25 active watches",
+    "collector_feature2": "Telegram, Push & Email",
+    "collector_feature3": "Advanced filters",
+    "collector_feature4": "Priority scanning — faster alerts",
+    "collector_feature5": "100 alerts/day",
+    "collector_cta": "Start Free Trial",
+    
+    "dealer_name": "Dealer",
+    "dealer_price": "€14.99",
+    "dealer_period": "/month",
+    "dealer_feature1": "100 active watches",
+    "dealer_feature2": "Telegram, Push & Email",
+    "dealer_feature3": "All advanced filters",
+    "dealer_feature4": "Highest priority — fastest alerts",
+    "dealer_feature5": "500 alerts/day",
+    "dealer_cta": "Contact Us"
+  },
+
+  "cta_section": {
+    "title": "Ready to Hunt the Secondary Market?",
+    "subtitle": "Join collectors who catch mispriced deals before anyone else.",
+    "cta": "Start Tracking for Free"
+  },
+
+  "about_creator": {
+    "line1": "Built by a LEGO collector in Europe.",
+    "line2": "Because I needed this tool and it didn't exist.",
+    "contact": "Questions?"
+  },
+
+  "footer": {
+    "tagline": "The smartest way to track the LEGO resale market.",
+    "product": "Product",
+    "marketplaces": "Marketplaces",
+    "ebay": "eBay",
+    "ebay_status": "Active",
+    "brickowl": "BrickOwl",
+    "brickowl_status": "Soon",
+    "retail": "Retail",
+    "retail_status": "Soon",
+    "regions": "Regions",
+    "usa": "USA",
+    "canada": "Canada", 
+    "uk": "UK",
+    "europe": "Europe",
+    "legal": "Legal",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "cookies": "Cookie Policy",
+    "support": "Support",
+    "contact": "Contact Us",
+    "faq": "FAQ",
+    "telegram_support": "Telegram Support",
+    "copyright": "© 2026 ScoutLoot. Not affiliated with the LEGO Group.",
+    "made_with": "Made with 🧱 for collectors worldwide"
+  },
+
+  "dashboard": {
+    "empty_watches": "No watches yet. Add your first LEGO set to start tracking the secondary market!",
+    "empty_notifications": "No notifications yet. Alerts will appear here when mispriced deals are found!",
+    "add_watch_subtitle": "Start tracking a LEGO set on the secondary market"
+  },
+
+  "modals": {
+    "signup_subtitle": "Start tracking the secondary market in seconds",
+    "setup_subtitle": "Set up notifications to never miss a mispriced deal",
+    "alert_reason": "Mispriced deal found!"
+  }
+}

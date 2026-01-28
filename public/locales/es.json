@@ -1,0 +1,213 @@
+{
+  "meta": {
+    "title": "Alertas LEGO Mercado Secundario | Seguir Sets Descatalogados en eBay | ScoutLoot",
+    "description": "El único sistema de alertas para el mercado secundario de LEGO. Recibe notificaciones instantáneas cuando sets descatalogados, piezas raras y ofertas infravaloradas aparecen en eBay. Sigue precios en USA, Canadá, UK y Europa.",
+    "keywords": "LEGO mercado secundario, sets LEGO descatalogados, LEGO segunda mano, ofertas eBay LEGO, alertas coleccionistas LEGO, sets LEGO retirados"
+  },
+
+  "nav": {
+    "how_it_works": "Cómo funciona",
+    "features": "Características",
+    "pricing": "Precios",
+    "login": "Iniciar sesión",
+    "get_started": "Empezar"
+  },
+
+  "hero": {
+    "badge": "El primer sistema de alertas del mercado secundario",
+    "title_line1": "Sigue el",
+    "title_highlight": "mercado LEGO de segunda mano",
+    "title_line2": "como un profesional",
+    "subtitle": "Recibe alertas instantáneas cuando sets descatalogados, piezas raras y ofertas infravaloradas aparecen en eBay y otros marketplaces. Encuentra anuncios de vendedores que no conocen el valor, necesitan vender rápido o simplemente pusieron mal el precio. La única herramienta para coleccionistas que buscan en el mercado secundario.",
+    "cta_primary": "Empezar a rastrear ofertas",
+    "cta_secondary": "Cómo funciona →",
+    "search_label": "o busca un set"
+  },
+
+  "stats_bar": {
+    "stat1_value": "🌍",
+    "stat1_label": "USA, Canadá, UK y Europa",
+    "stat2_value": "⚡",
+    "stat2_label": "Alertas en segundos",
+    "stat3_value": "📦",
+    "stat3_label": "Envío incluido",
+    "stat4_value": "🧱",
+    "stat4_label": "Hecho por coleccionistas"
+  },
+
+  "unique_value": {
+    "section_title": "Por qué los coleccionistas eligen ScoutLoot",
+    "section_subtitle": "No somos otro rastreador de precios de tiendas. Monitorizamos el mercado secundario, donde están las verdaderas gangas.",
+
+    "point1_icon": "🎯",
+    "point1_title": "Enfoque en Mercado Secundario",
+    "point1_desc": "Mientras otros siguen tiendas minoristas, nosotros monitorizamos eBay y plataformas de reventa donde coleccionistas venden a coleccionistas. Encuentra anuncios infravalorados de vendedores que no conocen el valor de mercado, necesitan dinero rápido o simplemente cometieron un error de precio.",
+
+    "point2_icon": "📦",
+    "point2_title": "Sets Descatalogados y Retirados",
+    "point2_desc": "¿Buscas ese set UCS que se descatalogó hace 3 años? Seguimos sets que ya no están en tiendas — los que los coleccionistas realmente quieren y donde los rastreadores de retail no pueden ayudar.",
+
+    "point3_icon": "💰",
+    "point3_title": "Precio Total Real",
+    "point3_desc": "Cada alerta muestra el coste real: precio del artículo + envío a tu país. Sin sorpresas, sin costes ocultos. Sabes exactamente lo que vas a pagar antes de hacer clic.",
+
+    "point4_icon": "🌍",
+    "point4_title": "Cobertura Multi-Región",
+    "point4_desc": "Escaneamos 9 marketplaces de eBay — US, CA, UK, DE, FR, ES, IT, NL, BE — con envío a toda Europa, USA y Canadá. Encuentra ofertas de vendedores de todo el mundo, entregadas en tu puerta."
+  },
+
+  "how_it_works": {
+    "section_title": "Cómo funciona",
+    "section_subtitle": "Tres pasos para no volver a pagar de más en el mercado secundario",
+
+    "step1_number": "1",
+    "step1_title": "Elige tus sets",
+    "step1_desc": "Busca por número de set o nombre. Establece tu precio objetivo — el máximo que estás dispuesto a pagar con envío incluido. Añade filtros para condición, valoración del vendedor y país de envío.",
+
+    "step2_number": "2",
+    "step2_title": "Escaneamos 24/7",
+    "step2_desc": "Nuestro sistema escanea eBay y otros marketplaces continuamente buscando anuncios infravalorados y ofertas por debajo del mercado. Calculamos el coste total con envío y verificamos cada anuncio contra tus criterios.",
+
+    "step3_number": "3",
+    "step3_title": "Recibe alertas instantáneas",
+    "step3_desc": "Cuando una oferta coincide, te avisamos al instante por Telegram, notificación push o email — tú eliges. Todos los detalles que necesitas para decidir rápido, porque las ofertas infravaloradas no duran."
+  },
+
+  "features": {
+    "section_title": "Diseñado para coleccionistas serios",
+    "section_subtitle": "Todo lo que necesitas para buscar eficazmente en el mercado secundario",
+
+    "feature1_icon": "🌍",
+    "feature1_title": "Búsqueda Multi-Región",
+    "feature1_desc": "Escanea 9 marketplaces de eBay en USA, Canadá, UK y Europa. Encuentra ofertas infravaloradas que los buscadores locales pierden.",
+
+    "feature2_icon": "📦",
+    "feature2_title": "Envío Calculado",
+    "feature2_desc": "Cada precio incluye el envío a tu país. Para compradores de UK, incluso estimamos los cargos de importación. Siempre el coste real.",
+
+    "feature3_icon": "⚡",
+    "feature3_title": "Alertas Instantáneas",
+    "feature3_desc": "Telegram, notificaciones push o email — tú eliges. Sé el primero en ver nuevos anuncios. La velocidad gana en la caza de gangas.",
+
+    "feature4_icon": "🎯",
+    "feature4_title": "Filtros Inteligentes",
+    "feature4_desc": "Filtra por condición (nuevo/usado), valoración mínima del vendedor, país de envío y excluye palabras clave. Nada de basura, nada de anuncios de solo minifiguras.",
+
+    "feature5_icon": "🛡️",
+    "feature5_title": "Sin Spam de Alertas",
+    "feature5_desc": "Una alerta por anuncio, mejor oferta por set por día. Calidad sobre cantidad — respetamos tu bandeja de entrada.",
+
+    "feature6_icon": "📊",
+    "feature6_title": "Historial de Precios",
+    "feature6_desc": "Ve por cuánto se han vendido los sets recientemente. Sigue las tendencias del mercado. Sabe cuándo una oferta es realmente buena."
+  },
+
+  "target_audience": {
+    "section_title": "Quién usa ScoutLoot",
+    "section_subtitle": "Diseñado para coleccionistas que se toman en serio el mercado secundario",
+
+    "audience1_icon": "🧱",
+    "audience1_title": "Coleccionistas",
+    "audience1_desc": "Sigue sets descatalogados que llevas años buscando. Recibe alertas en cuanto aparece un anuncio infravalorado.",
+
+    "audience2_icon": "📈",
+    "audience2_title": "Inversores",
+    "audience2_desc": "Monitoriza sets retirados para oportunidades por debajo del mercado. Pilla vendedores que no saben lo que tienen.",
+
+    "audience3_icon": "👨‍👩‍👧‍👦",
+    "audience3_title": "Padres",
+    "audience3_desc": "Encuentra ese set específico que tu hijo quiere — aunque lleve años descatalogado. Nunca más pagues de más en reventa."
+  },
+
+  "demo_alert": {
+    "section_title": "Lo que recibes",
+    "section_subtitle": "Una alerta real con todo lo que necesitas para decidir"
+  },
+
+  "pricing": {
+    "section_title": "Precios Simples",
+    "section_subtitle": "Empieza gratis, sube de nivel cuando necesites más watches y alertas más rápidas",
+
+    "free_name": "Gratis",
+    "free_price": "€0",
+    "free_period": "/mes",
+    "free_feature1": "3 watches activos",
+    "free_feature2": "Telegram, Push y Email",
+    "free_feature3": "Filtros básicos",
+    "free_feature4": "Todas las regiones incluidas",
+    "free_feature5": "Escaneo estándar",
+    "free_cta": "Empezar",
+
+    "collector_badge": "Más popular",
+    "collector_name": "Coleccionista",
+    "collector_price": "€6,99",
+    "collector_period": "/mes",
+    "collector_feature1": "25 watches activos",
+    "collector_feature2": "Telegram, Push y Email",
+    "collector_feature3": "Filtros avanzados",
+    "collector_feature4": "Escaneo prioritario — alertas más rápidas",
+    "collector_feature5": "100 alertas/día",
+    "collector_cta": "Prueba gratis",
+
+    "dealer_name": "Revendedor",
+    "dealer_price": "€14,99",
+    "dealer_period": "/mes",
+    "dealer_feature1": "100 watches activos",
+    "dealer_feature2": "Telegram, Push y Email",
+    "dealer_feature3": "Todos los filtros avanzados",
+    "dealer_feature4": "Máxima prioridad — alertas más rápidas",
+    "dealer_feature5": "500 alertas/día",
+    "dealer_cta": "Contactar"
+  },
+
+  "cta_section": {
+    "title": "¿Listo para cazar en el mercado secundario?",
+    "subtitle": "Únete a coleccionistas que encuentran ofertas infravaloradas antes que nadie.",
+    "cta": "Empezar gratis"
+  },
+
+  "about_creator": {
+    "line1": "Creado por un coleccionista LEGO en Europa.",
+    "line2": "Porque necesitaba esta herramienta y no existía.",
+    "contact": "¿Preguntas?"
+  },
+
+  "footer": {
+    "tagline": "La forma más inteligente de seguir el mercado LEGO de segunda mano.",
+    "product": "Producto",
+    "marketplaces": "Marketplaces",
+    "ebay": "eBay",
+    "ebay_status": "Activo",
+    "brickowl": "BrickOwl",
+    "brickowl_status": "Pronto",
+    "retail": "Retail",
+    "retail_status": "Pronto",
+    "regions": "Regiones",
+    "usa": "USA",
+    "canada": "Canadá",
+    "uk": "UK",
+    "europe": "Europa",
+    "legal": "Legal",
+    "privacy": "Privacidad",
+    "terms": "Términos de uso",
+    "cookies": "Política de cookies",
+    "support": "Soporte",
+    "contact": "Contacto",
+    "faq": "FAQ",
+    "telegram_support": "Soporte Telegram",
+    "copyright": "© 2026 ScoutLoot. No afiliado con el Grupo LEGO.",
+    "made_with": "Hecho con 🧱 para coleccionistas de todo el mundo"
+  },
+
+  "dashboard": {
+    "empty_watches": "Aún no hay watches. ¡Añade tu primer set LEGO para empezar a seguir el mercado secundario!",
+    "empty_notifications": "Aún no hay notificaciones. ¡Las alertas aparecerán aquí cuando se encuentren ofertas infravaloradas!",
+    "add_watch_subtitle": "Empieza a seguir un set LEGO en el mercado secundario"
+  },
+
+  "modals": {
+    "signup_subtitle": "Empieza a seguir el mercado secundario en segundos",
+    "setup_subtitle": "Configura notificaciones para no perderte ninguna oferta infravalorada",
+    "alert_reason": "¡Anuncio infravalorado encontrado!"
+  }
+}

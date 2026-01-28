@@ -1,13 +1,16 @@
 /**
  * ScoutLoot - Express Server Entry Point
  * 
- * V21: Set Pages Phase 4 - SEO & Polish
- * - Server-side meta tag injection for /set/:setNumber
- * - Server-side JSON-LD Product schema for crawlers
- * - Dynamic sitemap for sets
+ * V22: i18n Implementation
+ * - Multi-language URL routing (/de/, /fr/, /es/, etc.)
+ * - Accept-Language header detection
+ * - Server-side template rendering with translations
+ * - hreflang tags for SEO
+ * - Language switcher support
  */
 
 import express, { Request, Response, NextFunction } from 'express';
+import cookieParser from 'cookie-parser';
 import crypto from 'crypto';
 import path from 'path';
 import fs from 'fs';
@@ -19,6 +22,16 @@ import { pool, closePool } from './db/index.js';
 import { redis, closeRedis } from './db/redis.js';
 import { getQueueStats } from './jobs/telegramQueue.js';
 import routes from './routes/index.js';
+import {
+  SUPPORTED_LANGUAGES,
+  DEFAULT_LANGUAGE,
+  isSupportedLanguage,
+  loadTranslations,
+  detectLanguage,
+  injectTranslations,
+  clearTranslationCache,
+  type SupportedLanguage,
+} from './utils/i18n.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,6 +40,9 @@ const app = express();
 
 // Trust Nginx proxy (required for rate limiting behind reverse proxy)
 app.set('trust proxy', 1);
+
+// Cookie parser for language preference
+app.use(cookieParser());
 
 // Security headers
 app.use(helmet({
@@ -43,6 +59,46 @@ app.use(helmet({
   },
   crossOriginEmbedderPolicy: false,
 }));
+
+// ============================================
+// PATHS
+// ============================================
+const publicPath = path.join(__dirname, '..', 'public');
+const translationsPath = path.join(__dirname, '..', 'public', 'locales');
+
+// ============================================
+// TEMPLATE CACHE
+// ============================================
+const templateCache: Map<string, string> = new Map();
+
+function getTemplate(templateName: string): string {
+  if (config.isDevelopment || !templateCache.has(templateName)) {
+    const templatePath = path.join(publicPath, templateName);
+    const content = fs.readFileSync(templatePath, 'utf-8');
+    templateCache.set(templateName, content);
+  }
+  return templateCache.get(templateName)!;
+}
+
+// Clear template cache in development
+if (config.isDevelopment) {
+  fs.watch(publicPath, { recursive: true }, (eventType, filename) => {
+    if (filename?.endsWith('.html')) {
+      templateCache.clear();
+      console.log('[Dev] Template cache cleared');
+    }
+  });
+  
+  // Also watch translations
+  try {
+    fs.watch(translationsPath, { recursive: true }, () => {
+      clearTranslationCache();
+      console.log('[Dev] Translation cache cleared');
+    });
+  } catch {
+    // translationsPath might not exist yet
+  }
+}
 
 // ============================================
 // SECURITY: Block suspicious paths FIRST
@@ -107,7 +163,62 @@ app.use(globalLimiter);
 // ============================================
 app.use(express.json());
 
-const publicPath = path.join(__dirname, '..', 'public');
+// ============================================
+// i18n HELPER FUNCTIONS
+// ============================================
+
+/**
+ * Render a page with translations
+ */
+function renderI18nPage(
+  req: Request,
+  res: Response,
+  templateName: string,
+  lang: SupportedLanguage,
+  currentPath: string,
+  additionalData?: Record<string, unknown>
+): void {
+  try {
+    let html = getTemplate(templateName);
+    const translations = loadTranslations(lang, translationsPath);
+    
+    // Merge additional data into translations if provided
+    const mergedTranslations = additionalData 
+      ? { ...translations, ...additionalData }
+      : translations;
+    
+    html = injectTranslations(html, mergedTranslations, lang, currentPath);
+    
+    // Set language cookie for future visits
+    res.cookie('language', lang, {
+      maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year
+      httpOnly: false, // Accessible by JS
+      sameSite: 'lax',
+    });
+    
+    res.set('Content-Type', 'text/html; charset=utf-8');
+    res.set('Cache-Control', 'public, max-age=300');
+    res.send(html);
+  } catch (error) {
+    console.error(`[i18n] Error rendering ${templateName}:`, error);
+    res.sendFile(path.join(publicPath, templateName));
+  }
+}
+
+/**
+ * Extract language from URL path
+ */
+function extractLangFromPath(pathname: string): { lang: SupportedLanguage | null; cleanPath: string } {
+  const parts = pathname.split('/').filter(Boolean);
+  
+  if (parts.length > 0 && isSupportedLanguage(parts[0])) {
+    const lang = parts[0] as SupportedLanguage;
+    const cleanPath = '/' + parts.slice(1).join('/');
+    return { lang, cleanPath: cleanPath || '/' };
+  }
+  
+  return { lang: null, cleanPath: pathname };
+}
 
 // ============================================
 // DYNAMIC SITEMAP ROUTE (MUST BE BEFORE STATIC)
@@ -127,24 +238,37 @@ app.get('/sitemap-sets.xml', async (_req: Request, res: Response) => {
     const today = new Date().toISOString().split('T')[0];
     
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n';
     
     for (const row of result.rows) {
       const lastMod = row.last_updated 
         ? new Date(row.last_updated).toISOString().split('T')[0]
         : today;
       
-      xml += '  <url>\n';
-      xml += `    <loc>https://scoutloot.com/set/${row.set_number}</loc>\n`;
-      xml += `    <lastmod>${lastMod}</lastmod>\n`;
-      xml += '    <changefreq>daily</changefreq>\n';
-      xml += '    <priority>0.8</priority>\n';
-      xml += '  </url>\n';
+      // Add URLs for each language
+      for (const lang of SUPPORTED_LANGUAGES) {
+        const langPath = lang === 'en' ? '' : `/${lang}`;
+        
+        xml += '  <url>\n';
+        xml += `    <loc>https://scoutloot.com${langPath}/set/${row.set_number}</loc>\n`;
+        xml += `    <lastmod>${lastMod}</lastmod>\n`;
+        xml += '    <changefreq>daily</changefreq>\n';
+        xml += '    <priority>0.8</priority>\n';
+        
+        // Add hreflang alternates
+        for (const altLang of SUPPORTED_LANGUAGES) {
+          const altPath = altLang === 'en' ? '' : `/${altLang}`;
+          xml += `    <xhtml:link rel="alternate" hreflang="${altLang}" href="https://scoutloot.com${altPath}/set/${row.set_number}"/>\n`;
+        }
+        xml += `    <xhtml:link rel="alternate" hreflang="x-default" href="https://scoutloot.com/set/${row.set_number}"/>\n`;
+        
+        xml += '  </url>\n';
+      }
     }
     
     xml += '</urlset>';
     
-    console.log(`[Sitemap] Generated with ${result.rows.length} sets`);
+    console.log(`[Sitemap] Generated with ${result.rows.length} sets x ${SUPPORTED_LANGUAGES.length} languages`);
     
     res.set('Content-Type', 'application/xml');
     res.set('Cache-Control', 'public, max-age=3600');
@@ -156,8 +280,41 @@ app.get('/sitemap-sets.xml', async (_req: Request, res: Response) => {
   }
 });
 
-// Serve static files (AFTER dynamic sitemap route)
-app.use(express.static(publicPath));
+// ============================================
+// LANGUAGE API ENDPOINT
+// ============================================
+app.get('/api/languages', (_req: Request, res: Response) => {
+  res.json({
+    supported: SUPPORTED_LANGUAGES,
+    default: DEFAULT_LANGUAGE,
+  });
+});
+
+// Set language preference via API
+app.post('/api/language', express.json(), (req: Request, res: Response) => {
+  const { language } = req.body;
+  
+  if (!language || !isSupportedLanguage(language)) {
+    res.status(400).json({ error: 'Invalid language' });
+    return;
+  }
+  
+  res.cookie('language', language, {
+    maxAge: 365 * 24 * 60 * 60 * 1000,
+    httpOnly: false,
+    sameSite: 'lax',
+  });
+  
+  res.json({ success: true, language });
+});
+
+// Serve static files (CSS, JS, images) - BEFORE language routes
+app.use('/css', express.static(path.join(publicPath, 'css')));
+app.use('/js', express.static(path.join(publicPath, 'js')));
+app.use('/locales', express.static(path.join(publicPath, 'locales')));
+app.use(express.static(publicPath, {
+  index: false, // Don't serve index.html automatically - we handle it with i18n
+}));
 
 // ============================================
 // AUTH RATE LIMITING (before routes)
@@ -227,6 +384,10 @@ app.get('/health', async (_req, res) => {
       },
       queue: queueStats,
       environment: config.nodeEnv,
+      i18n: {
+        supportedLanguages: SUPPORTED_LANGUAGES,
+        defaultLanguage: DEFAULT_LANGUAGE,
+      },
     });
   } catch (error) {
     res.status(500).json({
@@ -237,26 +398,7 @@ app.get('/health', async (_req, res) => {
 });
 
 // ============================================
-// STATIC PAGE ROUTES
-// ============================================
-app.get('/privacy', (_req, res) => {
-  res.sendFile(path.join(publicPath, 'privacy.html'));
-});
-
-app.get('/terms', (_req, res) => {
-  res.sendFile(path.join(publicPath, 'terms.html'));
-});
-
-app.get('/faq', (_req, res) => {
-  res.sendFile(path.join(publicPath, 'faq.html'));
-});
-
-app.get('/cookies', (_req, res) => {
-  res.sendFile(path.join(publicPath, 'cookies.html'));
-});
-
-// ============================================
-// SET DETAIL PAGE WITH SERVER-SIDE SEO (V21)
+// SET DETAIL PAGE WITH SERVER-SIDE SEO
 // ============================================
 
 interface SetSEOData {
@@ -271,9 +413,6 @@ interface SetSEOData {
   watchers: number;
 }
 
-/**
- * Fetch set data for SEO injection
- */
 async function getSetSEOData(setNumber: string): Promise<SetSEOData | null> {
   try {
     const setResult = await pool.query(`
@@ -330,17 +469,18 @@ function escapeHtml(str: string): string {
     .replace(/'/g, '&#039;');
 }
 
-function generateProductJsonLd(data: SetSEOData): string {
+function generateProductJsonLd(data: SetSEOData, lang: SupportedLanguage): string {
   const bestPrice = data.best_price_new || data.best_price_used;
   
   const jsonLd: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Product',
     'name': `LEGO ${data.set_number} ${data.name || 'Set'}`,
-    'description': `Track prices for LEGO ${data.set_number} ${data.name || ''}. ${data.pieces ? `${data.pieces} pieces.` : ''} ${data.year ? `Released ${data.year}.` : ''} Get alerts when prices drop on eBay.`,
+    'description': `Track prices for LEGO ${data.set_number} ${data.name || ''}. ${data.pieces ? `${data.pieces} pieces.` : ''} ${data.year ? `Released ${data.year}.` : ''}`,
     'sku': data.set_number,
     'mpn': data.set_number,
     'brand': { '@type': 'Brand', 'name': 'LEGO' },
+    'inLanguage': lang,
   };
   
   if (data.image_url) {
@@ -368,7 +508,7 @@ function generateProductJsonLd(data: SetSEOData): string {
   return JSON.stringify(jsonLd, null, 2);
 }
 
-function injectSEOData(html: string, data: SetSEOData): string {
+function injectSetSEOData(html: string, data: SetSEOData, lang: SupportedLanguage): string {
   const setName = data.name || 'LEGO Set';
   const fullName = `LEGO ${data.set_number} ${setName}`;
   const bestPrice = data.best_price_new || data.best_price_used;
@@ -379,66 +519,117 @@ function injectSEOData(html: string, data: SetSEOData): string {
   if (bestPrice) description += ` Currently from €${bestPrice.toFixed(2)}.`;
   if (data.pieces) description += ` ${data.pieces} pieces.`;
   if (data.year) description += ` Released ${data.year}.`;
-  description += ' Get alerts when prices drop on eBay.';
   
-  const canonicalUrl = `https://scoutloot.com/set/${data.set_number}`;
+  const langPath = lang === 'en' ? '' : `/${lang}`;
+  const canonicalUrl = `https://scoutloot.com${langPath}/set/${data.set_number}`;
   const imageUrl = data.image_url || 'https://scoutloot.com/og-image.png';
-  const jsonLd = generateProductJsonLd(data);
+  const jsonLd = generateProductJsonLd(data, lang);
   
-  // Replace meta tags using regex
+  // Replace meta tags
   html = html.replace(/<title>[^<]*<\/title>/i, `<title>${escapeHtml(title)}</title>`);
   html = html.replace(/<meta\s+name="description"\s+content="[^"]*"\s*\/?>/i, `<meta name="description" content="${escapeHtml(description)}">`);
   html = html.replace(/<link\s+rel="canonical"\s+href="[^"]*"\s*\/?>/i, `<link rel="canonical" href="${canonicalUrl}">`);
   html = html.replace(/<meta\s+property="og:url"\s+content="[^"]*"\s*\/?>/i, `<meta property="og:url" content="${canonicalUrl}">`);
-  html = html.replace(/<meta\s+property="og:title"\s+content="[^"]*"\s*\/?>/i, `<meta property="og:title" content="${escapeHtml(fullName)} - Price Tracker | ScoutLoot">`);
+  html = html.replace(/<meta\s+property="og:title"\s+content="[^"]*"\s*\/?>/i, `<meta property="og:title" content="${escapeHtml(fullName)} | ScoutLoot">`);
   html = html.replace(/<meta\s+property="og:description"\s+content="[^"]*"\s*\/?>/i, `<meta property="og:description" content="${escapeHtml(description)}">`);
   html = html.replace(/<meta\s+property="og:image"\s+content="[^"]*"\s*\/?>/i, `<meta property="og:image" content="${imageUrl}">`);
-  html = html.replace(/<meta\s+name="twitter:title"\s+content="[^"]*"\s*\/?>/i, `<meta name="twitter:title" content="${escapeHtml(fullName)} - Price Tracker | ScoutLoot">`);
+  html = html.replace(/<meta\s+name="twitter:title"\s+content="[^"]*"\s*\/?>/i, `<meta name="twitter:title" content="${escapeHtml(fullName)} | ScoutLoot">`);
   html = html.replace(/<meta\s+name="twitter:description"\s+content="[^"]*"\s*\/?>/i, `<meta name="twitter:description" content="${escapeHtml(description)}">`);
   html = html.replace(/<meta\s+name="twitter:image"\s+content="[^"]*"\s*\/?>/i, `<meta name="twitter:image" content="${imageUrl}">`);
   
-  // Replace empty JSON-LD script
+  // Replace JSON-LD
   html = html.replace(/<script\s+id="json-ld"\s+type="application\/ld\+json">\s*<\/script>/i, `<script id="json-ld" type="application/ld+json">\n${jsonLd}\n</script>`);
   
   return html;
 }
 
-// Template cache
-let setPageTemplate: string | null = null;
+// ============================================
+// i18n PAGE ROUTES
+// ============================================
 
-function getSetPageTemplate(): string {
-  if (!setPageTemplate) {
-    setPageTemplate = fs.readFileSync(path.join(publicPath, 'set.html'), 'utf-8');
+// Handle language-prefixed routes and root
+const pageRouteHandler = (pageName: string, templateFile: string) => {
+  return async (req: Request, res: Response) => {
+    const { lang: pathLang, cleanPath } = extractLangFromPath(req.path);
+    const lang = pathLang || detectLanguage(req);
+    
+    // If English is explicitly in URL, redirect to clean URL
+    if ((pathLang as string) === 'en') {
+      res.redirect(301, cleanPath);
+      return;
+    }
+    
+    renderI18nPage(req, res, templateFile, lang, req.path);
+  };
+};
+
+// Homepage
+app.get('/', pageRouteHandler('homepage', 'index.html'));
+for (const lang of SUPPORTED_LANGUAGES) {
+  if (lang !== 'en') {
+    app.get(`/${lang}`, pageRouteHandler('homepage', 'index.html'));
+    app.get(`/${lang}/`, pageRouteHandler('homepage', 'index.html'));
   }
-  return setPageTemplate;
 }
 
-// Clear cache in development
-if (config.nodeEnv === 'development') {
-  fs.watch(path.join(publicPath, 'set.html'), () => {
-    setPageTemplate = null;
-    console.log('[Dev] set.html template cache cleared');
-  });
+// Static pages with i18n
+const staticPages = [
+  { path: '/privacy', template: 'privacy.html' },
+  { path: '/terms', template: 'terms.html' },
+  { path: '/faq', template: 'faq.html' },
+  { path: '/cookies', template: 'cookies.html' },
+];
+
+for (const page of staticPages) {
+  // English (default) route
+  app.get(page.path, pageRouteHandler(page.path, page.template));
+  
+  // Language-prefixed routes
+  for (const lang of SUPPORTED_LANGUAGES) {
+    if (lang !== 'en') {
+      app.get(`/${lang}${page.path}`, pageRouteHandler(page.path, page.template));
+    }
+  }
 }
 
-// Set detail page route with server-side SEO
-app.get('/set/:setNumber', async (req: Request, res: Response) => {
+// Set detail pages with i18n
+const setDetailHandler = async (req: Request, res: Response) => {
   const { setNumber } = req.params;
+  const { lang: pathLang, cleanPath } = extractLangFromPath(req.path);
+  const lang = pathLang || detectLanguage(req);
+  
+  // Normalize set number (remove -1 suffix)
   const normalizedSetNumber = setNumber.replace(/-\d+$/, '');
+  
+  // If English is explicitly in URL, redirect to clean URL
+  if ((pathLang as string) === 'en') {
+    res.redirect(301, `/set/${normalizedSetNumber}`);
+    return;
+  }
   
   // Redirect if URL has suffix
   if (setNumber !== normalizedSetNumber) {
-    res.redirect(301, `/set/${normalizedSetNumber}`);
+    const langPath = pathLang && (pathLang as string) !== 'en' ? `/${pathLang}` : '';
+    res.redirect(301, `${langPath}/set/${normalizedSetNumber}`);
     return;
   }
   
   try {
     const seoData = await getSetSEOData(normalizedSetNumber);
-    let html = getSetPageTemplate();
+    let html = getTemplate('set.html');
+    const translations = loadTranslations(lang, translationsPath);
+    
+    html = injectTranslations(html, translations, lang, req.path);
     
     if (seoData) {
-      html = injectSEOData(html, seoData);
+      html = injectSetSEOData(html, seoData, lang);
     }
+    
+    res.cookie('language', lang, {
+      maxAge: 365 * 24 * 60 * 60 * 1000,
+      httpOnly: false,
+      sameSite: 'lax',
+    });
     
     res.set('Content-Type', 'text/html; charset=utf-8');
     res.set('Cache-Control', 'public, max-age=300');
@@ -447,17 +638,50 @@ app.get('/set/:setNumber', async (req: Request, res: Response) => {
     console.error('[SEO] Error serving set page:', error);
     res.sendFile(path.join(publicPath, 'set.html'));
   }
+};
+
+// Set detail routes
+app.get('/set/:setNumber', setDetailHandler);
+for (const lang of SUPPORTED_LANGUAGES) {
+  if (lang !== 'en') {
+    app.get(`/${lang}/set/:setNumber`, setDetailHandler);
+  }
+}
+
+// ============================================
+// LANGUAGE REDIRECT MIDDLEWARE
+// ============================================
+// For users with a language preference visiting the root, optionally redirect
+// Note: This is disabled by default to keep English as default without redirect
+// Uncomment if you want automatic language redirect based on browser settings
+
+/*
+app.get('/', (req: Request, res: Response, next: NextFunction) => {
+  const detectedLang = detectLanguage(req);
+  if (detectedLang !== 'en') {
+    res.redirect(302, `/${detectedLang}/`);
+    return;
+  }
+  next();
 });
+*/
 
 // ============================================
 // CATCH-ALL ROUTE (SPA)
 // ============================================
 app.get('*', (req, res) => {
+  // API routes return 404
   if (req.path.startsWith('/api/')) {
     res.status(404).json({ error: 'Not found' });
     return;
   }
-  res.sendFile(path.join(publicPath, 'index.html'));
+  
+  // Check if this is a language-prefixed path that doesn't match a known route
+  const { lang: pathLang } = extractLangFromPath(req.path);
+  const lang = pathLang || detectLanguage(req);
+  
+  // Serve the SPA index for all other routes
+  renderI18nPage(req, res, 'index.html', lang, req.path);
 });
 
 // ============================================
@@ -481,11 +705,11 @@ app.listen(config.port, () => {
   console.log(`   Environment: ${config.nodeEnv}`);
   console.log(`   Rate limiting: enabled`);
   console.log(`   Security headers: enabled (Helmet)`);
+  console.log(`   i18n: ${SUPPORTED_LANGUAGES.length} languages (${SUPPORTED_LANGUAGES.join(', ')})`);
   console.log(`   Frontend: http://localhost:${config.port}/`);
+  console.log(`   German: http://localhost:${config.port}/de/`);
   console.log(`   Health check: http://localhost:${config.port}/health`);
   console.log(`   API base: http://localhost:${config.port}/api`);
-  console.log(`   Set pages: http://localhost:${config.port}/set/:setNumber`);
-  console.log(`   Sets sitemap: http://localhost:${config.port}/sitemap-sets.xml`);
 });
 
 export default app;

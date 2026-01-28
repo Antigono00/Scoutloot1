@@ -1,0 +1,213 @@
+{
+  "meta": {
+    "title": "Alerty LEGO Rynek Wtórny | Śledź Wycofane Zestawy na eBay | ScoutLoot",
+    "description": "Jedyny system alertów dla wtórnego rynku LEGO. Otrzymuj natychmiastowe powiadomienia, gdy wycofane zestawy, rzadkie kolekcjonerskie i niedowartościowane oferty pojawiają się na eBay. Śledź ceny w USA, Kanadzie, UK i Europie.",
+    "keywords": "LEGO rynek wtórny, wycofane zestawy LEGO, LEGO używane, oferty eBay LEGO, alerty kolekcjonerzy LEGO, zestawy LEGO z drugiej ręki"
+  },
+
+  "nav": {
+    "how_it_works": "Jak to działa",
+    "features": "Funkcje",
+    "pricing": "Cennik",
+    "login": "Zaloguj się",
+    "get_started": "Rozpocznij"
+  },
+
+  "hero": {
+    "badge": "Pierwszy system alertów dla rynku wtórnego",
+    "title_line1": "Śledź",
+    "title_highlight": "wtórny rynek LEGO",
+    "title_line2": "jak profesjonalista",
+    "subtitle": "Otrzymuj natychmiastowe alerty, gdy wycofane zestawy, rzadkie kolekcjonerskie i niedowartościowane oferty pojawiają się na eBay i innych platformach. Znajdź ogłoszenia od sprzedawców, którzy nie znają wartości, muszą szybko sprzedać lub po prostu źle wycenili produkt. Jedyne narzędzie dla kolekcjonerów przeszukujących rynek wtórny.",
+    "cta_primary": "Zacznij śledzić okazje",
+    "cta_secondary": "Jak to działa →",
+    "search_label": "lub wyszukaj zestaw"
+  },
+
+  "stats_bar": {
+    "stat1_value": "🌍",
+    "stat1_label": "USA, Kanada, UK i Europa",
+    "stat2_value": "⚡",
+    "stat2_label": "Alerty w sekundach",
+    "stat3_value": "📦",
+    "stat3_label": "Wysyłka w cenie",
+    "stat4_value": "🧱",
+    "stat4_label": "Stworzone przez kolekcjonerów"
+  },
+
+  "unique_value": {
+    "section_title": "Dlaczego kolekcjonerzy wybierają ScoutLoot",
+    "section_subtitle": "Nie jesteśmy kolejnym trackerem cen detalicznych. Monitorujemy rynek wtórny, gdzie są prawdziwe okazje.",
+
+    "point1_icon": "🎯",
+    "point1_title": "Fokus na Rynek Wtórny",
+    "point1_desc": "Podczas gdy inni śledzą sklepy, my monitorujemy eBay i platformy odsprzedaży, gdzie kolekcjonerzy sprzedają kolekcjonerom. Znajdź niedowartościowane ogłoszenia od sprzedawców, którzy nie znają wartości rynkowej, potrzebują szybko gotówki lub po prostu popełnili błąd cenowy.",
+
+    "point2_icon": "📦",
+    "point2_title": "Wycofane i Zakończone Zestawy",
+    "point2_desc": "Szukasz tego zestawu UCS wycofanego 3 lata temu? Śledzimy zestawy, których już nie ma w sklepach — te, których kolekcjonerzy naprawdę chcą i gdzie trackery detaliczne nie mogą pomóc.",
+
+    "point3_icon": "💰",
+    "point3_title": "Prawdziwa Cena Całkowita",
+    "point3_desc": "Każdy alert pokazuje rzeczywisty koszt: cena produktu + wysyłka do Twojego kraju. Bez niespodzianek, bez ukrytych kosztów. Wiesz dokładnie, ile zapłacisz, zanim klikniesz.",
+
+    "point4_icon": "🌍",
+    "point4_title": "Zasięg Wielu Regionów",
+    "point4_desc": "Skanujemy 9 rynków eBay — US, CA, UK, DE, FR, ES, IT, NL, BE — z dostawą do całej Europy, USA i Kanady. Znajdź okazje od sprzedawców z całego świata, dostarczane pod Twoje drzwi."
+  },
+
+  "how_it_works": {
+    "section_title": "Jak to działa",
+    "section_subtitle": "Trzy kroki, żeby już nigdy nie przepłacać na rynku wtórnym",
+
+    "step1_number": "1",
+    "step1_title": "Wybierz zestawy",
+    "step1_desc": "Wyszukaj po numerze zestawu lub nazwie. Ustaw cenę docelową — maksimum, które chcesz zapłacić z wysyłką. Dodaj filtry dla stanu, oceny sprzedawcy i kraju wysyłki.",
+
+    "step2_number": "2",
+    "step2_title": "Skanujemy 24/7",
+    "step2_desc": "Nasz system skanuje eBay i inne platformy ciągle w poszukiwaniu niedowartościowanych ogłoszeń i okazji poniżej ceny rynkowej. Obliczamy całkowity koszt z wysyłką i sprawdzamy każde ogłoszenie według Twoich kryteriów.",
+
+    "step3_number": "3",
+    "step3_title": "Otrzymuj natychmiastowe alerty",
+    "step3_desc": "Gdy okazja pasuje, dostajesz natychmiastowe powiadomienie przez Telegram, push lub email — Ty wybierasz. Wszystkie szczegóły do szybkiej decyzji, bo niedowartościowane okazje szybko znikają."
+  },
+
+  "features": {
+    "section_title": "Zbudowane dla poważnych kolekcjonerów",
+    "section_subtitle": "Wszystko, czego potrzebujesz, żeby skutecznie przeszukiwać rynek wtórny",
+
+    "feature1_icon": "🌍",
+    "feature1_title": "Wyszukiwanie Wielu Regionów",
+    "feature1_desc": "Skanuj 9 rynków eBay w USA, Kanadzie, UK i Europie. Znajdź niedowartościowane okazje, które lokalni szukający pomijają.",
+
+    "feature2_icon": "📦",
+    "feature2_title": "Wysyłka Wliczona",
+    "feature2_desc": "Każda cena zawiera wysyłkę do Twojego kraju. Dla kupujących z UK szacujemy nawet opłaty importowe. Zawsze prawdziwy koszt.",
+
+    "feature3_icon": "⚡",
+    "feature3_title": "Natychmiastowe Alerty",
+    "feature3_desc": "Telegram, powiadomienia push lub email — Ty wybierasz. Bądź pierwszy, który widzi nowe ogłoszenia. Szybkość wygrywa w polowaniu na okazje.",
+
+    "feature4_icon": "🎯",
+    "feature4_title": "Inteligentne Filtry",
+    "feature4_desc": "Filtruj po stanie (nowy/używany), minimalnej ocenie sprzedawcy, kraju wysyłki i wykluczaj słowa kluczowe. Bez śmieci, bez ogłoszeń tylko-minifigurki.",
+
+    "feature5_icon": "🛡️",
+    "feature5_title": "Bez Spamu Alertów",
+    "feature5_desc": "Jeden alert na ogłoszenie, najlepsza okazja na zestaw dziennie. Jakość ponad ilość — szanujemy Twoją skrzynkę odbiorczą.",
+
+    "feature6_icon": "📊",
+    "feature6_title": "Historia Cen",
+    "feature6_desc": "Zobacz za ile zestawy sprzedały się ostatnio. Śledź trendy rynkowe. Wiedz, kiedy okazja jest naprawdę okazją."
+  },
+
+  "target_audience": {
+    "section_title": "Kto używa ScoutLoot",
+    "section_subtitle": "Zbudowane dla kolekcjonerów, którzy poważnie traktują rynek wtórny",
+
+    "audience1_icon": "🧱",
+    "audience1_title": "Kolekcjonerzy",
+    "audience1_desc": "Śledź wycofane zestawy, których szukasz od lat. Otrzymuj alerty, gdy tylko pojawi się niedowartościowane ogłoszenie.",
+
+    "audience2_icon": "📈",
+    "audience2_title": "Inwestorzy",
+    "audience2_desc": "Monitoruj zakończone zestawy w poszukiwaniu okazji poniżej ceny rynkowej. Łap sprzedawców, którzy nie wiedzą, co mają.",
+
+    "audience3_icon": "👨‍👩‍👧‍👦",
+    "audience3_title": "Rodzice",
+    "audience3_desc": "Znajdź ten konkretny zestaw, który chce Twoje dziecko — nawet jeśli jest wycofany od lat. Już nigdy nie przepłacaj przy odsprzedaży."
+  },
+
+  "demo_alert": {
+    "section_title": "Co otrzymujesz",
+    "section_subtitle": "Prawdziwy alert ze wszystkim, co potrzebujesz do decyzji"
+  },
+
+  "pricing": {
+    "section_title": "Proste Ceny",
+    "section_subtitle": "Zacznij za darmo, ulepsz gdy potrzebujesz więcej watches i szybszych alertów",
+
+    "free_name": "Darmowy",
+    "free_price": "€0",
+    "free_period": "/miesiąc",
+    "free_feature1": "3 aktywne watches",
+    "free_feature2": "Telegram, Push i Email",
+    "free_feature3": "Podstawowe filtry",
+    "free_feature4": "Wszystkie regiony w cenie",
+    "free_feature5": "Standardowe skanowanie",
+    "free_cta": "Rozpocznij",
+
+    "collector_badge": "Najpopularniejszy",
+    "collector_name": "Kolekcjoner",
+    "collector_price": "€6,99",
+    "collector_period": "/miesiąc",
+    "collector_feature1": "25 aktywnych watches",
+    "collector_feature2": "Telegram, Push i Email",
+    "collector_feature3": "Zaawansowane filtry",
+    "collector_feature4": "Priorytetowe skanowanie — szybsze alerty",
+    "collector_feature5": "100 alertów/dzień",
+    "collector_cta": "Wypróbuj za darmo",
+
+    "dealer_name": "Handlarz",
+    "dealer_price": "€14,99",
+    "dealer_period": "/miesiąc",
+    "dealer_feature1": "100 aktywnych watches",
+    "dealer_feature2": "Telegram, Push i Email",
+    "dealer_feature3": "Wszystkie zaawansowane filtry",
+    "dealer_feature4": "Najwyższy priorytet — najszybsze alerty",
+    "dealer_feature5": "500 alertów/dzień",
+    "dealer_cta": "Kontakt"
+  },
+
+  "cta_section": {
+    "title": "Gotowy polować na rynku wtórnym?",
+    "subtitle": "Dołącz do kolekcjonerów, którzy znajdują niedowartościowane okazje przed wszystkimi innymi.",
+    "cta": "Zacznij za darmo"
+  },
+
+  "about_creator": {
+    "line1": "Stworzone przez kolekcjonera LEGO w Europie.",
+    "line2": "Bo potrzebowałem tego narzędzia, a ono nie istniało.",
+    "contact": "Pytania?"
+  },
+
+  "footer": {
+    "tagline": "Najmądrzejszy sposób na śledzenie wtórnego rynku LEGO.",
+    "product": "Produkt",
+    "marketplaces": "Platformy",
+    "ebay": "eBay",
+    "ebay_status": "Aktywne",
+    "brickowl": "BrickOwl",
+    "brickowl_status": "Wkrótce",
+    "retail": "Retail",
+    "retail_status": "Wkrótce",
+    "regions": "Regiony",
+    "usa": "USA",
+    "canada": "Kanada",
+    "uk": "UK",
+    "europe": "Europa",
+    "legal": "Prawne",
+    "privacy": "Prywatność",
+    "terms": "Warunki użytkowania",
+    "cookies": "Polityka cookies",
+    "support": "Wsparcie",
+    "contact": "Kontakt",
+    "faq": "FAQ",
+    "telegram_support": "Wsparcie Telegram",
+    "copyright": "© 2026 ScoutLoot. Nie jest powiązane z Grupą LEGO.",
+    "made_with": "Stworzone z 🧱 dla kolekcjonerów na całym świecie"
+  },
+
+  "dashboard": {
+    "empty_watches": "Jeszcze nie ma watches. Dodaj swój pierwszy zestaw LEGO, żeby zacząć śledzić rynek wtórny!",
+    "empty_notifications": "Jeszcze nie ma powiadomień. Alerty pojawią się tutaj, gdy zostaną znalezione niedowartościowane okazje!",
+    "add_watch_subtitle": "Zacznij śledzić zestaw LEGO na rynku wtórnym"
+  },
+
+  "modals": {
+    "signup_subtitle": "Zacznij śledzić rynek wtórny w kilka sekund",
+    "setup_subtitle": "Skonfiguruj powiadomienia, żeby nigdy nie przegapić niedowartościowanej okazji",
+    "alert_reason": "Znaleziono niedowartościowane ogłoszenie!"
+  }
+}

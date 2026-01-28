@@ -1,0 +1,213 @@
+{
+  "meta": {
+    "title": "LEGO Tweedehands Markt Alerts | Track Uitgelopen Sets op eBay | ScoutLoot",
+    "description": "Het enige alertsysteem voor de LEGO secundaire markt. Ontvang directe meldingen wanneer uitgelopen sets, zeldzame verzamelstukken en ondergewaardeerde aanbiedingen op eBay verschijnen. Volg prijzen in VS, Canada, UK & Europa.",
+    "keywords": "LEGO tweedehands markt, uitgelopen LEGO sets, LEGO tweedehands, eBay LEGO deals, LEGO verzamelaars alerts, gestopte LEGO sets"
+  },
+
+  "nav": {
+    "how_it_works": "Hoe het werkt",
+    "features": "Functies",
+    "pricing": "Prijzen",
+    "login": "Inloggen",
+    "get_started": "Start nu"
+  },
+
+  "hero": {
+    "badge": "Het eerste alertsysteem voor de secundaire markt",
+    "title_line1": "Volg de",
+    "title_highlight": "LEGO tweedehands markt",
+    "title_line2": "als een professional",
+    "subtitle": "Ontvang directe alerts wanneer uitgelopen sets, zeldzame verzamelstukken en ondergewaardeerde aanbiedingen op eBay en andere marktplaatsen verschijnen. Vind advertenties van verkopers die de waarde niet kennen, snel moeten verkopen, of gewoon een prijsfout hebben gemaakt. De enige tool voor verzamelaars die de secundaire markt afspeuren.",
+    "cta_primary": "Start met deals volgen",
+    "cta_secondary": "Hoe het werkt →",
+    "search_label": "of zoek een set"
+  },
+
+  "stats_bar": {
+    "stat1_value": "🌍",
+    "stat1_label": "VS, Canada, UK & Europa",
+    "stat2_value": "⚡",
+    "stat2_label": "Alerts in seconden",
+    "stat3_value": "📦",
+    "stat3_label": "Verzending inbegrepen",
+    "stat4_value": "🧱",
+    "stat4_label": "Gemaakt door verzamelaars"
+  },
+
+  "unique_value": {
+    "section_title": "Waarom verzamelaars ScoutLoot kiezen",
+    "section_subtitle": "We zijn niet zomaar een prijstracker. We monitoren de secundaire markt, waar de echte deals te vinden zijn.",
+
+    "point1_icon": "🎯",
+    "point1_title": "Focus op Secundaire Markt",
+    "point1_desc": "Terwijl anderen winkels volgen, monitoren wij eBay en doorverkoopplatforms waar verzamelaars aan verzamelaars verkopen. Vind ondergewaardeerde advertenties van verkopers die de marktwaarde niet kennen, snel geld nodig hebben, of gewoon een prijsfout maakten.",
+
+    "point2_icon": "📦",
+    "point2_title": "Uitgelopen & Gestopte Sets",
+    "point2_desc": "Op zoek naar die UCS set die 3 jaar geleden uitliep? We volgen sets die niet meer in de winkels zijn — de sets die verzamelaars echt willen en waar retail trackers niet bij kunnen helpen.",
+
+    "point3_icon": "💰",
+    "point3_title": "Echte Totaalprijs",
+    "point3_desc": "Elke alert toont de werkelijke kosten: artikelprijs + verzending naar jouw land. Geen verrassingen, geen verborgen kosten. Je weet precies wat je betaalt voordat je klikt.",
+
+    "point4_icon": "🌍",
+    "point4_title": "Multi-Regio Dekking",
+    "point4_desc": "We scannen 9 eBay marktplaatsen — US, CA, UK, DE, FR, ES, IT, NL, BE — met levering door heel Europa, VS en Canada. Vind deals van verkopers wereldwijd, bezorgd bij jou thuis."
+  },
+
+  "how_it_works": {
+    "section_title": "Hoe het werkt",
+    "section_subtitle": "Drie stappen om nooit meer te veel te betalen op de secundaire markt",
+
+    "step1_number": "1",
+    "step1_title": "Kies je sets",
+    "step1_desc": "Zoek op setnummer of naam. Stel je richtprijs in — het maximum dat je wilt betalen inclusief verzending. Voeg filters toe voor conditie, verkopersbeoordeling en verzendland.",
+
+    "step2_number": "2",
+    "step2_title": "Wij scannen 24/7",
+    "step2_desc": "Ons systeem scant eBay en andere marktplaatsen continu op ondergewaardeerde advertenties en deals onder de marktprijs. We berekenen de totale kosten inclusief verzending en checken elke advertentie tegen jouw criteria.",
+
+    "step3_number": "3",
+    "step3_title": "Ontvang directe alerts",
+    "step3_desc": "Wanneer een deal matcht, word je direct geïnformeerd via Telegram, push-notificatie of email — jij kiest. Alle details om snel te beslissen, want ondergewaardeerde deals zijn zo weg."
+  },
+
+  "features": {
+    "section_title": "Gebouwd voor serieuze verzamelaars",
+    "section_subtitle": "Alles wat je nodig hebt om effectief de secundaire markt af te speuren",
+
+    "feature1_icon": "🌍",
+    "feature1_title": "Multi-Regio Zoeken",
+    "feature1_desc": "Scan 9 eBay marktplaatsen in VS, Canada, UK & Europa. Vind ondergewaardeerde deals die lokale zoekers missen.",
+
+    "feature2_icon": "📦",
+    "feature2_title": "Verzending Berekend",
+    "feature2_desc": "Elke prijs is inclusief verzending naar jouw land. Voor UK-kopers schatten we zelfs de invoerkosten. Altijd de echte kosten.",
+
+    "feature3_icon": "⚡",
+    "feature3_title": "Directe Alerts",
+    "feature3_desc": "Telegram, push-notificaties of email — jij kiest. Wees de eerste die nieuwe advertenties ziet. Snelheid wint bij het jagen op deals.",
+
+    "feature4_icon": "🎯",
+    "feature4_title": "Slimme Filters",
+    "feature4_desc": "Filter op conditie (nieuw/gebruikt), minimale verkopersbeoordeling, verzendland en sluit zoekwoorden uit. Geen rommel, geen minifiguren-only advertenties.",
+
+    "feature5_icon": "🛡️",
+    "feature5_title": "Geen Alert Spam",
+    "feature5_desc": "Eén alert per advertentie, beste deal per set per dag. Kwaliteit boven kwantiteit — we respecteren je inbox.",
+
+    "feature6_icon": "📊",
+    "feature6_title": "Prijsgeschiedenis",
+    "feature6_desc": "Zie voor hoeveel sets recent zijn verkocht. Volg markttrends. Weet wanneer een deal echt een deal is."
+  },
+
+  "target_audience": {
+    "section_title": "Wie gebruikt ScoutLoot",
+    "section_subtitle": "Gebouwd voor verzamelaars die de secundaire markt serieus nemen",
+
+    "audience1_icon": "🧱",
+    "audience1_title": "Verzamelaars",
+    "audience1_desc": "Volg uitgelopen sets waar je al jaren naar zoekt. Ontvang alerts zodra een ondergewaardeerde advertentie verschijnt.",
+
+    "audience2_icon": "📈",
+    "audience2_title": "Investeerders",
+    "audience2_desc": "Monitor gestopte sets voor kansen onder de marktprijs. Pak verkopers die niet weten wat ze hebben.",
+
+    "audience3_icon": "👨‍👩‍👧‍👦",
+    "audience3_title": "Ouders",
+    "audience3_desc": "Vind die specifieke set die je kind wil — zelfs als die al jaren uitgelopen is. Nooit meer te veel betalen bij doorverkoop."
+  },
+
+  "demo_alert": {
+    "section_title": "Wat je ontvangt",
+    "section_subtitle": "Een echte alert met alles wat je nodig hebt om te beslissen"
+  },
+
+  "pricing": {
+    "section_title": "Eenvoudige Prijzen",
+    "section_subtitle": "Start gratis, upgrade wanneer je meer watches en snellere alerts nodig hebt",
+
+    "free_name": "Gratis",
+    "free_price": "€0",
+    "free_period": "/maand",
+    "free_feature1": "3 actieve watches",
+    "free_feature2": "Telegram, Push & Email",
+    "free_feature3": "Basis filters",
+    "free_feature4": "Alle regio's inbegrepen",
+    "free_feature5": "Standaard scanning",
+    "free_cta": "Start nu",
+
+    "collector_badge": "Meest populair",
+    "collector_name": "Verzamelaar",
+    "collector_price": "€6,99",
+    "collector_period": "/maand",
+    "collector_feature1": "25 actieve watches",
+    "collector_feature2": "Telegram, Push & Email",
+    "collector_feature3": "Geavanceerde filters",
+    "collector_feature4": "Prioriteit scanning — snellere alerts",
+    "collector_feature5": "100 alerts/dag",
+    "collector_cta": "Gratis proberen",
+
+    "dealer_name": "Handelaar",
+    "dealer_price": "€14,99",
+    "dealer_period": "/maand",
+    "dealer_feature1": "100 actieve watches",
+    "dealer_feature2": "Telegram, Push & Email",
+    "dealer_feature3": "Alle geavanceerde filters",
+    "dealer_feature4": "Hoogste prioriteit — snelste alerts",
+    "dealer_feature5": "500 alerts/dag",
+    "dealer_cta": "Contact"
+  },
+
+  "cta_section": {
+    "title": "Klaar om de secundaire markt af te speuren?",
+    "subtitle": "Sluit je aan bij verzamelaars die ondergewaardeerde deals vinden voordat iemand anders dat doet.",
+    "cta": "Start gratis"
+  },
+
+  "about_creator": {
+    "line1": "Gemaakt door een LEGO verzamelaar in Europa.",
+    "line2": "Omdat ik deze tool nodig had en die bestond niet.",
+    "contact": "Vragen?"
+  },
+
+  "footer": {
+    "tagline": "De slimste manier om de LEGO tweedehands markt te volgen.",
+    "product": "Product",
+    "marketplaces": "Marktplaatsen",
+    "ebay": "eBay",
+    "ebay_status": "Actief",
+    "brickowl": "BrickOwl",
+    "brickowl_status": "Binnenkort",
+    "retail": "Retail",
+    "retail_status": "Binnenkort",
+    "regions": "Regio's",
+    "usa": "VS",
+    "canada": "Canada",
+    "uk": "UK",
+    "europe": "Europa",
+    "legal": "Juridisch",
+    "privacy": "Privacy",
+    "terms": "Gebruiksvoorwaarden",
+    "cookies": "Cookiebeleid",
+    "support": "Support",
+    "contact": "Contact",
+    "faq": "FAQ",
+    "telegram_support": "Telegram Support",
+    "copyright": "© 2026 ScoutLoot. Niet gelieerd aan de LEGO Group.",
+    "made_with": "Gemaakt met 🧱 voor verzamelaars wereldwijd"
+  },
+
+  "dashboard": {
+    "empty_watches": "Nog geen watches. Voeg je eerste LEGO set toe om de secundaire markt te gaan volgen!",
+    "empty_notifications": "Nog geen meldingen. Alerts verschijnen hier wanneer ondergewaardeerde deals worden gevonden!",
+    "add_watch_subtitle": "Begin met het volgen van een LEGO set op de secundaire markt"
+  },
+
+  "modals": {
+    "signup_subtitle": "Begin in seconden met het volgen van de secundaire markt",
+    "setup_subtitle": "Stel notificaties in om nooit een ondergewaardeerde deal te missen",
+    "alert_reason": "Ondergewaardeerde advertentie gevonden!"
+  }
+}
