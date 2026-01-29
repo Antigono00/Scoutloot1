@@ -4,8 +4,6 @@
  * V24: Updated to support both sets and minifigures
  * - Now joins with both sets AND minifigs tables
  * - Supports item_type + item_id in POST body
- * 
- * V26 Phase 3: Accepts minifig_image_url from frontend search results
  */
 
 import { Router, Request, Response } from 'express';
@@ -110,15 +108,12 @@ async function fetchAndUpdateSetInfo(setNumber: string): Promise<void> {
 /**
  * Fetch minifig info and update database
  * 
- * V26 Phase 3: Now accepts optional providedImageUrl from frontend search results
- * This ensures minifig images are saved even if Rebrickable lookup fails
- * 
- * V26: Uses lookupMinifig() which properly handles:
+ * V26: Now uses lookupMinifig() which properly handles:
  * - Bricklink codes (sw0010, cty0890) → searches BrickOwl
  * - Names → searches BrickOwl
  * - Rebrickable IDs (fig-XXXXXX) → queries Rebrickable directly
  */
-async function fetchAndUpdateMinifigInfo(figNum: string, providedImageUrl?: string): Promise<void> {
+async function fetchAndUpdateMinifigInfo(figNum: string): Promise<void> {
   const normalized = figNum.toLowerCase();
   
   // Check if we already have complete info
@@ -141,9 +136,6 @@ async function fetchAndUpdateMinifigInfo(figNum: string, providedImageUrl?: stri
     if (result.success && result.name) {
       console.log(`✅ Resolved minifig ${figNum}: ${result.name} (bricklink: ${result.bricklink_id || 'none'})`);
       
-      // V26 Phase 3: Use provided image URL if lookup didn't return one
-      const imageUrl = result.image_url || providedImageUrl || null;
-      
       // Update the database with all resolved info
       await query(
         `UPDATE minifigs SET 
@@ -154,39 +146,13 @@ async function fetchAndUpdateMinifigInfo(figNum: string, providedImageUrl?: stri
            num_parts = COALESCE($6, num_parts),
            updated_at = NOW()
          WHERE minifig_id = $1 OR bricklink_id = $1`,
-        [normalized, result.name, result.bricklink_id, result.brickowl_boid, imageUrl, result.num_parts]
-      );
-    } else if (providedImageUrl) {
-      // V26 Phase 3: Even if lookup failed, save the provided image URL
-      console.log(`Lookup failed for ${figNum}, but saving provided image URL`);
-      await query(
-        `UPDATE minifigs SET 
-           image_url = COALESCE($2, image_url),
-           updated_at = NOW()
-         WHERE minifig_id = $1 OR bricklink_id = $1`,
-        [normalized, providedImageUrl]
+        [normalized, result.name, result.bricklink_id, result.brickowl_boid, result.image_url, result.num_parts]
       );
     } else {
       console.log(`Could not resolve minifig ${figNum}`);
     }
   } catch (error) {
     console.error(`Error looking up minifig ${figNum}:`, error);
-    
-    // V26 Phase 3: Even on error, try to save provided image URL
-    if (providedImageUrl) {
-      try {
-        await query(
-          `UPDATE minifigs SET 
-             image_url = COALESCE($2, image_url),
-             updated_at = NOW()
-           WHERE minifig_id = $1 OR bricklink_id = $1`,
-          [normalized, providedImageUrl]
-        );
-        console.log(`Saved provided image URL for ${figNum} despite lookup error`);
-      } catch (updateError) {
-        console.error(`Failed to save provided image URL for ${figNum}:`, updateError);
-      }
-    }
   }
 }
 
@@ -209,7 +175,6 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       min_seller_feedback,
       exclude_words,
       enable_brickowl_alerts,
-      minifig_image_url,  // V26 Phase 3: Image URL from frontend search
     } = req.body;
 
     // Validate required fields
@@ -240,8 +205,7 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
     // Fetch item info from Rebrickable in background
     const watchItemType = item_type || 'set';
     if (watchItemType === 'minifig') {
-      // V26 Phase 3: Pass minifig_image_url to fetchAndUpdateMinifigInfo
-      fetchAndUpdateMinifigInfo(actualItemId, minifig_image_url || undefined).catch(err => {
+      fetchAndUpdateMinifigInfo(actualItemId).catch(err => {
         console.error('Background Rebrickable minifig fetch failed:', err);
       });
     } else {

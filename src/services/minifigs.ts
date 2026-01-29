@@ -124,7 +124,7 @@ export async function lookupMinifig(input: string): Promise<MinifigLookupResult>
   
   // Step 1: Check local cache first
   const cached = await findInCache(normalizedInput, inputType);
-  if (cached && cached.name) {
+  if (cached && cached.name && cached.image_url) {
     console.log(`[Minifigs] Cache hit for "${input}": ${cached.name}`);
     return {
       success: true,
@@ -154,7 +154,7 @@ export async function lookupMinifig(input: string): Promise<MinifigLookupResult>
         brickowl_boid: brickOwlResult.boid,
         name: brickOwlResult.name,
         rebrickable_id: rebrickableInfo?.rebrickable_id || null,
-        image_url: rebrickableInfo?.image_url || null,
+        image_url: rebrickableInfo?.image_url || brickOwlResult.image_url || null,
         num_parts: rebrickableInfo?.num_parts || null,
       });
       
@@ -305,9 +305,31 @@ async function cacheMinifigData(data: {
 // ============================================
 
 interface BrickOwlMinifigResult {
+  image_url: string | null;
   boid: string;
   name: string;
 }
+/**
+ * Get image URL from BrickOwl by BOID (lookup endpoint has images, search doesn't)
+ */
+async function getBrickOwlImage(boid: string): Promise<string | null> {
+  if (!BRICKOWL_API_KEY || !boid) return null;
+  
+  try {
+    const url = `https://api.brickowl.com/v1/catalog/lookup?key=${BRICKOWL_API_KEY}&boid=${boid}`;
+    const response = await fetch(url);
+    
+    if (!response.ok) return null;
+    
+    const data = await response.json() as any;
+    return data.images?.[0]?.medium || null;
+  } catch (error) {
+    console.error('[Minifigs] BrickOwl image lookup error:', error);
+    return null;
+  }
+}
+
+
 
 /**
  * Search BrickOwl for a minifig by Bricklink code or name
@@ -350,26 +372,32 @@ async function searchBrickOwlMinifig(searchQuery: string): Promise<BrickOwlMinif
       // For Bricklink codes, check if it appears in the name or permalink
       if (isBricklinkCode(searchQuery)) {
         if (nameLower.includes(searchLower) || permalinkLower.includes(searchLower)) {
+          const imageUrl = await getBrickOwlImage(result.boid);
           return {
             boid: result.boid,
             name: decodeHtmlEntities(result.name),
+            image_url: imageUrl,
           };
         }
       }
       
       // For name searches, return first minifigure result
+      const imageUrl = await getBrickOwlImage(result.boid);
       return {
-        boid: result.boid,
-        name: decodeHtmlEntities(result.name),
-      };
+          boid: result.boid,
+          name: decodeHtmlEntities(result.name),
+          image_url: imageUrl,
+        };
     }
     
     // If no exact match found but we have results, return first minifigure
     const firstMinifig = data.results.find((r: any) => r.type === 'Minifigure');
     if (firstMinifig) {
+      const imageUrl = await getBrickOwlImage(firstMinifig.boid);
       return {
         boid: firstMinifig.boid,
         name: decodeHtmlEntities(firstMinifig.name),
+        image_url: imageUrl,
       };
     }
     
