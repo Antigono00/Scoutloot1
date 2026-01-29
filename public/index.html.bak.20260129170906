@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Primary SEO -->
+  <title>{{meta.title}}</title>
+  <meta name="description" content="{{meta.description}}">
+  <meta name="keywords" content="{{meta.keywords}}">
+  <meta name="author" content="ScoutLoot">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <link rel="canonical" href="https://scoutloot.com/">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://scoutloot.com/">
+  <meta property="og:title" content="{{meta.title}}">
+  <meta property="og:description" content="{{meta.description}}">
+  <meta property="og:image" content="https://scoutloot.com/og-image.png">
+  <meta property="og:site_name" content="ScoutLoot">
+  <meta property="og:locale" content="en_US">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://scoutloot.com/">
+  <meta name="twitter:title" content="{{meta.title}}">
+  <meta name="twitter:description" content="{{meta.description}}">
+  <meta name="twitter:image" content="https://scoutloot.com/og-image.png">
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0A0A0F">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ScoutLoot">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+  
+  <!-- Structured Data - WebApplication -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "ScoutLoot",
+    "alternateName": "LEGO Deal Alerts",
+    "description": "{{meta.description}}",
+    "url": "https://scoutloot.com",
+    "applicationCategory": "ShoppingApplication",
+    "operatingSystem": "Web Browser",
+    "browserRequirements": "Requires JavaScript",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD",
+      "description": "Free tier available"
+    },
+    "featureList": [
+      "LEGO price alerts",
+      "eBay deal tracking", 
+      "Telegram notifications",
+      "Push notifications",
+      "USA, Canada, UK & Europe support",
+      "Multi-currency tracking"
+    ]
+  }
+  </script>
+  
+  <!-- Structured Data - Organization -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "ScoutLoot",
+    "url": "https://scoutloot.com",
+    "logo": "https://scoutloot.com/icon-512.png",
+    "description": "LEGO deal alerts and price tracking service"
+  }
+  </script>
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="/css/styles.css">
+  <!-- Structured Data - WebSite with SearchAction -->
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"WebSite","name":"ScoutLoot","url":"https://scoutloot.com","potentialAction":{"@type":"SearchAction","target":"https://scoutloot.com/set/{search_term_string}","query-input":"required name=search_term_string"}}
+  </script>
+</head>
+<body>
+  <div class="bg-pattern"></div>
+  
+  <!-- Navigation -->
+  <nav>
+    <a href="/" class="logo">
+      <img src="/logo-icon.png" alt="ScoutLoot" class="logo-icon">
+      <span>ScoutLoot</span>
+    </a>
+    
+    <div class="nav-links">
+      <a href="#how-it-works">{{nav.how_it_works}}</a>
+      <a href="#features">{{nav.features}}</a>
+      <a href="#pricing">{{nav.pricing}}</a>
+    </div>
+    
+    <div class="nav-right">
+      <!-- Language Switcher -->
+      <div class="language-switcher" id="language-switcher">
+        <button class="language-btn" id="language-btn" aria-label="Select language">
+          <span class="language-flag" id="current-lang-flag">🇬🇧</span>
+          <span class="language-code" id="current-lang-code">EN</span>
+          <span class="dropdown-arrow">▼</span>
+        </button>
+        <div class="language-dropdown" id="language-dropdown">
+          <!-- Populated by JS from window.__SCOUTLOOT_LANGUAGES__ -->
+        </div>
+      </div>
+      
+      <div class="nav-auth" id="nav-auth">
+        <button class="btn btn-ghost" onclick="openModal('login')">{{nav.login}}</button>
+        <button class="btn btn-primary" onclick="openModal('signup')">{{nav.get_started}}</button>
+      </div>
+    </div>
+    
+    <div class="user-menu" id="user-menu" style="display: none;">
+      <button class="user-btn">
+        <div class="user-avatar" id="user-avatar">J</div>
+        <span id="user-email">user@example.com</span>
+        <span>▼</span>
+      </button>
+      <div class="user-dropdown">
+        <a href="#" onclick="showDashboard(); return false;">
+          {{dashboard.user_menu.dashboard}}
+        </a>
+        <a href="#" onclick="openModal('settings'); return false;">
+          {{dashboard.user_menu.settings}}
+        </a>
+        <button class="logout-btn" onclick="logout()">
+          {{dashboard.user_menu.logout}}
+        </button>
+      </div>
+    </div>
+  </nav>
+  
+  <!-- Landing Page -->
+  <div class="landing">
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-visual">
+        <div class="floating-brick">🧱</div>
+        <div class="floating-brick">🧱</div>
+        <div class="floating-brick">🧱</div>
+        <div class="floating-brick">🧱</div>
+        <div class="floating-brick">🧱</div>
+        <div class="floating-brick">🧱</div>
+      </div>
+      
+      <div class="hero-content">
+        <div class="hero-badge">{{hero.badge}}</div>
+        <h1>{{hero.title_line1}} <span class="highlight">{{hero.title_highlight}}</span> {{hero.title_line2}}</h1>
+        <p class="hero-subtitle">{{hero.subtitle}}</p>
+        <div class="hero-cta">
+          <button class="btn btn-primary btn-large" onclick="openModal('signup')">
+            🔔 {{hero.cta_primary}}
+          </button>
+          <button class="btn btn-secondary btn-large" onclick="scrollTo('#how-it-works')">
+            {{hero.cta_secondary}} →
+          </button>
+        </div>
+
+        <!-- Set Explorer Search -->
+        <div class="hero-search">
+          <span class="hero-search-label">{{hero.search_label}}</span>
+          <div class="hero-search-container">
+            <span class="hero-search-icon">🔍</span>
+            <input type="text" id="hero-search-input" class="hero-search-input" placeholder="Search any LEGO set... e.g. Millennium Falcon, 75192" autocomplete="off">
+            <div id="hero-search-results" class="hero-search-results"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+      <div class="stats-grid">
+        <div class="stat">
+          <span class="stat-value">{{stats_bar.stat1_value}}</span>
+          <span class="stat-label">{{stats_bar.stat1_label}}</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">{{stats_bar.stat2_value}}</span>
+          <span class="stat-label">{{stats_bar.stat2_label}}</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">{{stats_bar.stat3_value}}</span>
+          <span class="stat-label">{{stats_bar.stat3_label}}</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">{{stats_bar.stat4_value}}</span>
+          <span class="stat-label">{{stats_bar.stat4_label}}</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Unique Value Section -->
+    <section class="section unique-value-section">
+      <div class="section-header">
+        <h2>{{unique_value.section_title}}</h2>
+        <p>{{unique_value.section_subtitle}}</p>
+      </div>
+      
+      <div class="value-grid">
+        <div class="value-card">
+          <div class="value-icon">{{unique_value.point1_icon}}</div>
+          <h3>{{unique_value.point1_title}}</h3>
+          <p>{{unique_value.point1_desc}}</p>
+        </div>
+        <div class="value-card">
+          <div class="value-icon">{{unique_value.point2_icon}}</div>
+          <h3>{{unique_value.point2_title}}</h3>
+          <p>{{unique_value.point2_desc}}</p>
+        </div>
+        <div class="value-card">
+          <div class="value-icon">{{unique_value.point3_icon}}</div>
+          <h3>{{unique_value.point3_title}}</h3>
+          <p>{{unique_value.point3_desc}}</p>
+        </div>
+        <div class="value-card">
+          <div class="value-icon">{{unique_value.point4_icon}}</div>
+          <h3>{{unique_value.point4_title}}</h3>
+          <p>{{unique_value.point4_desc}}</p>
+        </div>
+      </div>
+    </section>
+    
+    <!-- How It Works -->
+    <section class="section" id="how-it-works">
+      <div class="section-header">
+        <h2>{{how_it_works.section_title}}</h2>
+        <p>{{how_it_works.section_subtitle}}</p>
+      </div>
+      
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-number">{{how_it_works.step1_number}}</div>
+          <h3>{{how_it_works.step1_title}}</h3>
+          <p>{{how_it_works.step1_desc}}</p>
+        </div>
+        <div class="step-card">
+          <div class="step-number">{{how_it_works.step2_number}}</div>
+          <h3>{{how_it_works.step2_title}}</h3>
+          <p>{{how_it_works.step2_desc}}</p>
+        </div>
+        <div class="step-card">
+          <div class="step-number">{{how_it_works.step3_number}}</div>
+          <h3>{{how_it_works.step3_title}}</h3>
+          <p>{{how_it_works.step3_desc}}</p>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Features -->
+    <section class="section features-section" id="features">
+      <div class="section-header">
+        <h2>{{features.section_title}}</h2>
+        <p>{{features.section_subtitle}}</p>
+      </div>
+      
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">{{features.feature1_icon}}</div>
+          <div class="feature-content">
+            <h3>{{features.feature1_title}}</h3>
+            <p>{{features.feature1_desc}}</p>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">{{features.feature2_icon}}</div>
+          <div class="feature-content">
+            <h3>{{features.feature2_title}}</h3>
+            <p>{{features.feature2_desc}}</p>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">{{features.feature3_icon}}</div>
+          <div class="feature-content">
+            <h3>{{features.feature3_title}}</h3>
+            <p>{{features.feature3_desc}}</p>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">{{features.feature4_icon}}</div>
+          <div class="feature-content">
+            <h3>{{features.feature4_title}}</h3>
+            <p>{{features.feature4_desc}}</p>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">{{features.feature5_icon}}</div>
+          <div class="feature-content">
+            <h3>{{features.feature5_title}}</h3>
+            <p>{{features.feature5_desc}}</p>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">{{features.feature6_icon}}</div>
+          <div class="feature-content">
+            <h3>{{features.feature6_title}}</h3>
+            <p>{{features.feature6_desc}}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Target Audience -->
+    <section class="section target-audience-section">
+      <div class="section-header">
+        <h2>{{target_audience.section_title}}</h2>
+        <p>{{target_audience.section_subtitle}}</p>
+      </div>
+      
+      <div class="audience-grid">
+        <div class="audience-card">
+          <div class="audience-icon">{{target_audience.audience1_icon}}</div>
+          <h3>{{target_audience.audience1_title}}</h3>
+          <p>{{target_audience.audience1_desc}}</p>
+        </div>
+        <div class="audience-card">
+          <div class="audience-icon">{{target_audience.audience2_icon}}</div>
+          <h3>{{target_audience.audience2_title}}</h3>
+          <p>{{target_audience.audience2_desc}}</p>
+        </div>
+        <div class="audience-card">
+          <div class="audience-icon">{{target_audience.audience3_icon}}</div>
+          <h3>{{target_audience.audience3_title}}</h3>
+          <p>{{target_audience.audience3_desc}}</p>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Demo Alert -->
+    <section class="section demo-section">
+      <div class="section-header">
+        <h2>{{demo_alert.section_title}}</h2>
+        <p>{{demo_alert.section_subtitle}}</p>
+      </div>
+      
+      <div class="demo-container">
+        <div class="demo-alert">
+          <div class="demo-alert-header">
+            <div class="telegram-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.359 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.461-1.901-.903-1.056-.692-1.653-1.123-2.678-1.799-1.185-.781-.417-1.21.258-1.911.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.139-5.062 3.345-.479.329-.913.489-1.302.481-.428-.009-1.252-.242-1.865-.442-.752-.244-1.349-.374-1.297-.789.027-.216.324-.437.893-.663 3.498-1.524 5.831-2.529 6.998-3.015 3.333-1.386 4.025-1.627 4.477-1.635.099-.002.321.023.465.141.121.1.154.234.169.334.016.099.036.323.02.498z"/>
+              </svg>
+            </div>
+            <div>
+              <strong>ScoutLoot Bot</strong>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Just now</div>
+            </div>
+          </div>
+          <div class="demo-alert-content">
+            <div>🧱 <strong>DEAL ALERT</strong></div>
+            <br>
+            <div><span class="label">Set:</span> <span class="value">75192 - Millennium Falcon</span></div>
+            <br>
+            <div><span class="emoji">💰</span> <span class="label">Price:</span> <span class="price">€549.00</span></div>
+            <div><span class="emoji">📦</span> <span class="label">Shipping:</span> <span class="value">€12.00</span></div>
+            <div><strong>Total: <span class="price">€561.00</span></strong></div>
+            <br>
+            <div><span class="emoji">🎯</span> <span class="label">Your target:</span> <span class="value">€600.00</span></div>
+            <div><span class="emoji">✅</span> <span class="label">You save:</span> <span class="savings">€39.00</span></div>
+            <br>
+            <div><span class="emoji">👤</span> <span class="label">Seller:</span> <span class="value">brickmaster_de (99.8%)</span></div>
+            <div><span class="emoji">🇩🇪</span> <span class="label">Ships from:</span> <span class="value">Germany</span></div>
+            <div><span class="emoji">📋</span> <span class="label">Condition:</span> <span class="value">New</span></div>
+            
+            <a href="#" class="demo-alert-btn">🔍 View Deal</a>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Pricing -->
+    <section class="section" id="pricing">
+      <div class="section-header">
+        <h2>{{pricing.section_title}}</h2>
+        <p>{{pricing.section_subtitle}}</p>
+      </div>
+      
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <h3>{{pricing.free_name}}</h3>
+          <div class="pricing-price">{{pricing.free_price}}<span>{{pricing.free_period}}</span></div>
+          <ul class="pricing-features">
+            <li>{{pricing.free_feature1}}</li>
+            <li>{{pricing.free_feature2}}</li>
+            <li>{{pricing.free_feature3}}</li>
+            <li>{{pricing.free_feature4}}</li>
+            <li>{{pricing.free_feature5}}</li>
+          </ul>
+          <button class="btn btn-secondary" style="width: 100%;" onclick="openModal('signup')">{{pricing.free_cta}}</button>
+        </div>
+        
+        <div class="pricing-card featured">
+          <div class="pricing-badge">{{pricing.collector_badge}}</div>
+          <h3>{{pricing.collector_name}}</h3>
+          <div class="pricing-price">{{pricing.collector_price}}<span>{{pricing.collector_period}}</span></div>
+          <ul class="pricing-features">
+            <li>{{pricing.collector_feature1}}</li>
+            <li>{{pricing.collector_feature2}}</li>
+            <li>{{pricing.collector_feature3}}</li>
+            <li>{{pricing.collector_feature4}}</li>
+            <li>{{pricing.collector_feature5}}</li>
+          </ul>
+          <button class="btn btn-primary" style="width: 100%;" onclick="openModal('signup')">{{pricing.collector_cta}}</button>
+        </div>
+        
+        <div class="pricing-card">
+          <h3>{{pricing.dealer_name}}</h3>
+          <div class="pricing-price">{{pricing.dealer_price}}<span>{{pricing.dealer_period}}</span></div>
+          <ul class="pricing-features">
+            <li>{{pricing.dealer_feature1}}</li>
+            <li>{{pricing.dealer_feature2}}</li>
+            <li>{{pricing.dealer_feature3}}</li>
+            <li>{{pricing.dealer_feature4}}</li>
+            <li>{{pricing.dealer_feature5}}</li>
+          </ul>
+          <button class="btn btn-secondary" style="width: 100%;" onclick="openModal('signup')">{{pricing.dealer_cta}}</button>
+        </div>
+      </div>
+    </section>
+    
+    <!-- CTA -->
+    <section class="section cta-section">
+      <h2>{{cta_section.title}}</h2>
+      <p>{{cta_section.subtitle}}</p>
+      <button class="btn btn-primary btn-large" onclick="openModal('signup')">
+        🔔 {{cta_section.cta}}
+      </button>
+    </section>
+    
+    <!-- About Creator -->
+    <section class="section" style="padding-top: 0;">
+      <div class="about-creator">
+        <p>🧱 {{about_creator.line1}}</p>
+        <p>{{about_creator.line2}}</p>
+        <p>{{about_creator.contact}} <a href="mailto:support@scoutloot.com">support@scoutloot.com</a></p>
+      </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer>
+      <div class="footer-content">
+        <div class="footer-brand">
+          <a href="/" class="logo">
+            <img src="/logo-icon.png" alt="ScoutLoot" class="logo-icon">
+            <span>ScoutLoot</span>
+          </a>
+          <p>{{footer.tagline}}</p>
+        </div>
+        
+        <div class="footer-column">
+          <h4>{{footer.product}}</h4>
+          <ul>
+            <li><a href="#how-it-works">{{nav.how_it_works}}</a></li>
+            <li><a href="#features">{{nav.features}}</a></li>
+            <li><a href="#pricing">{{nav.pricing}}</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-column">
+          <h4>{{footer.marketplaces}}</h4>
+          <ul>
+            <li>{{footer.ebay}} <span class="source-status active">{{footer.ebay_status}}</span></li>
+            <li>{{footer.brickowl}} <span class="source-status coming">{{footer.brickowl_status}}</span></li>
+          </ul>
+        </div>
+        
+        <div class="footer-column">
+          <h4>{{footer.regions}}</h4>
+          <ul>
+            <li>🇺🇸 {{footer.usa}} <span class="source-status active">Active</span></li>
+            <li>🇨🇦 {{footer.canada}} <span class="source-status active">Active</span></li>
+            <li>🇬🇧 {{footer.uk}} <span class="source-status active">Active</span></li>
+            <li>🇪🇺 {{footer.europe}} <span class="source-status active">Active</span></li>
+          </ul>
+        </div>
+        
+        <div class="footer-column">
+          <h4>{{footer.legal}}</h4>
+          <ul>
+            <li><a href="/privacy">{{footer.privacy}}</a></li>
+            <li><a href="/terms">{{footer.terms}}</a></li>
+            <li><a href="/cookies">{{footer.cookies}}</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-column">
+          <h4>{{footer.support}}</h4>
+          <ul>
+            <li><a href="mailto:support@scoutloot.com">{{footer.contact}}</a></li>
+            <li><a href="/faq">{{footer.faq}}</a></li>
+            <li><a href="https://t.me/scoutloot_support">{{footer.telegram_support}}</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>{{footer.copyright}}</p>
+        <p>{{footer.made_with}}</p>
+      </div>
+    </footer>
+  </div>
+  
+  <!-- Dashboard -->
+  <div class="dashboard">
+    <div class="dashboard-container">
+
+      <!-- Set Explorer for Dashboard -->
+      <div class="dashboard-search">
+        <div class="dashboard-search-header"><h3>{{dashboard.explore_sets}}</h3></div>
+        <div class="dashboard-search-container">
+          <span class="dashboard-search-icon">🔍</span>
+          <input type="text" id="dashboard-search-input" class="dashboard-search-input" placeholder="{{dashboard.search_placeholder}}" autocomplete="off">
+          <div id="dashboard-search-results" class="dashboard-search-results"></div>
+        </div>
+      </div>
+      <div class="dashboard-header">
+        <h1>{{dashboard.title}}</h1>
+        <button class="btn btn-primary" onclick="openModal('add-watch')">
+          {{dashboard.add_watch}}
+        </button>
+      </div>
+      
+      <div class="dashboard-stats">
+        <div class="dashboard-stat">
+          <div class="dashboard-stat-label">{{dashboard.stats.active_watches}}</div>
+          <div class="dashboard-stat-value" id="dash-watches">0</div>
+        </div>
+        <div class="dashboard-stat">
+          <div class="dashboard-stat-label">{{dashboard.stats.alerts_today}}</div>
+          <div class="dashboard-stat-value" id="dash-alerts-today">0</div>
+        </div>
+        <div class="dashboard-stat">
+          <div class="dashboard-stat-label">{{dashboard.stats.total_alerts}}</div>
+          <div class="dashboard-stat-value" id="dash-alerts-total">0</div>
+        </div>
+        <div class="dashboard-stat">
+          <div class="dashboard-stat-label">{{dashboard.stats.subscription}}</div>
+          <div class="dashboard-stat-value" id="dash-tier">Free</div>
+        </div>
+      </div>
+      
+      <!-- Dashboard Tabs -->
+      <div class="dashboard-tabs">
+        <button class="dashboard-tab active" onclick="switchTab('watches')">
+          {{dashboard.tabs.watches}}
+        </button>
+        <button class="dashboard-tab" onclick="switchTab('notifications')" id="notifications-tab">
+          {{dashboard.tabs.notifications}} <span class="tab-badge" id="unread-badge" style="display: none;">0</span>
+        </button>
+      </div>
+      
+      <!-- Watches Tab -->
+      <div class="tab-content active" id="tab-watches">
+        <div class="watches-section">
+          <div class="watches-header">
+            <h2>{{dashboard.your_watchlist}}</h2>
+          </div>
+          <div class="watches-list" id="watches-list">
+            <div class="empty-state">
+              <div class="empty-state-icon">🔍</div>
+              <p>{{dashboard.empty_watches}}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Notifications Tab -->
+      <div class="tab-content" id="tab-notifications">
+        <div class="inbox-section">
+          <div class="inbox-header">
+            <h2>{{dashboard.notifications_inbox}}</h2>
+            <button class="btn btn-ghost" onclick="markAllRead()">{{dashboard.mark_all_read}}</button>
+          </div>
+          <div class="inbox-list" id="inbox-list">
+            <div class="empty-state">
+              <div class="empty-state-icon">🔔</div>
+              <p>{{dashboard.empty_notifications}}</p>
+            </div>
+          </div>
+          <div class="inbox-load-more" id="inbox-load-more" style="display: none;">
+            <button class="btn btn-secondary" onclick="loadMoreAlerts()">{{dashboard.load_more}}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Login Modal -->
+  <div class="modal-overlay" id="modal-login">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal('login')">×</button>
+      <h2>{{modals.login.title}}</h2>
+      <p class="modal-subtitle">{{modals.login.subtitle}}</p>
+      
+      <form onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="login-email">{{forms.email}}</label>
+          <input type="email" id="login-email" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+          <label for="login-password">{{forms.password}}</label>
+          <input type="password" id="login-password" placeholder="••••••••" required>
+        </div>
+        <div style="text-align: right; margin-bottom: 16px;">
+          <a href="#" onclick="switchModal('login', 'forgot-password'); return false;" style="font-size: 0.85rem; color: var(--accent); text-decoration: none;">{{modals.login.forgot_password}}</a>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;" id="login-submit-btn">{{nav.login}}</button>
+      </form>
+      
+      <div class="modal-footer">
+        {{modals.login.no_account}} <a href="#" onclick="switchModal('login', 'signup'); return false;">Sign up</a>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Signup Modal -->
+  <div class="modal-overlay" id="modal-signup">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal('signup')">×</button>
+      <h2>{{modals.signup.title}}</h2>
+      <p class="modal-subtitle">{{modals.signup_subtitle}}</p>
+      
+      <form onsubmit="handleSignup(event)">
+        <div class="form-group">
+          <label for="signup-email">{{forms.email}}</label>
+          <input type="email" id="signup-email" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+          <label for="signup-password">{{forms.password}}</label>
+          <input type="password" id="signup-password" placeholder="••••••••" minlength="8" required>
+        </div>
+        <div class="form-group">
+          <label for="signup-country">{{forms.ship_to_country}}</label>
+          <select id="signup-country" required>
+            <optgroup label="{{forms.countries.north_america}}">
+              <option value="US">United States 🇺🇸</option>
+              <option value="CA">Canada 🇨🇦</option>
+            </optgroup>
+            <optgroup label="{{forms.countries.united_kingdom}}">
+              <option value="GB">United Kingdom 🇬🇧</option>
+            </optgroup>
+            <optgroup label="{{forms.countries.western_europe}}">
+              <option value="DE">Germany 🇩🇪</option>
+              <option value="FR">France 🇫🇷</option>
+              <option value="NL">Netherlands 🇳🇱</option>
+              <option value="BE">Belgium 🇧🇪</option>
+              <option value="LU">Luxembourg 🇱🇺</option>
+              <option value="AT">Austria 🇦🇹</option>
+              <option value="IE">Ireland 🇮🇪</option>
+            </optgroup>
+            <optgroup label="{{forms.countries.southern_europe}}">
+              <option value="ES">Spain 🇪🇸</option>
+              <option value="IT">Italy 🇮🇹</option>
+              <option value="PT">Portugal 🇵🇹</option>
+              <option value="GR">Greece 🇬🇷</option>
+              <option value="MT">Malta 🇲🇹</option>
+              <option value="CY">Cyprus 🇨🇾</option>
+            </optgroup>
+            <optgroup label="{{forms.countries.northern_europe}}">
+              <option value="SE">Sweden 🇸🇪</option>
+              <option value="DK">Denmark 🇩🇰</option>
+              <option value="FI">Finland 🇫🇮</option>
+              <option value="EE">Estonia 🇪🇪</option>
+              <option value="LV">Latvia 🇱🇻</option>
+              <option value="LT">Lithuania 🇱🇹</option>
+            </optgroup>
+            <optgroup label="{{forms.countries.central_eastern_europe}}">
+              <option value="PL">Poland 🇵🇱</option>
+              <option value="CZ">Czechia 🇨🇿</option>
+              <option value="SK">Slovakia 🇸🇰</option>
+              <option value="HU">Hungary 🇭🇺</option>
+              <option value="SI">Slovenia 🇸🇮</option>
+              <option value="HR">Croatia 🇭🇷</option>
+              <option value="RO">Romania 🇷🇴</option>
+              <option value="BG">Bulgaria 🇧🇬</option>
+            </optgroup>
+          </select>
+        </div>
+        
+        <div class="form-divider">{{forms.notification_preferences}}</div>
+        
+        <div class="checkbox-group">
+          <input type="checkbox" id="signup-weekly-digest" checked>
+          <div class="checkbox-label">
+            <div class="checkbox-title">{{forms.weekly_digest.title}}</div>
+            <div class="checkbox-desc">{{forms.weekly_digest.desc}}</div>
+          </div>
+        </div>
+        
+        <div class="checkbox-group">
+          <input type="checkbox" id="signup-reminders">
+          <div class="checkbox-label">
+            <div class="checkbox-title">{{forms.reminders.title}}</div>
+            <div class="checkbox-desc">{{forms.reminders.desc}}</div>
+          </div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 16px;" id="signup-submit-btn">{{modals.signup.btn_submit}}</button>
+      </form>
+      
+      <div class="modal-footer">
+        {{modals.signup.already_have_account}} <a href="#" onclick="switchModal('signup', 'login'); return false;">{{nav.login}}</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Complete Setup Modal (shown after signup) -->
+  <div class="modal-overlay" id="modal-complete-setup">
+    <div class="modal">
+      <button class="modal-close" onclick="closeSetupModal()">×</button>
+      <h2>🎉 Account Created!</h2>
+      <p class="modal-subtitle">{{modals.setup_subtitle}}</p>
+      
+      <div class="setup-options">
+        <div class="setup-option" id="setup-telegram" onclick="setupTelegram()">
+          <div class="setup-option-header">
+            <span class="setup-option-icon">📱</span>
+            <span class="setup-option-title">{{modals.complete_setup.telegram.title}}</span>
+          </div>
+          <div class="setup-option-desc">
+            {{modals.complete_setup.telegram.desc}}
+          </div>
+        </div>
+        
+        <div class="setup-option" id="setup-push" onclick="setupPush()">
+          <div class="setup-option-header">
+            <span class="setup-option-icon">🔔</span>
+            <span class="setup-option-title">{{modals.complete_setup.push.title}}</span>
+          </div>
+          <div class="setup-option-desc">
+            {{modals.complete_setup.push.desc}}
+          </div>
+        </div>
+      </div>
+      
+      <div style="margin-top: 24px; text-align: center;">
+        <button class="btn btn-ghost" onclick="closeSetupModal()">{{modals.complete_setup.skip}}</button>
+      </div>
+      
+      <div style="margin-top: 16px; text-align: center; font-size: 0.85rem; color: var(--text-muted);">
+        You can always set these up later in Settings
+      </div>
+    </div>
+  </div>
+  
+  <!-- Add Watch Modal -->
+  <div class="modal-overlay" id="modal-add-watch">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal('add-watch')">×</button>
+      <h2>{{modals.add_watch.title}}</h2>
+      <p class="modal-subtitle">{{dashboard.add_watch_subtitle}}</p>
+      
+      <form class="add-watch-form" onsubmit="handleAddWatch(event)">
+        <!-- V24: Item Type Toggle -->
+        <div class="watch-type-toggle">
+          <button type="button" class="toggle-btn active" data-type="set" onclick="switchWatchType('set')">
+            🧱 Set
+          </button>
+          <button type="button" class="toggle-btn" data-type="minifig" onclick="switchWatchType('minifig')">
+            🧍 Minifigure
+          </button>
+        </div>
+        
+        
+        <!-- V24: Item Type Toggle -->
+        <div class="watch-type-toggle">
+          <button type="button" class="toggle-btn active" data-type="set" onclick="switchWatchType('set')">🧱 Set</button>
+          <button type="button" class="toggle-btn" data-type="minifig" onclick="switchWatchType('minifig')">🧍 Minifigure</button>
+        </div>
+        
+        <div class="form-group autocomplete-container">
+          <label for="watch-set">Set Number or Name</label>
+          <input type="text" id="watch-set" placeholder="e.g., 75192 or Millennium Falcon" required autocomplete="off">
+          <div class="autocomplete-results" id="set-autocomplete"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="watch-target">{{forms.target_price}} (€)</label>
+            <input type="number" id="watch-target" placeholder="500" min="1" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label for="watch-min">{{forms.min_price}} (€)</label>
+            <input type="number" id="watch-min" placeholder="50" min="0" step="0.01" value="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="watch-condition">{{forms.condition}}</label>
+          <select id="watch-condition">
+            <option value="new" selected>{{forms.condition_new}}</option>
+            <option value="used">{{forms.condition_used}}</option>
+            <option value="any">{{forms.condition_any}}</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;" id="add-watch-submit-btn">{{modals.add_watch.btn_submit}}</button>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Edit Watch Modal -->
+  <div class="modal-overlay" id="modal-edit-watch">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal('edit-watch')">×</button>
+      <h2>{{modals.edit_watch.title}}</h2>
+      <p class="modal-subtitle" id="edit-watch-name">{{modals.edit_watch.subtitle}}</p>
+      
+      <form class="add-watch-form" onsubmit="handleEditWatch(event)">
+        <div class="form-group">
+          <label>{{forms.set_number}}</label>
+          <input type="text" id="edit-watch-set" disabled style="opacity: 0.6; cursor: not-allowed;">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="edit-watch-target">{{forms.target_price}} (€)</label>
+            <input type="number" id="edit-watch-target" placeholder="500" min="1" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-watch-min">{{forms.min_price}} (€)</label>
+            <input type="number" id="edit-watch-min" placeholder="50" min="0" step="0.01" value="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="edit-watch-condition">{{forms.condition}}</label>
+          <select id="edit-watch-condition">
+            <option value="new">{{forms.condition_new}}</option>
+            <option value="used">{{forms.condition_used}}</option>
+            <option value="any">{{forms.condition_any}}</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;" id="edit-watch-submit-btn">{{modals.edit_watch.btn_submit}}</button>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="modal-settings">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal('settings')">×</button>
+      <h2>{{modals.settings.title}}</h2>
+      <p class="modal-subtitle">{{modals.settings.subtitle}}</p>
+      
+      <form onsubmit="handleSettings(event)">
+        <div class="form-group">
+          <label for="settings-country">{{forms.ship_to_country}}</label>
+          <select id="settings-country">
+            <optgroup label="{{forms.countries.north_america}}">
+              <option value="US">United States 🇺🇸</option>
+              <option value="CA">Canada 🇨🇦</option>
+            </optgroup>
+            <optgroup label="{{forms.countries.united_kingdom}}">
+              <option value="GB">United Kingdom 🇬🇧</option>
+            </optgroup>
+            <optgroup label="{{forms.countries.western_europe}}">
+              <option value="DE">Germany 🇩🇪</option>
+              <option value="FR">France 🇫🇷</option>
+              <option value="NL">Netherlands 🇳🇱</option>
+              <option value="BE">Belgium 🇧🇪</option>
+              <option value="LU">Luxembourg 🇱🇺</option>
+              <option value="AT">Austria 🇦🇹</option>
+              <option value="IE">Ireland 🇮🇪</option>
+            </optgroup>
+            <optgroup label="{{forms.countries.southern_europe}}">
+              <option value="ES">Spain 🇪🇸</option>
+              <option value="IT">Italy 🇮🇹</option>
+              <option value="PT">Portugal 🇵🇹</option>
+              <option value="GR">Greece 🇬🇷</option>
+              <option value="MT">Malta 🇲🇹</option>
+              <option value="CY">Cyprus 🇨🇾</option>
+            </optgroup>
+            <optgroup label="{{forms.countries.northern_europe}}">
+              <option value="SE">Sweden 🇸🇪</option>
+              <option value="DK">Denmark 🇩🇰</option>
+              <option value="FI">Finland 🇫🇮</option>
+              <option value="EE">Estonia 🇪🇪</option>
+              <option value="LV">Latvia 🇱🇻</option>
+              <option value="LT">Lithuania 🇱🇹</option>
+            </optgroup>
+            <optgroup label="{{forms.countries.central_eastern_europe}}">
+              <option value="PL">Poland 🇵🇱</option>
+              <option value="CZ">Czechia 🇨🇿</option>
+              <option value="SK">Slovakia 🇸🇰</option>
+              <option value="HU">Hungary 🇭🇺</option>
+              <option value="SI">Slovenia 🇸🇮</option>
+              <option value="HR">Croatia 🇭🇷</option>
+              <option value="RO">Romania 🇷🇴</option>
+              <option value="BG">Bulgaria 🇧🇬</option>
+            </optgroup>
+          </select>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">
+            ⚠️ Changing your country will reset notifications to show fresh deals in your new region.
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="settings-timezone">{{forms.timezone}}</label>
+          <select id="settings-timezone">
+            <optgroup label="{{forms.countries.north_america}}">
+              <option value="America/New_York">New York (Eastern)</option>
+              <option value="America/Chicago">Chicago (Central)</option>
+              <option value="America/Denver">Denver (Mountain)</option>
+              <option value="America/Los_Angeles">Los Angeles (Pacific)</option>
+              <option value="America/Toronto">Toronto (Eastern)</option>
+              <option value="America/Vancouver">Vancouver (Pacific)</option>
+            </optgroup>
+            <optgroup label="{{forms.countries.united_kingdom}}">
+              <option value="Europe/London">London (GMT)</option>
+              <option value="Europe/Dublin">Dublin (GMT)</option>
+            </optgroup>
+            <optgroup label="Central European Time">
+              <option value="Europe/Berlin">Berlin (CET)</option>
+              <option value="Europe/Paris">Paris (CET)</option>
+              <option value="Europe/Madrid">Madrid (CET)</option>
+              <option value="Europe/Rome">Rome (CET)</option>
+              <option value="Europe/Amsterdam">Amsterdam (CET)</option>
+              <option value="Europe/Brussels">Brussels (CET)</option>
+              <option value="Europe/Vienna">Vienna (CET)</option>
+              <option value="Europe/Warsaw">Warsaw (CET)</option>
+              <option value="Europe/Prague">Prague (CET)</option>
+              <option value="Europe/Budapest">Budapest (CET)</option>
+              <option value="Europe/Stockholm">Stockholm (CET)</option>
+              <option value="Europe/Copenhagen">Copenhagen (CET)</option>
+            </optgroup>
+            <optgroup label="Other European">
+              <option value="Europe/Lisbon">Lisbon (WET)</option>
+              <option value="Europe/Helsinki">Helsinki (EET)</option>
+              <option value="Europe/Athens">Athens (EET)</option>
+              <option value="Europe/Bucharest">Bucharest (EET)</option>
+              <option value="Europe/Sofia">Sofia (EET)</option>
+              <option value="Europe/Tallinn">Tallinn (EET)</option>
+              <option value="Europe/Riga">Riga (EET)</option>
+              <option value="Europe/Vilnius">Vilnius (EET)</option>
+            </optgroup>
+          </select>
+        </div>
+        
+        <div class="form-divider">Telegram</div>
+        
+        <div class="form-group">
+          <label>Telegram Status</label>
+          <div id="telegram-status" style="padding: 14px 16px; background: var(--bg-tertiary); border-radius: 10px; font-size: 0.95rem;">
+            <span id="telegram-connected" style="display: none; color: var(--success);">✔ Connected</span>
+            <span id="telegram-disconnected" style="color: var(--text-muted);">Not connected</span>
+          </div>
+        </div>
+        
+        <button type="button" class="btn btn-telegram" onclick="connectTelegram()">
+          Connect Telegram
+        </button>
+        
+        <div class="form-divider">Push Notifications</div>
+        
+        <!-- iOS Instructions (shown conditionally) -->
+        <div class="ios-instructions" id="ios-instructions" style="display: none;">
+          <h4>📱 iPhone/iPad Instructions</h4>
+          <ol>
+            <li>Tap the Share button in Safari</li>
+            <li>Select "Add to Home Screen"</li>
+            <li>Open ScoutLoot from the home screen icon</li>
+            <li>Then enable Push Notifications below</li>
+          </ol>
+        </div>
+        
+        <div class="push-status-box" id="push-status-box">
+          <div class="push-status-row">
+            <span>Browser Push</span>
+            <div class="push-status-indicator">
+              <span class="push-status-dot" id="push-status-dot"></span>
+              <span id="push-status-text">Checking...</span>
+            </div>
+          </div>
+          <div class="push-status-row" id="push-devices-row" style="display: none;">
+            <span>Active Devices</span>
+            <span id="push-device-count">0</span>
+          </div>
+        </div>
+        
+        <button type="button" class="btn btn-push" id="push-toggle-btn" onclick="togglePushNotifications()">
+          Enable Push Notifications
+        </button>
+        
+        <div class="form-divider">Email Preferences</div>
+        
+        <div class="checkbox-group">
+          <input type="checkbox" id="settings-weekly-digest" checked>
+          <div class="checkbox-label">
+            <div class="checkbox-title">{{forms.weekly_digest.title}}</div>
+            <div class="checkbox-desc">Sunday summary of all your watches</div>
+          </div>
+        </div>
+        
+        <div class="checkbox-group">
+          <input type="checkbox" id="settings-still-available">
+          <div class="checkbox-label">
+            <div class="checkbox-title">💡 "Still Available" Reminders</div>
+            <div class="checkbox-desc">Notify after 3 days if deal &gt;20% off is still there</div>
+          </div>
+        </div>
+        
+        <div style="margin-top: 24px;">
+          <button type="submit" class="btn btn-primary" style="width: 100%;" id="settings-submit-btn">{{modals.settings.btn_save}}</button>
+        </div>
+
+        <div class="form-divider">{{modals.settings.security}}</div>
+
+        <button type="button" class="btn btn-secondary" style="width: 100%;" onclick="switchModal('settings', 'change-password')">
+          {{modals.settings.change_password_btn}}
+        </button>
+
+        <div class="danger-zone">
+          <h3>{{modals.settings.danger_zone}}</h3>
+          <p class="danger-description">{{modals.settings.danger_description}}</p>
+          
+          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="exportUserData()">
+              {{modals.settings.export_data}}
+            </button>
+            <button type="button" class="btn btn-outline-danger btn-sm" onclick="switchModal('settings', 'delete-account')">
+              {{modals.settings.delete_account_btn}}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Forgot Password Modal -->
+  <div class="modal-overlay" id="modal-forgot-password">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal('forgot-password')">×</button>
+      <h2>{{modals.forgot_password.title}}</h2>
+      <p class="modal-subtitle">{{modals.forgot_password.subtitle}}</p>
+      
+      <form onsubmit="handleForgotPassword(event)">
+        <div class="form-group">
+          <label for="forgot-email">{{forms.email}}</label>
+          <input type="email" id="forgot-email" placeholder="you@example.com" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;" id="forgot-submit-btn">{{modals.forgot_password.btn_submit}}</button>
+      </form>
+      
+      <div class="modal-footer">
+        {{modals.forgot_password.remember_password}} <a href="#" onclick="switchModal('forgot-password', 'login'); return false;">{{nav.login}}</a>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Reset Password Modal -->
+  <div class="modal-overlay" id="modal-reset-password">
+    <div class="modal">
+      <button class="modal-close" onclick="closeResetModal()">×</button>
+      <h2>{{modals.reset_password.title}}</h2>
+      <p class="modal-subtitle" id="reset-email-display">{{modals.reset_password.subtitle}}</p>
+      
+      <form onsubmit="handleResetPassword(event)">
+        <div class="form-group">
+          <label for="reset-password">{{forms.new_password}}</label>
+          <input type="password" id="reset-password" placeholder="••••••••" minlength="8" required>
+        </div>
+        <div class="form-group">
+          <label for="reset-password-confirm">{{forms.confirm_password}}</label>
+          <input type="password" id="reset-password-confirm" placeholder="••••••••" minlength="8" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;" id="reset-submit-btn">{{modals.reset_password.btn_submit}}</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Change Password Modal (GDPR) -->
+  <div class="modal-overlay" id="modal-change-password">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal('change-password'); openModal('settings');">×</button>
+      <h2>{{modals.change_password.title}}</h2>
+      <p class="modal-subtitle">{{modals.change_password.subtitle}}</p>
+      
+      <form onsubmit="handleChangePassword(event)">
+        <div class="form-group">
+          <label for="current-password">{{forms.current_password}}</label>
+          <input type="password" id="current-password" placeholder="••••••••" required>
+        </div>
+        <div class="form-group">
+          <label for="new-password">{{forms.new_password}}</label>
+          <input type="password" id="new-password" placeholder="••••••••" minlength="8" required>
+        </div>
+        <div class="form-group">
+          <label for="confirm-new-password">{{forms.confirm_new_password}}</label>
+          <input type="password" id="confirm-new-password" placeholder="••••••••" minlength="8" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;" id="change-password-btn">{{modals.change_password.btn_submit}}</button>
+      </form>
+      
+      <div class="modal-footer">
+        <a href="#" onclick="closeModal('change-password'); openModal('settings'); return false;">{{modals.change_password.back_to_settings}}</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Account Modal (GDPR) -->
+  <div class="modal-overlay" id="modal-delete-account">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal('delete-account'); openModal('settings');">×</button>
+      
+      <div class="danger-header">
+        <span class="danger-icon">⚠️</span>
+        <div>
+          <h2 style="color: var(--error);">{{modals.delete_account.title}}</h2>
+          <p class="modal-subtitle" style="margin-bottom: 0;">{{modals.delete_account.subtitle}}</p>
+        </div>
+      </div>
+      
+      <p style="margin-top: 16px; color: var(--text-secondary);">
+        {{modals.delete_account.warning_intro}}
+      </p>
+      
+      <ul class="delete-warning-list">
+        <li>{{modals.delete_account.warning_items.0}}</li>
+        <li>{{modals.delete_account.warning_items.1}}</li>
+        <li>{{modals.delete_account.warning_items.2}}</li>
+        <li>{{modals.delete_account.warning_items.3}}</li>
+      </ul>
+      
+      <form onsubmit="handleDeleteAccount(event)">
+        <div class="form-group">
+          <label for="delete-confirm-input">{{modals.delete_account.confirm_label}}</label>
+          <input type="text" id="delete-confirm-input" placeholder="DELETE" autocomplete="off" required>
+        </div>
+        <button type="submit" class="btn btn-danger" style="width: 100%;" id="delete-account-btn" disabled>
+          {{modals.delete_account.btn_delete}}
+        </button>
+      </form>
+      
+      <div class="modal-footer">
+        <a href="#" onclick="closeModal('delete-account'); openModal('settings'); return false;">{{modals.delete_account.cancel}}</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alert Detail Modal -->
+  <div class="modal-overlay" id="modal-alert-detail">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal('alert-detail')">×</button>
+      <h2 id="alert-detail-title">{{modals.alert_detail.title}}</h2>
+      <p class="modal-subtitle" id="alert-detail-reason">{{modals.alert_reason}}</p>
+      
+      <div id="alert-detail-content">
+        <!-- Populated by JS -->
+      </div>
+      
+      <div style="display: flex; gap: 12px; margin-top: 24px;">
+        <a href="#" id="alert-detail-buy-btn" class="btn btn-primary" style="flex: 1; text-align: center;" target="_blank">
+          {{modals.alert_detail.buy_btn}}
+        </a>
+        <button class="btn btn-secondary" onclick="closeModal('alert-detail')">{{modals.alert_detail.close}}</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cookie Banner (GDPR) -->
+  <div class="cookie-banner" id="cookie-banner">
+    <div class="cookie-content">
+      <p>
+        {{cookie_banner.message}} 
+        <a href="/privacy">{{footer.privacy}}</a> and <a href="/cookies">{{footer.cookies}}</a>.
+      </p>
+      <button class="btn btn-primary btn-sm" onclick="acceptCookies()">{{cookie_banner.accept}}</button>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+  
+  <!-- JavaScript (EXTRACTED) -->
+  <script src="/js/app.js"></script>
+  
+  <!-- Language Switcher Script -->
+  <script>
+    // Initialize language switcher from server-injected data
+    (function() {
+      const dropdown = document.getElementById('language-dropdown');
+      const btn = document.getElementById('language-btn');
+      const flagEl = document.getElementById('current-lang-flag');
+      const codeEl = document.getElementById('current-lang-code');
+      
+      if (!window.__SCOUTLOOT_LANGUAGES__ || !dropdown) return;
+      
+      const languages = window.__SCOUTLOOT_LANGUAGES__;
+      const currentLang = window.__SCOUTLOOT_LANG__ || 'en';
+      
+      // Set current language display
+      const current = languages.find(l => l.isCurrent) || languages[0];
+      if (current) {
+        flagEl.textContent = current.flag;
+        codeEl.textContent = current.code.toUpperCase();
+      }
+      
+      // Build dropdown
+      dropdown.innerHTML = languages.map(lang => `
+        <a href="${lang.url}" class="language-option ${lang.isCurrent ? 'active' : ''}" data-lang="${lang.code}">
+          <span class="language-flag">${lang.flag}</span>
+          <span class="language-name">${lang.nativeName}</span>
+          ${lang.isCurrent ? '<span class="check">✓</span>' : ''}
+        </a>
+      `).join('');
+      
+      // Toggle dropdown
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle('show');
+      });
+      
+      // Close on outside click
+      document.addEventListener('click', () => {
+        dropdown.classList.remove('show');
+      });
+    })();
+  </script>
+</body>
+</html>

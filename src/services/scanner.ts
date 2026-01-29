@@ -387,7 +387,7 @@ async function scanEbayForMinifig(
   try {
     // Search for minifig on eBay
     // Use fig_num + "minifigure" to get relevant results
-    const searchQuery = figNum;
+    const searchQuery = figName ? `${figName} minifigure lego` : figNum;
     const searchResponse = await searchEbay(searchQuery, shipToCountry);
     const rawListings = searchResponse.itemSummaries ?? [];
     result.listingsFound += rawListings.length;

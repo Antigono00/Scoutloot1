@@ -11,7 +11,7 @@ import { query } from '../db/index.js';
 // ============================================
 
 export interface Minifig {
-  fig_num: string;
+  minifig_id: string;
   name: string | null;
   num_parts: number | null;
   image_url: string | null;
@@ -23,7 +23,7 @@ export interface Minifig {
 }
 
 export interface MinifigSearchResult {
-  fig_num: string;
+  minifig_id: string;
   name: string;
   num_parts: number | null;
   image_url: string | null;
@@ -39,9 +39,9 @@ export interface MinifigSearchResult {
  */
 export async function ensureMinifigExists(figNum: string): Promise<void> {
   await query(
-    `INSERT INTO minifigs (fig_num) 
+    `INSERT INTO minifigs (minifig_id) 
      VALUES ($1) 
-     ON CONFLICT (fig_num) DO NOTHING`,
+     ON CONFLICT (minifig_id) DO NOTHING`,
     [figNum.toLowerCase()]
   );
 }
@@ -51,7 +51,7 @@ export async function ensureMinifigExists(figNum: string): Promise<void> {
  */
 export async function getMinifig(figNum: string): Promise<Minifig | null> {
   const result = await query<Minifig>(
-    `SELECT * FROM minifigs WHERE fig_num = $1`,
+    `SELECT * FROM minifigs WHERE minifig_id = $1`,
     [figNum.toLowerCase()]
   );
   return result.rows[0] ?? null;
@@ -80,7 +80,7 @@ export async function updateMinifig(
        set_nums = COALESCE($6, set_nums),
        theme = COALESCE($7, theme),
        updated_at = NOW()
-     WHERE fig_num = $1
+     WHERE minifig_id = $1
      RETURNING *`,
     [
       figNum.toLowerCase(),
@@ -110,9 +110,9 @@ export async function upsertMinifig(
   }
 ): Promise<Minifig> {
   const result = await query<Minifig>(
-    `INSERT INTO minifigs (fig_num, name, num_parts, image_url, rebrickable_url, set_nums, theme)
+    `INSERT INTO minifigs (minifig_id, name, num_parts, image_url, rebrickable_url, set_nums, theme)
      VALUES ($1, $2, $3, $4, $5, $6, $7)
-     ON CONFLICT (fig_num) DO UPDATE SET
+     ON CONFLICT (minifig_id) DO UPDATE SET
        name = COALESCE(EXCLUDED.name, minifigs.name),
        num_parts = COALESCE(EXCLUDED.num_parts, minifigs.num_parts),
        image_url = COALESCE(EXCLUDED.image_url, minifigs.image_url),
@@ -139,22 +139,22 @@ export async function upsertMinifig(
 // ============================================
 
 /**
- * Search minifigs by name or fig_num
+ * Search minifigs by name or minifig_id
  */
 export async function searchMinifigs(
   searchQuery: string,
   limit: number = 20
 ): Promise<MinifigSearchResult[]> {
   const result = await query<MinifigSearchResult>(
-    `SELECT fig_num, name, num_parts, image_url
+    `SELECT minifig_id, name, num_parts, image_url
      FROM minifigs
      WHERE name IS NOT NULL
        AND (
-         fig_num ILIKE $1
+         minifig_id ILIKE $1
          OR name ILIKE $2
        )
      ORDER BY 
-       CASE WHEN fig_num ILIKE $1 THEN 0 ELSE 1 END,
+       CASE WHEN minifig_id ILIKE $1 THEN 0 ELSE 1 END,
        name
      LIMIT $3`,
     [`${searchQuery}%`, `%${searchQuery}%`, limit]
@@ -168,10 +168,10 @@ export async function searchMinifigs(
 export async function getMinifigsForSet(setNumber: string): Promise<MinifigSearchResult[]> {
   // Uses the set_nums array column
   const result = await query<MinifigSearchResult>(
-    `SELECT fig_num, name, num_parts, image_url
+    `SELECT minifig_id, name, num_parts, image_url
      FROM minifigs
      WHERE $1 = ANY(set_nums)
-     ORDER BY fig_num`,
+     ORDER BY minifig_id`,
     [setNumber]
   );
   return result.rows;
@@ -182,14 +182,14 @@ export async function getMinifigsForSet(setNumber: string): Promise<MinifigSearc
  */
 export async function getPopularMinifigs(limit: number = 20): Promise<MinifigSearchResult[]> {
   const result = await query<MinifigSearchResult>(
-    `SELECT m.fig_num, m.name, m.num_parts, m.image_url
+    `SELECT m.minifig_id, m.name, m.num_parts, m.image_url
      FROM minifigs m
      JOIN (
        SELECT item_id, COUNT(*) as watch_count
        FROM watches
        WHERE item_type = 'minifig' AND status = 'active'
        GROUP BY item_id
-     ) w ON m.fig_num = w.item_id
+     ) w ON m.minifig_id = w.item_id
      WHERE m.name IS NOT NULL
      ORDER BY watch_count DESC
      LIMIT $1`,
@@ -206,14 +206,14 @@ export async function getPopularMinifigs(limit: number = 20): Promise<MinifigSea
  * Get minifigs that need info updated (missing name)
  */
 export async function getMinifigsNeedingUpdate(limit: number = 50): Promise<string[]> {
-  const result = await query<{ fig_num: string }>(
-    `SELECT fig_num FROM minifigs 
+  const result = await query<{ minifig_id: string }>(
+    `SELECT minifig_id FROM minifigs 
      WHERE name IS NULL OR name = ''
      ORDER BY created_at ASC
      LIMIT $1`,
     [limit]
   );
-  return result.rows.map(r => r.fig_num);
+  return result.rows.map(r => r.minifig_id);
 }
 
 /**
@@ -259,7 +259,7 @@ export function normalizeMinifigId(figNum: string): string {
 }
 
 /**
- * Get theme prefix from fig_num
+ * Get theme prefix from minifig_id
  * e.g., "sw0001" -> "sw" (Star Wars)
  * e.g., "sh001" -> "sh" (Super Heroes)
  */
