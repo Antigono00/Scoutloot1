@@ -174,7 +174,7 @@ export async function syncMinifig(figNum: string): Promise<boolean> {
     num_parts: data.num_parts,
     image_url: data.set_img_url,
     rebrickable_url: data.set_url,
-    set_nums: setNums.length > 0 ? setNums : null,
+    set_numbers: setNums.length > 0 ? setNums : null,
     theme: theme,
   });
   
@@ -258,7 +258,7 @@ export async function syncMinifigsFromSearch(
         num_parts: minifig.num_parts,
         image_url: minifig.set_img_url,
         rebrickable_url: minifig.set_url,
-        set_nums: setNums.length > 0 ? setNums : null,
+        set_numbers: setNums.length > 0 ? setNums : null,
         theme: theme,
       });
       

@@ -1,10 +1,17 @@
 /**
  * BrickOwl API Client
  * 
+ * V26: Updated with proper minifig ID mapping support
+ * 
  * Handles all communication with BrickOwl's Catalog API:
  * - Search for items (sets, minifigures)
  * - Lookup item details
  * - Get availability (listings)
+ * 
+ * Key Changes in V26:
+ * - findBoidForMinifig() now checks minifigs table for cached BOID first
+ * - Supports Bricklink codes (sw0010) for minifig searches
+ * - Better minifig search matching logic
  */
 
 import { config } from '../../config.js';
@@ -42,7 +49,7 @@ async function rateLimitedFetch(url: string): Promise<Response> {
 /**
  * Search BrickOwl catalog by query and type
  * 
- * @param query - Search term (set number, name, or fig_num)
+ * @param query - Search term (set number, name, or Bricklink minifig code)
  * @param type - Item type: 'Set', 'Minifigure', 'Part', 'Gear'
  */
 export async function searchBrickOwl(
@@ -144,7 +151,7 @@ export async function getAvailability(
 }
 
 // ============================================
-// BOID RESOLUTION HELPERS
+// BOID RESOLUTION - SETS
 // ============================================
 
 /**
@@ -200,54 +207,171 @@ export async function findBoidForSet(setNumber: string): Promise<string | null> 
   return null;
 }
 
+// ============================================
+// BOID RESOLUTION - MINIFIGS (V26 UPDATED)
+// ============================================
+
+/**
+ * Check if a string looks like a Bricklink minifig code
+ */
+function isBricklinkCode(input: string): boolean {
+  return /^[a-z]{2,4}\d+[a-z]?$/i.test(input.trim());
+}
+
 /**
  * Find BOID for a minifigure
  * 
- * @param figNum - Minifigure ID (e.g., "sw0001" or "sh001")
+ * V26: Now checks minifigs table for cached BOID first, supports Bricklink codes
+ * 
+ * @param figNum - Minifigure ID (Bricklink code like "sw0010" or Rebrickable like "fig-003509")
  * @returns BOID or null if not found
  */
 export async function findBoidForMinifig(figNum: string): Promise<string | null> {
-  // First check cache
-  const cached = await getBoidFromCache(figNum, 'minifig');
+  const normalizedFigNum = figNum.toLowerCase().trim();
+  
+  // ============================================
+  // Step 1: Check minifigs table for cached BOID (V26)
+  // ============================================
+  try {
+    const minifigResult = await query<{ brickowl_boid: string | null; name: string | null }>(
+      `SELECT brickowl_boid, name FROM minifigs 
+       WHERE minifig_id = $1 OR bricklink_id = $1 
+       LIMIT 1`,
+      [normalizedFigNum]
+    );
+    
+    if (minifigResult.rows[0]?.brickowl_boid) {
+      console.log(`[BrickOwl] Minifig BOID from minifigs table: ${minifigResult.rows[0].brickowl_boid}`);
+      return minifigResult.rows[0].brickowl_boid;
+    }
+    
+    // If we have a name but no BOID, we can search BrickOwl by name
+    if (minifigResult.rows[0]?.name) {
+      console.log(`[BrickOwl] Have name "${minifigResult.rows[0].name}" but no BOID, will search`);
+    }
+  } catch (error) {
+    // Table might not have bricklink_id column yet - continue with search
+    console.log(`[BrickOwl] Minifigs table check failed, continuing with search`);
+  }
+  
+  // ============================================
+  // Step 2: Check brickowl_boids cache table
+  // ============================================
+  const cached = await getBoidFromCache(normalizedFigNum, 'minifig');
   if (cached) {
     console.log(`[BrickOwl] BOID cache hit for minifig ${figNum}: ${cached}`);
     return cached;
   }
   
-  // Search BrickOwl
-  const results = await searchBrickOwl(figNum, 'Minifigure');
+  // ============================================
+  // Step 3: Search BrickOwl
+  // ============================================
+  // For Bricklink codes (sw0010), search directly - BrickOwl understands these
+  // For Rebrickable IDs (fig-003509), BrickOwl doesn't understand them, so we need name
+  
+  let searchQuery = normalizedFigNum;
+  
+  // If it's a Rebrickable ID, try to get the name from our database first
+  if (normalizedFigNum.startsWith('fig-')) {
+    try {
+      const nameResult = await query<{ name: string }>(
+        `SELECT name FROM minifigs WHERE minifig_id = $1 AND name IS NOT NULL`,
+        [normalizedFigNum]
+      );
+      if (nameResult.rows[0]?.name) {
+        searchQuery = nameResult.rows[0].name;
+        console.log(`[BrickOwl] Using name for search: "${searchQuery}"`);
+      }
+    } catch (error) {
+      // Continue with figNum as search
+    }
+  }
+  
+  const results = await searchBrickOwl(searchQuery, 'Minifigure');
   
   if (!results.results || results.results.length === 0) {
     console.log(`[BrickOwl] No results found for minifig ${figNum}`);
     return null;
   }
   
-  // Find exact match by fig_num
+  // Find best match
+  const searchLower = searchQuery.toLowerCase();
+  
   for (const result of results.results) {
-    // Check if the name or permalink contains the fig_num
-    const figNumLower = figNum.toLowerCase();
-    const nameContainsFig = result.name.toLowerCase().includes(figNumLower) ||
-                            result.permalink.toLowerCase().includes(figNumLower);
+    if (result.type !== 'Minifigure') continue;
     
-    if (nameContainsFig) {
-      // Cache and return
-      await cacheBoid(figNum, 'minifig', result.boid, result.name);
-      console.log(`[BrickOwl] Found BOID for minifig ${figNum}: ${result.boid}`);
-      return result.boid;
+    const nameLower = (result.name || '').toLowerCase();
+    const permalinkLower = (result.permalink || '').toLowerCase();
+    
+    // For Bricklink codes, check if it appears in the name or permalink
+    if (isBricklinkCode(normalizedFigNum)) {
+      if (nameLower.includes(normalizedFigNum) || permalinkLower.includes(normalizedFigNum)) {
+        // Cache the BOID
+        await cacheBoid(normalizedFigNum, 'minifig', result.boid, result.name);
+        
+        // Also update minifigs table with the BOID (V26)
+        await updateMinifigBoid(normalizedFigNum, result.boid, result.name);
+        
+        console.log(`[BrickOwl] Found BOID for minifig ${figNum}: ${result.boid}`);
+        return result.boid;
+      }
     }
+    
+    // For name searches or if code not found, use first minifigure result
+    await cacheBoid(normalizedFigNum, 'minifig', result.boid, result.name);
+    await updateMinifigBoid(normalizedFigNum, result.boid, result.name);
+    
+    console.log(`[BrickOwl] Using first result for minifig ${figNum}: ${result.boid}`);
+    return result.boid;
   }
   
-  // If no exact match, try first result if it's a minifigure
-  if (results.results[0]?.type === 'Minifigure') {
-    const boid = results.results[0].boid;
-    const name = results.results[0].name;
-    await cacheBoid(figNum, 'minifig', boid, name);
-    console.log(`[BrickOwl] Using first result for minifig ${figNum}: ${boid}`);
-    return boid;
+  // If no exact match found but we have results, return first minifigure
+  const firstMinifig = results.results.find(r => r.type === 'Minifigure');
+  if (firstMinifig) {
+    await cacheBoid(normalizedFigNum, 'minifig', firstMinifig.boid, firstMinifig.name);
+    await updateMinifigBoid(normalizedFigNum, firstMinifig.boid, firstMinifig.name);
+    
+    console.log(`[BrickOwl] Using first minifig result for ${figNum}: ${firstMinifig.boid}`);
+    return firstMinifig.boid;
   }
   
   console.log(`[BrickOwl] No matching minifig found for ${figNum}`);
   return null;
+}
+
+/**
+ * Update minifigs table with BrickOwl BOID (V26)
+ */
+async function updateMinifigBoid(figNum: string, boid: string, name: string | null): Promise<void> {
+  try {
+    // Check if figNum looks like a Bricklink code
+    const isBricklink = isBricklinkCode(figNum);
+    
+    if (isBricklink) {
+      // Update by bricklink_id
+      await query(
+        `UPDATE minifigs SET 
+           brickowl_boid = $2,
+           name = COALESCE(name, $3),
+           updated_at = NOW()
+         WHERE bricklink_id = $1 OR minifig_id = $1`,
+        [figNum.toLowerCase(), boid, decodeHtmlEntities(name || '')]
+      );
+    } else {
+      // Update by minifig_id
+      await query(
+        `UPDATE minifigs SET 
+           brickowl_boid = $2,
+           name = COALESCE(name, $3),
+           updated_at = NOW()
+         WHERE minifig_id = $1`,
+        [figNum.toLowerCase(), boid, decodeHtmlEntities(name || '')]
+      );
+    }
+  } catch (error) {
+    // Non-fatal - just log
+    console.log(`[BrickOwl] Failed to update minifigs table with BOID:`, error);
+  }
 }
 
 // ============================================
@@ -342,7 +466,9 @@ export async function scanBrickOwlForSet(
 /**
  * Scan BrickOwl for a minifigure
  * 
- * @param figNum - Minifigure ID to scan
+ * V26: Uses proper ID resolution through minifigs table
+ * 
+ * @param figNum - Minifigure ID (Bricklink code or any stored ID)
  * @param destinationCountry - User's destination country
  * @returns Array of listings (raw, not normalized)
  */
@@ -351,7 +477,7 @@ export async function scanBrickOwlForMinifig(
   destinationCountry: string
 ): Promise<BrickOwlListing[]> {
   try {
-    // Find BOID for this minifig
+    // Find BOID for this minifig (V26: now checks minifigs table first)
     const boid = await findBoidForMinifig(figNum);
     
     if (!boid) {
