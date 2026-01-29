@@ -1,11 +1,14 @@
 /**
  * ScoutLoot i18n Utility Module
  * 
+ * V22.1: Added client-side translations injection for JS
+ * 
  * Handles:
  * - Language detection (URL path, Accept-Language header, cookie)
  * - Translation loading and caching
  * - Template rendering with translations
  * - hreflang tag generation
+ * - Client-side translations for JavaScript
  */
 
 import { Request } from 'express';
@@ -123,7 +126,9 @@ export function parseAcceptLanguage(header: string | undefined): SupportedLangua
 
 /**
  * Detect language from request
- * Priority: URL path > Cookie > Accept-Language header > Default
+ * Priority: URL path > Query param (?lang=xx) > Cookie > Accept-Language header > Default
+ * 
+ * V22.1: Added query parameter support for explicit language switching
  */
 export function detectLanguage(req: Request, pathLang?: string): SupportedLanguage {
   // 1. URL path (e.g., /de/, /fr/)
@@ -131,19 +136,25 @@ export function detectLanguage(req: Request, pathLang?: string): SupportedLangua
     return pathLang;
   }
 
-  // 2. Cookie preference
+  // 2. Query parameter (e.g., ?lang=en) - for explicit language switching
+  const queryLang = req.query?.lang as string | undefined;
+  if (queryLang && isSupportedLanguage(queryLang)) {
+    return queryLang;
+  }
+
+  // 3. Cookie preference
   const cookieLang = req.cookies?.language;
   if (cookieLang && isSupportedLanguage(cookieLang)) {
     return cookieLang;
   }
 
-  // 3. Accept-Language header
+  // 4. Accept-Language header
   const headerLang = parseAcceptLanguage(req.headers['accept-language']);
   if (headerLang) {
     return headerLang;
   }
 
-  // 4. Default
+  // 5. Default
   return DEFAULT_LANGUAGE;
 }
 
@@ -204,6 +215,7 @@ export function generateHreflangTags(currentPath: string, baseUrl: string = 'htt
 
 /**
  * Generate language switcher data
+ * V22.1: Added ?lang= query parameter to ensure cookie gets updated on switch
  */
 export function getLanguageSwitcherData(currentLang: SupportedLanguage, currentPath: string): Array<{
   code: SupportedLanguage;
@@ -226,9 +238,15 @@ export function getLanguageSwitcherData(currentLang: SupportedLanguage, currentP
     cleanPath = '/' + cleanPath;
   }
 
+  // Remove any existing query parameters from path for clean URLs
+  const pathWithoutQuery = cleanPath.split('?')[0];
+
   return SUPPORTED_LANGUAGES.map(lang => {
     const meta = LANGUAGE_META[lang];
-    const url = lang === 'en' ? cleanPath : `/${lang}${cleanPath === '/' ? '' : cleanPath}`;
+    // For English, use clean path with ?lang=en to ensure cookie update
+    // For other languages, use /xx/ prefix with ?lang=xx for consistency
+    const basePath = lang === 'en' ? pathWithoutQuery : `/${lang}${pathWithoutQuery === '/' ? '' : pathWithoutQuery}`;
+    const url = `${basePath}?lang=${lang}`;
     
     return {
       code: lang,
@@ -258,6 +276,7 @@ export function interpolateTemplate(
 /**
  * Inject translations into HTML template
  * Replaces data-i18n attributes and {{key}} placeholders
+ * Also injects client-side translations for JavaScript
  */
 export function injectTranslations(
   html: string,
@@ -280,6 +299,29 @@ export function injectTranslations(
   const switcherData = getLanguageSwitcherData(lang, currentPath);
   const switcherScript = `<script>window.__SCOUTLOOT_LANG__ = "${lang}"; window.__SCOUTLOOT_LANGUAGES__ = ${JSON.stringify(switcherData)};</script>`;
   html = html.replace('</head>', `  ${switcherScript}\n</head>`);
+
+  // 5. V22.1: Inject client-side translations for JavaScript (toasts, dynamic content)
+  // Extract only the keys needed for client-side use to keep payload small
+  const clientTranslations: Record<string, unknown> = {
+    toasts: translations.toasts || {},
+    dashboard: {
+      empty_watches: (translations.dashboard as Record<string, unknown>)?.empty_watches || '',
+      empty_notifications: (translations.dashboard as Record<string, unknown>)?.empty_notifications || '',
+    },
+    modals: {
+      signup: { creating: ((translations.modals as Record<string, unknown>)?.signup as Record<string, unknown>)?.creating || 'Creating account...' },
+      login: { logging_in: ((translations.modals as Record<string, unknown>)?.login as Record<string, unknown>)?.logging_in || 'Logging in...' },
+      settings: { saving: ((translations.modals as Record<string, unknown>)?.settings as Record<string, unknown>)?.saving || 'Saving...' },
+      change_password: { updating: ((translations.modals as Record<string, unknown>)?.change_password as Record<string, unknown>)?.updating || 'Updating...' },
+      delete_account: { deleting: ((translations.modals as Record<string, unknown>)?.delete_account as Record<string, unknown>)?.deleting || 'Deleting...' },
+      forgot_password: { sending: ((translations.modals as Record<string, unknown>)?.forgot_password as Record<string, unknown>)?.sending || 'Sending...' },
+      reset_password: { resetting: ((translations.modals as Record<string, unknown>)?.reset_password as Record<string, unknown>)?.resetting || 'Resetting...' },
+      add_watch: { adding: ((translations.modals as Record<string, unknown>)?.add_watch as Record<string, unknown>)?.adding || 'Adding...' },
+      edit_watch: { saving: ((translations.modals as Record<string, unknown>)?.edit_watch as Record<string, unknown>)?.saving || 'Saving...' },
+    },
+  };
+  const translationsScript = `<script>window.__SCOUTLOOT_T__ = ${JSON.stringify(clientTranslations)};</script>`;
+  html = html.replace('</head>', `  ${translationsScript}\n</head>`);
 
   return html;
 }

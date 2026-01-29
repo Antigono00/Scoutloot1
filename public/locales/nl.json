@@ -4,7 +4,6 @@
     "description": "Het enige alertsysteem voor de LEGO secundaire markt. Ontvang directe meldingen wanneer uitgelopen sets, zeldzame verzamelstukken en ondergewaardeerde aanbiedingen op eBay verschijnen. Volg prijzen in VS, Canada, UK & Europa.",
     "keywords": "LEGO tweedehands markt, uitgelopen LEGO sets, LEGO tweedehands, eBay LEGO deals, LEGO verzamelaars alerts, gestopte LEGO sets"
   },
-
   "nav": {
     "how_it_works": "Hoe het werkt",
     "features": "Functies",
@@ -12,7 +11,6 @@
     "login": "Inloggen",
     "get_started": "Start nu"
   },
-
   "hero": {
     "badge": "Het eerste alertsysteem voor de secundaire markt",
     "title_line1": "Volg de",
@@ -23,7 +21,6 @@
     "cta_secondary": "Hoe het werkt →",
     "search_label": "of zoek een set"
   },
-
   "stats_bar": {
     "stat1_value": "🌍",
     "stat1_label": "VS, Canada, UK & Europa",
@@ -34,100 +31,77 @@
     "stat4_value": "🧱",
     "stat4_label": "Gemaakt door verzamelaars"
   },
-
   "unique_value": {
     "section_title": "Waarom verzamelaars ScoutLoot kiezen",
     "section_subtitle": "We zijn niet zomaar een prijstracker. We monitoren de secundaire markt, waar de echte deals te vinden zijn.",
-
     "point1_icon": "🎯",
     "point1_title": "Focus op Secundaire Markt",
     "point1_desc": "Terwijl anderen winkels volgen, monitoren wij eBay en doorverkoopplatforms waar verzamelaars aan verzamelaars verkopen. Vind ondergewaardeerde advertenties van verkopers die de marktwaarde niet kennen, snel geld nodig hebben, of gewoon een prijsfout maakten.",
-
     "point2_icon": "📦",
     "point2_title": "Uitgelopen & Gestopte Sets",
     "point2_desc": "Op zoek naar die UCS set die 3 jaar geleden uitliep? We volgen sets die niet meer in de winkels zijn — de sets die verzamelaars echt willen en waar retail trackers niet bij kunnen helpen.",
-
     "point3_icon": "💰",
     "point3_title": "Echte Totaalprijs",
     "point3_desc": "Elke alert toont de werkelijke kosten: artikelprijs + verzending naar jouw land. Geen verrassingen, geen verborgen kosten. Je weet precies wat je betaalt voordat je klikt.",
-
     "point4_icon": "🌍",
     "point4_title": "Multi-Regio Dekking",
     "point4_desc": "We scannen 9 eBay marktplaatsen — US, CA, UK, DE, FR, ES, IT, NL, BE — met levering door heel Europa, VS en Canada. Vind deals van verkopers wereldwijd, bezorgd bij jou thuis."
   },
-
   "how_it_works": {
     "section_title": "Hoe het werkt",
     "section_subtitle": "Drie stappen om nooit meer te veel te betalen op de secundaire markt",
-
     "step1_number": "1",
     "step1_title": "Kies je sets",
     "step1_desc": "Zoek op setnummer of naam. Stel je richtprijs in — het maximum dat je wilt betalen inclusief verzending. Voeg filters toe voor conditie, verkopersbeoordeling en verzendland.",
-
     "step2_number": "2",
     "step2_title": "Wij scannen 24/7",
     "step2_desc": "Ons systeem scant eBay en andere marktplaatsen continu op ondergewaardeerde advertenties en deals onder de marktprijs. We berekenen de totale kosten inclusief verzending en checken elke advertentie tegen jouw criteria.",
-
     "step3_number": "3",
     "step3_title": "Ontvang directe alerts",
     "step3_desc": "Wanneer een deal matcht, word je direct geïnformeerd via Telegram, push-notificatie of email — jij kiest. Alle details om snel te beslissen, want ondergewaardeerde deals zijn zo weg."
   },
-
   "features": {
     "section_title": "Gebouwd voor serieuze verzamelaars",
     "section_subtitle": "Alles wat je nodig hebt om effectief de secundaire markt af te speuren",
-
     "feature1_icon": "🌍",
     "feature1_title": "Multi-Regio Zoeken",
     "feature1_desc": "Scan 9 eBay marktplaatsen in VS, Canada, UK & Europa. Vind ondergewaardeerde deals die lokale zoekers missen.",
-
     "feature2_icon": "📦",
     "feature2_title": "Verzending Berekend",
     "feature2_desc": "Elke prijs is inclusief verzending naar jouw land. Voor UK-kopers schatten we zelfs de invoerkosten. Altijd de echte kosten.",
-
     "feature3_icon": "⚡",
     "feature3_title": "Directe Alerts",
     "feature3_desc": "Telegram, push-notificaties of email — jij kiest. Wees de eerste die nieuwe advertenties ziet. Snelheid wint bij het jagen op deals.",
-
     "feature4_icon": "🎯",
     "feature4_title": "Slimme Filters",
     "feature4_desc": "Filter op conditie (nieuw/gebruikt), minimale verkopersbeoordeling, verzendland en sluit zoekwoorden uit. Geen rommel, geen minifiguren-only advertenties.",
-
     "feature5_icon": "🛡️",
     "feature5_title": "Geen Alert Spam",
     "feature5_desc": "Eén alert per advertentie, beste deal per set per dag. Kwaliteit boven kwantiteit — we respecteren je inbox.",
-
     "feature6_icon": "📊",
     "feature6_title": "Prijsgeschiedenis",
     "feature6_desc": "Zie voor hoeveel sets recent zijn verkocht. Volg markttrends. Weet wanneer een deal echt een deal is."
   },
-
   "target_audience": {
     "section_title": "Wie gebruikt ScoutLoot",
     "section_subtitle": "Gebouwd voor verzamelaars die de secundaire markt serieus nemen",
-
     "audience1_icon": "🧱",
     "audience1_title": "Verzamelaars",
     "audience1_desc": "Volg uitgelopen sets waar je al jaren naar zoekt. Ontvang alerts zodra een ondergewaardeerde advertentie verschijnt.",
-
     "audience2_icon": "📈",
     "audience2_title": "Investeerders",
     "audience2_desc": "Monitor gestopte sets voor kansen onder de marktprijs. Pak verkopers die niet weten wat ze hebben.",
-
     "audience3_icon": "👨‍👩‍👧‍👦",
     "audience3_title": "Ouders",
     "audience3_desc": "Vind die specifieke set die je kind wil — zelfs als die al jaren uitgelopen is. Nooit meer te veel betalen bij doorverkoop."
   },
-
   "demo_alert": {
     "section_title": "Wat je ontvangt",
     "section_subtitle": "Een echte alert met alles wat je nodig hebt om te beslissen"
   },
-
   "pricing": {
     "section_title": "Eenvoudige Prijzen",
     "section_subtitle": "Start gratis, upgrade wanneer je meer watches en snellere alerts nodig hebt",
-
     "free_name": "Gratis",
     "free_price": "€0",
     "free_period": "/maand",
@@ -137,7 +111,6 @@
     "free_feature4": "Alle regio's inbegrepen",
     "free_feature5": "Standaard scanning",
     "free_cta": "Start nu",
-
     "collector_badge": "Meest populair",
     "collector_name": "Verzamelaar",
     "collector_price": "€6,99",
@@ -148,7 +121,6 @@
     "collector_feature4": "Prioriteit scanning — snellere alerts",
     "collector_feature5": "100 alerts/dag",
     "collector_cta": "Gratis proberen",
-
     "dealer_name": "Handelaar",
     "dealer_price": "€14,99",
     "dealer_period": "/maand",
@@ -159,19 +131,16 @@
     "dealer_feature5": "500 alerts/dag",
     "dealer_cta": "Contact"
   },
-
   "cta_section": {
     "title": "Klaar om de secundaire markt af te speuren?",
     "subtitle": "Sluit je aan bij verzamelaars die ondergewaardeerde deals vinden voordat iemand anders dat doet.",
     "cta": "Start gratis"
   },
-
   "about_creator": {
     "line1": "Gemaakt door een LEGO verzamelaar in Europa.",
     "line2": "Omdat ik deze tool nodig had en die bestond niet.",
     "contact": "Vragen?"
   },
-
   "footer": {
     "tagline": "De slimste manier om de LEGO tweedehands markt te volgen.",
     "product": "Product",
@@ -198,16 +167,209 @@
     "copyright": "© 2026 ScoutLoot. Niet gelieerd aan de LEGO Group.",
     "made_with": "Gemaakt met 🧱 voor verzamelaars wereldwijd"
   },
-
   "dashboard": {
-    "empty_watches": "Nog geen watches. Voeg je eerste LEGO set toe om de secundaire markt te gaan volgen!",
-    "empty_notifications": "Nog geen meldingen. Alerts verschijnen hier wanneer ondergewaardeerde deals worden gevonden!",
-    "add_watch_subtitle": "Begin met het volgen van een LEGO set op de secundaire markt"
+    "empty_watches": "Nog geen meldingen. Voeg je eerste LEGO set toe om de tweedehandsmarkt te volgen!",
+    "empty_notifications": "Nog geen notificaties. Meldingen verschijnen hier wanneer ondergewaardeerde deals worden gevonden!",
+    "add_watch_subtitle": "Begin met het volgen van een LEGO set op de tweedehandsmarkt",
+    "title": "Dashboard",
+    "add_watch": "+ Melding toevoegen",
+    "your_watchlist": "Jouw volglijst",
+    "notifications_inbox": "Notificaties inbox",
+    "mark_all_read": "Alles als gelezen markeren",
+    "load_more": "Meer laden",
+    "explore_sets": "🔍 Sets verkennen",
+    "search_placeholder": "Zoek naar LEGO sets om prijzen en deals te bekijken...",
+    "stats": {
+      "active_watches": "Actieve meldingen",
+      "alerts_today": "Meldingen vandaag",
+      "total_alerts": "Totaal meldingen",
+      "subscription": "Abonnement"
+    },
+    "tabs": {
+      "watches": "👀 Meldingen",
+      "notifications": "🔔 Notificaties"
+    },
+    "watch_card": {
+      "target_price": "Doelprijs",
+      "min_price": "Minimumprijs",
+      "alerts_sent": "meldingen verzonden",
+      "edit": "Bewerken",
+      "delete": "Verwijderen"
+    },
+    "user_menu": {
+      "dashboard": "📊 Dashboard",
+      "settings": "⚙ Instellingen",
+      "logout": "🚪 Uitloggen"
+    }
   },
-
   "modals": {
     "signup_subtitle": "Begin in seconden met het volgen van de secundaire markt",
     "setup_subtitle": "Stel notificaties in om nooit een ondergewaardeerde deal te missen",
-    "alert_reason": "Ondergewaardeerde advertentie gevonden!"
+    "alert_reason": "Ondergewaardeerde advertentie gevonden!",
+    "signup": {
+      "title": "Account aanmaken",
+      "subtitle": "Begin in seconden met het volgen van de tweedehandsmarkt",
+      "btn_submit": "Account aanmaken",
+      "already_have_account": "Heb je al een account?",
+      "creating": "Account aanmaken..."
+    },
+    "login": {
+      "title": "Welkom terug",
+      "subtitle": "Log in op je ScoutLoot account",
+      "btn_submit": "Inloggen",
+      "forgot_password": "Wachtwoord vergeten?",
+      "no_account": "Heb je nog geen account?",
+      "logging_in": "Inloggen..."
+    },
+    "settings": {
+      "title": "Instellingen",
+      "subtitle": "Beheer je account",
+      "btn_save": "Instellingen opslaan",
+      "security": "Beveiliging",
+      "change_password_btn": "🔐 Wachtwoord wijzigen",
+      "danger_zone": "⚠️ Gevarenzone",
+      "danger_description": "Exporteer je gegevens of verwijder je account permanent.",
+      "export_data": "📥 Mijn gegevens exporteren",
+      "delete_account_btn": "🗑️ Account verwijderen",
+      "saving": "Opslaan..."
+    },
+    "change_password": {
+      "title": "Wachtwoord wijzigen",
+      "subtitle": "Voer je huidige wachtwoord in en kies een nieuw wachtwoord",
+      "btn_submit": "Wachtwoord bijwerken",
+      "back_to_settings": "← Terug naar instellingen",
+      "updating": "Bijwerken..."
+    },
+    "delete_account": {
+      "title": "Account verwijderen",
+      "subtitle": "Deze actie kan niet ongedaan worden gemaakt",
+      "warning_intro": "Dit verwijdert permanent je ScoutLoot account en alle bijbehorende gegevens:",
+      "warning_items": [
+        "Je profiel en e-mailadres",
+        "Al je meldingen en instellingen",
+        "Alle push-notificatie abonnementen",
+        "Je meldingsgeschiedenis"
+      ],
+      "confirm_label": "Typ <strong>DELETE</strong> om te bevestigen",
+      "btn_delete": "Mijn account permanent verwijderen",
+      "cancel": "← Annuleren, account behouden",
+      "deleting": "Verwijderen..."
+    },
+    "forgot_password": {
+      "title": "Wachtwoord vergeten?",
+      "subtitle": "Voer je e-mail in en we sturen je een reset link",
+      "btn_submit": "Reset link versturen",
+      "remember_password": "Weet je je wachtwoord weer?",
+      "sending": "Versturen..."
+    },
+    "reset_password": {
+      "title": "Wachtwoord resetten",
+      "subtitle": "Voer je nieuwe wachtwoord in",
+      "btn_submit": "Wachtwoord resetten",
+      "resetting": "Resetten..."
+    },
+    "complete_setup": {
+      "title": "🎉 Account aangemaakt!",
+      "subtitle": "Stel notificaties in om nooit een ondergewaardeerde deal te missen",
+      "telegram": {
+        "title": "Telegram verbinden",
+        "desc": "Ontvang directe meldingen op je telefoon via Telegram. Meest betrouwbare optie."
+      },
+      "push": {
+        "title": "Browser push inschakelen",
+        "desc": "Ontvang notificaties in deze browser. Werkt op desktop en mobiel."
+      },
+      "skip": "Nu overslaan"
+    },
+    "add_watch": {
+      "title": "Melding toevoegen",
+      "subtitle": "Begin met het volgen van een LEGO set op de tweedehandsmarkt",
+      "btn_submit": "Start volgen",
+      "adding": "Toevoegen..."
+    },
+    "edit_watch": {
+      "title": "Melding bewerken",
+      "subtitle": "Bewerk je meldinginstellingen",
+      "btn_submit": "Wijzigingen opslaan",
+      "saving": "Opslaan..."
+    },
+    "alert_detail": {
+      "title": "Deal melding",
+      "reason": "Ondergewaardeerde deal gevonden!",
+      "buy_btn": "🛒 Kopen op eBay",
+      "close": "Sluiten"
+    }
+  },
+  "forms": {
+    "email": "E-mail",
+    "email_placeholder": "jij@voorbeeld.nl",
+    "password": "Wachtwoord",
+    "password_placeholder": "••••••••",
+    "current_password": "Huidig wachtwoord",
+    "new_password": "Nieuw wachtwoord",
+    "confirm_password": "Bevestig wachtwoord",
+    "confirm_new_password": "Bevestig nieuw wachtwoord",
+    "ship_to_country": "Verzendland",
+    "timezone": "Tijdzone",
+    "notification_preferences": "Notificatie voorkeuren",
+    "weekly_digest": {
+      "title": "📊 Wekelijks overzicht",
+      "desc": "Zondag samenvatting van al je meldingen en beste deals"
+    },
+    "reminders": {
+      "title": "💡 3-daagse herinneringen",
+      "desc": "Herinnering als een geweldige deal (>20% korting) nog beschikbaar is na 3 dagen"
+    },
+    "set_number": "Set nummer",
+    "set_number_placeholder": "bijv. 75192",
+    "target_price": "Doelprijs",
+    "target_price_placeholder": "500",
+    "min_price": "Minimumprijs",
+    "min_price_placeholder": "50",
+    "condition": "Conditie",
+    "condition_any": "Alle",
+    "condition_new": "Alleen nieuw",
+    "condition_used": "Alleen gebruikt",
+    "countries": {
+      "north_america": "Noord-Amerika",
+      "united_kingdom": "Verenigd Koninkrijk",
+      "western_europe": "West-Europa",
+      "southern_europe": "Zuid-Europa",
+      "northern_europe": "Noord-Europa",
+      "central_eastern_europe": "Centraal/Oost-Europa"
+    }
+  },
+  "toasts": {
+    "account_created": "Account aangemaakt! Welkom bij ScoutLoot 🎉",
+    "welcome_back": "Welkom terug!",
+    "settings_saved": "Instellingen opgeslagen!",
+    "watch_added": "Melding toegevoegd! Je ontvangt notificaties wanneer deals worden gevonden 🔔",
+    "watch_updated": "Melding bijgewerkt 🎯",
+    "watch_deleted": "Melding verwijderd",
+    "delete_watch_confirm": "Weet je zeker dat je deze melding wilt verwijderen?",
+    "all_read": "Alle notificaties als gelezen gemarkeerd",
+    "password_updated": "Wachtwoord succesvol bijgewerkt!",
+    "password_reset_success": "Wachtwoord succesvol gereset! Welkom terug.",
+    "reset_email_sent": "Als een account bestaat, is een reset link verzonden.",
+    "account_deleted": "Je account is verwijderd. Tot ziens! 👋",
+    "data_exported": "Je gegevens zijn geëxporteerd 📥",
+    "push_enabled": "Push notificaties ingeschakeld! 🔔",
+    "push_disabled": "Push notificaties uitgeschakeld",
+    "telegram_connected": "Telegram verbonden! Je ontvangt daar meldingen 📱",
+    "error": {
+      "generic": "Er ging iets mis. Probeer het opnieuw.",
+      "login_failed": "Ongeldige e-mail of wachtwoord",
+      "create_account_failed": "Kon account niet aanmaken",
+      "password_mismatch": "Wachtwoorden komen niet overeen",
+      "password_too_short": "Wachtwoord moet minimaal 8 tekens bevatten",
+      "type_delete": "Typ DELETE om te bevestigen",
+      "invalid_reset_link": "Deze reset link is ongeldig of verlopen.",
+      "push_not_supported": "Push notificaties worden niet ondersteund in deze browser",
+      "push_denied": "Notificatie toestemming geweigerd"
+    }
+  },
+  "cookie_banner": {
+    "message": "🍪 We gebruiken cookies om je ervaring te verbeteren. Door ScoutLoot te gebruiken, ga je akkoord met ons",
+    "accept": "Accepteren"
   }
 }

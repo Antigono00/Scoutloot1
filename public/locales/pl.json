@@ -4,7 +4,6 @@
     "description": "Jedyny system alertów dla wtórnego rynku LEGO. Otrzymuj natychmiastowe powiadomienia, gdy wycofane zestawy, rzadkie kolekcjonerskie i niedowartościowane oferty pojawiają się na eBay. Śledź ceny w USA, Kanadzie, UK i Europie.",
     "keywords": "LEGO rynek wtórny, wycofane zestawy LEGO, LEGO używane, oferty eBay LEGO, alerty kolekcjonerzy LEGO, zestawy LEGO z drugiej ręki"
   },
-
   "nav": {
     "how_it_works": "Jak to działa",
     "features": "Funkcje",
@@ -12,7 +11,6 @@
     "login": "Zaloguj się",
     "get_started": "Rozpocznij"
   },
-
   "hero": {
     "badge": "Pierwszy system alertów dla rynku wtórnego",
     "title_line1": "Śledź",
@@ -23,7 +21,6 @@
     "cta_secondary": "Jak to działa →",
     "search_label": "lub wyszukaj zestaw"
   },
-
   "stats_bar": {
     "stat1_value": "🌍",
     "stat1_label": "USA, Kanada, UK i Europa",
@@ -34,100 +31,77 @@
     "stat4_value": "🧱",
     "stat4_label": "Stworzone przez kolekcjonerów"
   },
-
   "unique_value": {
     "section_title": "Dlaczego kolekcjonerzy wybierają ScoutLoot",
     "section_subtitle": "Nie jesteśmy kolejnym trackerem cen detalicznych. Monitorujemy rynek wtórny, gdzie są prawdziwe okazje.",
-
     "point1_icon": "🎯",
     "point1_title": "Fokus na Rynek Wtórny",
     "point1_desc": "Podczas gdy inni śledzą sklepy, my monitorujemy eBay i platformy odsprzedaży, gdzie kolekcjonerzy sprzedają kolekcjonerom. Znajdź niedowartościowane ogłoszenia od sprzedawców, którzy nie znają wartości rynkowej, potrzebują szybko gotówki lub po prostu popełnili błąd cenowy.",
-
     "point2_icon": "📦",
     "point2_title": "Wycofane i Zakończone Zestawy",
     "point2_desc": "Szukasz tego zestawu UCS wycofanego 3 lata temu? Śledzimy zestawy, których już nie ma w sklepach — te, których kolekcjonerzy naprawdę chcą i gdzie trackery detaliczne nie mogą pomóc.",
-
     "point3_icon": "💰",
     "point3_title": "Prawdziwa Cena Całkowita",
     "point3_desc": "Każdy alert pokazuje rzeczywisty koszt: cena produktu + wysyłka do Twojego kraju. Bez niespodzianek, bez ukrytych kosztów. Wiesz dokładnie, ile zapłacisz, zanim klikniesz.",
-
     "point4_icon": "🌍",
     "point4_title": "Zasięg Wielu Regionów",
     "point4_desc": "Skanujemy 9 rynków eBay — US, CA, UK, DE, FR, ES, IT, NL, BE — z dostawą do całej Europy, USA i Kanady. Znajdź okazje od sprzedawców z całego świata, dostarczane pod Twoje drzwi."
   },
-
   "how_it_works": {
     "section_title": "Jak to działa",
     "section_subtitle": "Trzy kroki, żeby już nigdy nie przepłacać na rynku wtórnym",
-
     "step1_number": "1",
     "step1_title": "Wybierz zestawy",
     "step1_desc": "Wyszukaj po numerze zestawu lub nazwie. Ustaw cenę docelową — maksimum, które chcesz zapłacić z wysyłką. Dodaj filtry dla stanu, oceny sprzedawcy i kraju wysyłki.",
-
     "step2_number": "2",
     "step2_title": "Skanujemy 24/7",
     "step2_desc": "Nasz system skanuje eBay i inne platformy ciągle w poszukiwaniu niedowartościowanych ogłoszeń i okazji poniżej ceny rynkowej. Obliczamy całkowity koszt z wysyłką i sprawdzamy każde ogłoszenie według Twoich kryteriów.",
-
     "step3_number": "3",
     "step3_title": "Otrzymuj natychmiastowe alerty",
     "step3_desc": "Gdy okazja pasuje, dostajesz natychmiastowe powiadomienie przez Telegram, push lub email — Ty wybierasz. Wszystkie szczegóły do szybkiej decyzji, bo niedowartościowane okazje szybko znikają."
   },
-
   "features": {
     "section_title": "Zbudowane dla poważnych kolekcjonerów",
     "section_subtitle": "Wszystko, czego potrzebujesz, żeby skutecznie przeszukiwać rynek wtórny",
-
     "feature1_icon": "🌍",
     "feature1_title": "Wyszukiwanie Wielu Regionów",
     "feature1_desc": "Skanuj 9 rynków eBay w USA, Kanadzie, UK i Europie. Znajdź niedowartościowane okazje, które lokalni szukający pomijają.",
-
     "feature2_icon": "📦",
     "feature2_title": "Wysyłka Wliczona",
     "feature2_desc": "Każda cena zawiera wysyłkę do Twojego kraju. Dla kupujących z UK szacujemy nawet opłaty importowe. Zawsze prawdziwy koszt.",
-
     "feature3_icon": "⚡",
     "feature3_title": "Natychmiastowe Alerty",
     "feature3_desc": "Telegram, powiadomienia push lub email — Ty wybierasz. Bądź pierwszy, który widzi nowe ogłoszenia. Szybkość wygrywa w polowaniu na okazje.",
-
     "feature4_icon": "🎯",
     "feature4_title": "Inteligentne Filtry",
     "feature4_desc": "Filtruj po stanie (nowy/używany), minimalnej ocenie sprzedawcy, kraju wysyłki i wykluczaj słowa kluczowe. Bez śmieci, bez ogłoszeń tylko-minifigurki.",
-
     "feature5_icon": "🛡️",
     "feature5_title": "Bez Spamu Alertów",
     "feature5_desc": "Jeden alert na ogłoszenie, najlepsza okazja na zestaw dziennie. Jakość ponad ilość — szanujemy Twoją skrzynkę odbiorczą.",
-
     "feature6_icon": "📊",
     "feature6_title": "Historia Cen",
     "feature6_desc": "Zobacz za ile zestawy sprzedały się ostatnio. Śledź trendy rynkowe. Wiedz, kiedy okazja jest naprawdę okazją."
   },
-
   "target_audience": {
     "section_title": "Kto używa ScoutLoot",
     "section_subtitle": "Zbudowane dla kolekcjonerów, którzy poważnie traktują rynek wtórny",
-
     "audience1_icon": "🧱",
     "audience1_title": "Kolekcjonerzy",
     "audience1_desc": "Śledź wycofane zestawy, których szukasz od lat. Otrzymuj alerty, gdy tylko pojawi się niedowartościowane ogłoszenie.",
-
     "audience2_icon": "📈",
     "audience2_title": "Inwestorzy",
     "audience2_desc": "Monitoruj zakończone zestawy w poszukiwaniu okazji poniżej ceny rynkowej. Łap sprzedawców, którzy nie wiedzą, co mają.",
-
     "audience3_icon": "👨‍👩‍👧‍👦",
     "audience3_title": "Rodzice",
     "audience3_desc": "Znajdź ten konkretny zestaw, który chce Twoje dziecko — nawet jeśli jest wycofany od lat. Już nigdy nie przepłacaj przy odsprzedaży."
   },
-
   "demo_alert": {
     "section_title": "Co otrzymujesz",
     "section_subtitle": "Prawdziwy alert ze wszystkim, co potrzebujesz do decyzji"
   },
-
   "pricing": {
     "section_title": "Proste Ceny",
     "section_subtitle": "Zacznij za darmo, ulepsz gdy potrzebujesz więcej watches i szybszych alertów",
-
     "free_name": "Darmowy",
     "free_price": "€0",
     "free_period": "/miesiąc",
@@ -137,7 +111,6 @@
     "free_feature4": "Wszystkie regiony w cenie",
     "free_feature5": "Standardowe skanowanie",
     "free_cta": "Rozpocznij",
-
     "collector_badge": "Najpopularniejszy",
     "collector_name": "Kolekcjoner",
     "collector_price": "€6,99",
@@ -148,7 +121,6 @@
     "collector_feature4": "Priorytetowe skanowanie — szybsze alerty",
     "collector_feature5": "100 alertów/dzień",
     "collector_cta": "Wypróbuj za darmo",
-
     "dealer_name": "Handlarz",
     "dealer_price": "€14,99",
     "dealer_period": "/miesiąc",
@@ -159,19 +131,16 @@
     "dealer_feature5": "500 alertów/dzień",
     "dealer_cta": "Kontakt"
   },
-
   "cta_section": {
     "title": "Gotowy polować na rynku wtórnym?",
     "subtitle": "Dołącz do kolekcjonerów, którzy znajdują niedowartościowane okazje przed wszystkimi innymi.",
     "cta": "Zacznij za darmo"
   },
-
   "about_creator": {
     "line1": "Stworzone przez kolekcjonera LEGO w Europie.",
     "line2": "Bo potrzebowałem tego narzędzia, a ono nie istniało.",
     "contact": "Pytania?"
   },
-
   "footer": {
     "tagline": "Najmądrzejszy sposób na śledzenie wtórnego rynku LEGO.",
     "product": "Produkt",
@@ -198,16 +167,209 @@
     "copyright": "© 2026 ScoutLoot. Nie jest powiązane z Grupą LEGO.",
     "made_with": "Stworzone z 🧱 dla kolekcjonerów na całym świecie"
   },
-
   "dashboard": {
-    "empty_watches": "Jeszcze nie ma watches. Dodaj swój pierwszy zestaw LEGO, żeby zacząć śledzić rynek wtórny!",
-    "empty_notifications": "Jeszcze nie ma powiadomień. Alerty pojawią się tutaj, gdy zostaną znalezione niedowartościowane okazje!",
-    "add_watch_subtitle": "Zacznij śledzić zestaw LEGO na rynku wtórnym"
+    "empty_watches": "Brak obserwacji. Dodaj swój pierwszy zestaw LEGO, aby śledzić rynek wtórny!",
+    "empty_notifications": "Brak powiadomień. Alerty pojawią się tutaj, gdy zostaną znalezione niedowartościowane oferty!",
+    "add_watch_subtitle": "Zacznij śledzić zestaw LEGO na rynku wtórnym",
+    "title": "Panel",
+    "add_watch": "+ Dodaj obserwację",
+    "your_watchlist": "Twoja lista obserwacji",
+    "notifications_inbox": "Skrzynka powiadomień",
+    "mark_all_read": "Oznacz wszystkie jako przeczytane",
+    "load_more": "Załaduj więcej",
+    "explore_sets": "🔍 Przeglądaj zestawy",
+    "search_placeholder": "Szukaj zestawów LEGO, aby zobaczyć ceny i oferty...",
+    "stats": {
+      "active_watches": "Aktywne obserwacje",
+      "alerts_today": "Alerty dziś",
+      "total_alerts": "Wszystkie alerty",
+      "subscription": "Subskrypcja"
+    },
+    "tabs": {
+      "watches": "👀 Obserwacje",
+      "notifications": "🔔 Powiadomienia"
+    },
+    "watch_card": {
+      "target_price": "Cena docelowa",
+      "min_price": "Cena minimalna",
+      "alerts_sent": "alertów wysłanych",
+      "edit": "Edytuj",
+      "delete": "Usuń"
+    },
+    "user_menu": {
+      "dashboard": "📊 Panel",
+      "settings": "⚙ Ustawienia",
+      "logout": "🚪 Wyloguj"
+    }
   },
-
   "modals": {
     "signup_subtitle": "Zacznij śledzić rynek wtórny w kilka sekund",
     "setup_subtitle": "Skonfiguruj powiadomienia, żeby nigdy nie przegapić niedowartościowanej okazji",
-    "alert_reason": "Znaleziono niedowartościowane ogłoszenie!"
+    "alert_reason": "Znaleziono niedowartościowane ogłoszenie!",
+    "signup": {
+      "title": "Utwórz konto",
+      "subtitle": "Zacznij śledzić rynek wtórny w kilka sekund",
+      "btn_submit": "Utwórz konto",
+      "already_have_account": "Masz już konto?",
+      "creating": "Tworzenie konta..."
+    },
+    "login": {
+      "title": "Witamy ponownie",
+      "subtitle": "Zaloguj się do swojego konta ScoutLoot",
+      "btn_submit": "Zaloguj się",
+      "forgot_password": "Zapomniałeś hasła?",
+      "no_account": "Nie masz konta?",
+      "logging_in": "Logowanie..."
+    },
+    "settings": {
+      "title": "Ustawienia",
+      "subtitle": "Zarządzaj swoim kontem",
+      "btn_save": "Zapisz ustawienia",
+      "security": "Bezpieczeństwo",
+      "change_password_btn": "🔐 Zmień hasło",
+      "danger_zone": "⚠️ Strefa niebezpieczeństwa",
+      "danger_description": "Eksportuj swoje dane lub trwale usuń konto.",
+      "export_data": "📥 Eksportuj moje dane",
+      "delete_account_btn": "🗑️ Usuń konto",
+      "saving": "Zapisywanie..."
+    },
+    "change_password": {
+      "title": "Zmień hasło",
+      "subtitle": "Wprowadź aktualne hasło i wybierz nowe",
+      "btn_submit": "Zaktualizuj hasło",
+      "back_to_settings": "← Powrót do ustawień",
+      "updating": "Aktualizowanie..."
+    },
+    "delete_account": {
+      "title": "Usuń konto",
+      "subtitle": "Tej operacji nie można cofnąć",
+      "warning_intro": "To trwale usunie Twoje konto ScoutLoot i wszystkie powiązane dane:",
+      "warning_items": [
+        "Twój profil i adres e-mail",
+        "Wszystkie Twoje obserwacje i ustawienia",
+        "Wszystkie subskrypcje powiadomień push",
+        "Historię alertów"
+      ],
+      "confirm_label": "Wpisz <strong>DELETE</strong>, aby potwierdzić",
+      "btn_delete": "Trwale usuń moje konto",
+      "cancel": "← Anuluj, zachowaj konto",
+      "deleting": "Usuwanie..."
+    },
+    "forgot_password": {
+      "title": "Zapomniałeś hasła?",
+      "subtitle": "Wprowadź e-mail, a wyślemy Ci link do resetowania",
+      "btn_submit": "Wyślij link",
+      "remember_password": "Pamiętasz hasło?",
+      "sending": "Wysyłanie..."
+    },
+    "reset_password": {
+      "title": "Zresetuj hasło",
+      "subtitle": "Wprowadź nowe hasło",
+      "btn_submit": "Zresetuj hasło",
+      "resetting": "Resetowanie..."
+    },
+    "complete_setup": {
+      "title": "🎉 Konto utworzone!",
+      "subtitle": "Skonfiguruj powiadomienia, aby nigdy nie przegapić niedowartościowanej oferty",
+      "telegram": {
+        "title": "Połącz z Telegramem",
+        "desc": "Otrzymuj natychmiastowe alerty na telefon przez Telegram. Najbardziej niezawodna opcja."
+      },
+      "push": {
+        "title": "Włącz powiadomienia push",
+        "desc": "Otrzymuj powiadomienia w tej przeglądarce. Działa na komputerze i telefonie."
+      },
+      "skip": "Pomiń na razie"
+    },
+    "add_watch": {
+      "title": "Dodaj obserwację",
+      "subtitle": "Zacznij śledzić zestaw LEGO na rynku wtórnym",
+      "btn_submit": "Rozpocznij śledzenie",
+      "adding": "Dodawanie..."
+    },
+    "edit_watch": {
+      "title": "Edytuj obserwację",
+      "subtitle": "Edytuj ustawienia obserwacji",
+      "btn_submit": "Zapisz zmiany",
+      "saving": "Zapisywanie..."
+    },
+    "alert_detail": {
+      "title": "Alert o ofercie",
+      "reason": "Znaleziono niedowartościowaną ofertę!",
+      "buy_btn": "🛒 Kup na eBay",
+      "close": "Zamknij"
+    }
+  },
+  "forms": {
+    "email": "E-mail",
+    "email_placeholder": "ty@przykład.pl",
+    "password": "Hasło",
+    "password_placeholder": "••••••••",
+    "current_password": "Aktualne hasło",
+    "new_password": "Nowe hasło",
+    "confirm_password": "Potwierdź hasło",
+    "confirm_new_password": "Potwierdź nowe hasło",
+    "ship_to_country": "Kraj dostawy",
+    "timezone": "Strefa czasowa",
+    "notification_preferences": "Preferencje powiadomień",
+    "weekly_digest": {
+      "title": "📊 Tygodniowe podsumowanie",
+      "desc": "Niedzielne podsumowanie wszystkich obserwacji i najlepszych ofert"
+    },
+    "reminders": {
+      "title": "💡 Przypomnienia 3-dniowe",
+      "desc": "Przypomnienie, jeśli świetna oferta (>20% zniżki) jest nadal dostępna po 3 dniach"
+    },
+    "set_number": "Numer zestawu",
+    "set_number_placeholder": "np. 75192",
+    "target_price": "Cena docelowa",
+    "target_price_placeholder": "500",
+    "min_price": "Cena minimalna",
+    "min_price_placeholder": "50",
+    "condition": "Stan",
+    "condition_any": "Dowolny",
+    "condition_new": "Tylko nowy",
+    "condition_used": "Tylko używany",
+    "countries": {
+      "north_america": "Ameryka Północna",
+      "united_kingdom": "Wielka Brytania",
+      "western_europe": "Europa Zachodnia",
+      "southern_europe": "Europa Południowa",
+      "northern_europe": "Europa Północna",
+      "central_eastern_europe": "Europa Środkowa/Wschodnia"
+    }
+  },
+  "toasts": {
+    "account_created": "Konto utworzone! Witamy w ScoutLoot 🎉",
+    "welcome_back": "Witamy ponownie!",
+    "settings_saved": "Ustawienia zapisane!",
+    "watch_added": "Obserwacja dodana! Otrzymasz powiadomienia, gdy zostaną znalezione oferty 🔔",
+    "watch_updated": "Obserwacja zaktualizowana 🎯",
+    "watch_deleted": "Obserwacja usunięta",
+    "delete_watch_confirm": "Czy na pewno chcesz usunąć tę obserwację?",
+    "all_read": "Wszystkie powiadomienia oznaczone jako przeczytane",
+    "password_updated": "Hasło zaktualizowane pomyślnie!",
+    "password_reset_success": "Hasło zresetowane pomyślnie! Witamy ponownie.",
+    "reset_email_sent": "Jeśli konto istnieje, wysłano link do resetowania.",
+    "account_deleted": "Twoje konto zostało usunięte. Do widzenia! 👋",
+    "data_exported": "Twoje dane zostały wyeksportowane 📥",
+    "push_enabled": "Powiadomienia push włączone! 🔔",
+    "push_disabled": "Powiadomienia push wyłączone",
+    "telegram_connected": "Telegram połączony! Będziesz otrzymywać tam alerty 📱",
+    "error": {
+      "generic": "Coś poszło nie tak. Spróbuj ponownie.",
+      "login_failed": "Nieprawidłowy e-mail lub hasło",
+      "create_account_failed": "Nie udało się utworzyć konta",
+      "password_mismatch": "Hasła nie pasują do siebie",
+      "password_too_short": "Hasło musi mieć co najmniej 8 znaków",
+      "type_delete": "Wpisz DELETE, aby potwierdzić",
+      "invalid_reset_link": "Ten link do resetowania jest nieprawidłowy lub wygasł.",
+      "push_not_supported": "Powiadomienia push nie są obsługiwane w tej przeglądarce",
+      "push_denied": "Odmówiono uprawnień do powiadomień"
+    }
+  },
+  "cookie_banner": {
+    "message": "🍪 Używamy plików cookie, aby poprawić Twoje doświadczenie. Korzystając ze ScoutLoot, akceptujesz naszą",
+    "accept": "Akceptuj"
   }
 }

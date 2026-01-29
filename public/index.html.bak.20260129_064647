@@ -136,13 +136,13 @@
       </button>
       <div class="user-dropdown">
         <a href="#" onclick="showDashboard(); return false;">
-          {{dashboard.user_menu.dashboard}}
+          <span>📊</span> Dashboard
         </a>
         <a href="#" onclick="openModal('settings'); return false;">
-          {{dashboard.user_menu.settings}}
+          <span>⚙</span> Settings
         </a>
         <button class="logout-btn" onclick="logout()">
-          {{dashboard.user_menu.logout}}
+          <span>🚪</span> Log Out
         </button>
       </div>
     </div>
@@ -524,35 +524,35 @@
 
       <!-- Set Explorer for Dashboard -->
       <div class="dashboard-search">
-        <div class="dashboard-search-header"><h3>{{dashboard.explore_sets}}</h3></div>
+        <div class="dashboard-search-header"><h3>🔍 Explore Sets</h3></div>
         <div class="dashboard-search-container">
           <span class="dashboard-search-icon">🔍</span>
-          <input type="text" id="dashboard-search-input" class="dashboard-search-input" placeholder="{{dashboard.search_placeholder}}" autocomplete="off">
+          <input type="text" id="dashboard-search-input" class="dashboard-search-input" placeholder="Search for any LEGO set to view prices and deals..." autocomplete="off">
           <div id="dashboard-search-results" class="dashboard-search-results"></div>
         </div>
       </div>
       <div class="dashboard-header">
-        <h1>{{dashboard.title}}</h1>
+        <h1>Dashboard</h1>
         <button class="btn btn-primary" onclick="openModal('add-watch')">
-          {{dashboard.add_watch}}
+          + Add Watch
         </button>
       </div>
       
       <div class="dashboard-stats">
         <div class="dashboard-stat">
-          <div class="dashboard-stat-label">{{dashboard.stats.active_watches}}</div>
+          <div class="dashboard-stat-label">Active Watches</div>
           <div class="dashboard-stat-value" id="dash-watches">0</div>
         </div>
         <div class="dashboard-stat">
-          <div class="dashboard-stat-label">{{dashboard.stats.alerts_today}}</div>
+          <div class="dashboard-stat-label">Alerts Today</div>
           <div class="dashboard-stat-value" id="dash-alerts-today">0</div>
         </div>
         <div class="dashboard-stat">
-          <div class="dashboard-stat-label">{{dashboard.stats.total_alerts}}</div>
+          <div class="dashboard-stat-label">Total Alerts</div>
           <div class="dashboard-stat-value" id="dash-alerts-total">0</div>
         </div>
         <div class="dashboard-stat">
-          <div class="dashboard-stat-label">{{dashboard.stats.subscription}}</div>
+          <div class="dashboard-stat-label">Subscription</div>
           <div class="dashboard-stat-value" id="dash-tier">Free</div>
         </div>
       </div>
@@ -560,10 +560,10 @@
       <!-- Dashboard Tabs -->
       <div class="dashboard-tabs">
         <button class="dashboard-tab active" onclick="switchTab('watches')">
-          {{dashboard.tabs.watches}}
+          👀 Watches
         </button>
         <button class="dashboard-tab" onclick="switchTab('notifications')" id="notifications-tab">
-          {{dashboard.tabs.notifications}} <span class="tab-badge" id="unread-badge" style="display: none;">0</span>
+          🔔 Notifications <span class="tab-badge" id="unread-badge" style="display: none;">0</span>
         </button>
       </div>
       
@@ -571,7 +571,7 @@
       <div class="tab-content active" id="tab-watches">
         <div class="watches-section">
           <div class="watches-header">
-            <h2>{{dashboard.your_watchlist}}</h2>
+            <h2>Your Watchlist</h2>
           </div>
           <div class="watches-list" id="watches-list">
             <div class="empty-state">
@@ -586,8 +586,8 @@
       <div class="tab-content" id="tab-notifications">
         <div class="inbox-section">
           <div class="inbox-header">
-            <h2>{{dashboard.notifications_inbox}}</h2>
-            <button class="btn btn-ghost" onclick="markAllRead()">{{dashboard.mark_all_read}}</button>
+            <h2>Notifications Inbox</h2>
+            <button class="btn btn-ghost" onclick="markAllRead()">Mark all read</button>
           </div>
           <div class="inbox-list" id="inbox-list">
             <div class="empty-state">
@@ -596,7 +596,7 @@
             </div>
           </div>
           <div class="inbox-load-more" id="inbox-load-more" style="display: none;">
-            <button class="btn btn-secondary" onclick="loadMoreAlerts()">{{dashboard.load_more}}</button>
+            <button class="btn btn-secondary" onclick="loadMoreAlerts()">Load More</button>
           </div>
         </div>
       </div>
@@ -607,26 +607,26 @@
   <div class="modal-overlay" id="modal-login">
     <div class="modal">
       <button class="modal-close" onclick="closeModal('login')">×</button>
-      <h2>{{modals.login.title}}</h2>
-      <p class="modal-subtitle">{{modals.login.subtitle}}</p>
+      <h2>Welcome Back</h2>
+      <p class="modal-subtitle">Log in to your ScoutLoot account</p>
       
       <form onsubmit="handleLogin(event)">
         <div class="form-group">
-          <label for="login-email">{{forms.email}}</label>
+          <label for="login-email">Email</label>
           <input type="email" id="login-email" placeholder="you@example.com" required>
         </div>
         <div class="form-group">
-          <label for="login-password">{{forms.password}}</label>
+          <label for="login-password">Password</label>
           <input type="password" id="login-password" placeholder="••••••••" required>
         </div>
         <div style="text-align: right; margin-bottom: 16px;">
-          <a href="#" onclick="switchModal('login', 'forgot-password'); return false;" style="font-size: 0.85rem; color: var(--accent); text-decoration: none;">{{modals.login.forgot_password}}</a>
+          <a href="#" onclick="switchModal('login', 'forgot-password'); return false;" style="font-size: 0.85rem; color: var(--accent); text-decoration: none;">Forgot password?</a>
         </div>
         <button type="submit" class="btn btn-primary" style="width: 100%;" id="login-submit-btn">{{nav.login}}</button>
       </form>
       
       <div class="modal-footer">
-        {{modals.login.no_account}} <a href="#" onclick="switchModal('login', 'signup'); return false;">Sign up</a>
+        Don't have an account? <a href="#" onclick="switchModal('login', 'signup'); return false;">Sign up</a>
       </div>
     </div>
   </div>
@@ -635,29 +635,29 @@
   <div class="modal-overlay" id="modal-signup">
     <div class="modal">
       <button class="modal-close" onclick="closeModal('signup')">×</button>
-      <h2>{{modals.signup.title}}</h2>
+      <h2>Create Account</h2>
       <p class="modal-subtitle">{{modals.signup_subtitle}}</p>
       
       <form onsubmit="handleSignup(event)">
         <div class="form-group">
-          <label for="signup-email">{{forms.email}}</label>
+          <label for="signup-email">Email</label>
           <input type="email" id="signup-email" placeholder="you@example.com" required>
         </div>
         <div class="form-group">
-          <label for="signup-password">{{forms.password}}</label>
+          <label for="signup-password">Password</label>
           <input type="password" id="signup-password" placeholder="••••••••" minlength="8" required>
         </div>
         <div class="form-group">
-          <label for="signup-country">{{forms.ship_to_country}}</label>
+          <label for="signup-country">Ship-to Country</label>
           <select id="signup-country" required>
-            <optgroup label="{{forms.countries.north_america}}">
+            <optgroup label="North America">
               <option value="US">United States 🇺🇸</option>
               <option value="CA">Canada 🇨🇦</option>
             </optgroup>
-            <optgroup label="{{forms.countries.united_kingdom}}">
+            <optgroup label="United Kingdom">
               <option value="GB">United Kingdom 🇬🇧</option>
             </optgroup>
-            <optgroup label="{{forms.countries.western_europe}}">
+            <optgroup label="Western Europe">
               <option value="DE">Germany 🇩🇪</option>
               <option value="FR">France 🇫🇷</option>
               <option value="NL">Netherlands 🇳🇱</option>
@@ -666,7 +666,7 @@
               <option value="AT">Austria 🇦🇹</option>
               <option value="IE">Ireland 🇮🇪</option>
             </optgroup>
-            <optgroup label="{{forms.countries.southern_europe}}">
+            <optgroup label="Southern Europe">
               <option value="ES">Spain 🇪🇸</option>
               <option value="IT">Italy 🇮🇹</option>
               <option value="PT">Portugal 🇵🇹</option>
@@ -674,7 +674,7 @@
               <option value="MT">Malta 🇲🇹</option>
               <option value="CY">Cyprus 🇨🇾</option>
             </optgroup>
-            <optgroup label="{{forms.countries.northern_europe}}">
+            <optgroup label="Northern Europe">
               <option value="SE">Sweden 🇸🇪</option>
               <option value="DK">Denmark 🇩🇰</option>
               <option value="FI">Finland 🇫🇮</option>
@@ -682,7 +682,7 @@
               <option value="LV">Latvia 🇱🇻</option>
               <option value="LT">Lithuania 🇱🇹</option>
             </optgroup>
-            <optgroup label="{{forms.countries.central_eastern_europe}}">
+            <optgroup label="Central/Eastern Europe">
               <option value="PL">Poland 🇵🇱</option>
               <option value="CZ">Czechia 🇨🇿</option>
               <option value="SK">Slovakia 🇸🇰</option>
@@ -695,29 +695,29 @@
           </select>
         </div>
         
-        <div class="form-divider">{{forms.notification_preferences}}</div>
+        <div class="form-divider">Notification Preferences</div>
         
         <div class="checkbox-group">
           <input type="checkbox" id="signup-weekly-digest" checked>
           <div class="checkbox-label">
-            <div class="checkbox-title">{{forms.weekly_digest.title}}</div>
-            <div class="checkbox-desc">{{forms.weekly_digest.desc}}</div>
+            <div class="checkbox-title">📊 Weekly Digest</div>
+            <div class="checkbox-desc">Sunday summary of all your watches and best deals</div>
           </div>
         </div>
         
         <div class="checkbox-group">
           <input type="checkbox" id="signup-reminders">
           <div class="checkbox-label">
-            <div class="checkbox-title">{{forms.reminders.title}}</div>
-            <div class="checkbox-desc">{{forms.reminders.desc}}</div>
+            <div class="checkbox-title">💡 3-Day Reminders</div>
+            <div class="checkbox-desc">Reminder if a great deal (&gt;20% off) is still available after 3 days</div>
           </div>
         </div>
         
-        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 16px;" id="signup-submit-btn">{{modals.signup.btn_submit}}</button>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 16px;" id="signup-submit-btn">Create Account</button>
       </form>
       
       <div class="modal-footer">
-        {{modals.signup.already_have_account}} <a href="#" onclick="switchModal('signup', 'login'); return false;">{{nav.login}}</a>
+        Already have an account? <a href="#" onclick="switchModal('signup', 'login'); return false;">{{nav.login}}</a>
       </div>
     </div>
   </div>
@@ -733,26 +733,26 @@
         <div class="setup-option" id="setup-telegram" onclick="setupTelegram()">
           <div class="setup-option-header">
             <span class="setup-option-icon">📱</span>
-            <span class="setup-option-title">{{modals.complete_setup.telegram.title}}</span>
+            <span class="setup-option-title">Connect Telegram</span>
           </div>
           <div class="setup-option-desc">
-            {{modals.complete_setup.telegram.desc}}
+            Get instant alerts on your phone via Telegram. Most reliable option.
           </div>
         </div>
         
         <div class="setup-option" id="setup-push" onclick="setupPush()">
           <div class="setup-option-header">
             <span class="setup-option-icon">🔔</span>
-            <span class="setup-option-title">{{modals.complete_setup.push.title}}</span>
+            <span class="setup-option-title">Enable Browser Push</span>
           </div>
           <div class="setup-option-desc">
-            {{modals.complete_setup.push.desc}}
+            Get notifications in this browser. Works on desktop and mobile.
           </div>
         </div>
       </div>
       
       <div style="margin-top: 24px; text-align: center;">
-        <button class="btn btn-ghost" onclick="closeSetupModal()">{{modals.complete_setup.skip}}</button>
+        <button class="btn btn-ghost" onclick="closeSetupModal()">Skip for now</button>
       </div>
       
       <div style="margin-top: 16px; text-align: center; font-size: 0.85rem; color: var(--text-muted);">
@@ -765,7 +765,7 @@
   <div class="modal-overlay" id="modal-add-watch">
     <div class="modal">
       <button class="modal-close" onclick="closeModal('add-watch')">×</button>
-      <h2>{{modals.add_watch.title}}</h2>
+      <h2>Add Watch</h2>
       <p class="modal-subtitle">{{dashboard.add_watch_subtitle}}</p>
       
       <form class="add-watch-form" onsubmit="handleAddWatch(event)">
@@ -776,23 +776,23 @@
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label for="watch-target">{{forms.target_price}} (€)</label>
+            <label for="watch-target">Target Price (€)</label>
             <input type="number" id="watch-target" placeholder="500" min="1" step="0.01" required>
           </div>
           <div class="form-group">
-            <label for="watch-min">{{forms.min_price}} (€)</label>
+            <label for="watch-min">Min Price (€)</label>
             <input type="number" id="watch-min" placeholder="50" min="0" step="0.01" value="0">
           </div>
         </div>
         <div class="form-group">
-          <label for="watch-condition">{{forms.condition}}</label>
+          <label for="watch-condition">Condition</label>
           <select id="watch-condition">
-            <option value="any">{{forms.condition_any}}</option>
-            <option value="new">{{forms.condition_new}}</option>
-            <label value="used">{{forms.condition_used}}</option>
+            <option value="any">Any</option>
+            <option value="new">New Only</option>
+            <option value="used">Used Only</option>
           </select>
         </div>
-        <button type="submit" class="btn btn-primary" style="width: 100%;" id="add-watch-submit-btn">{{modals.add_watch.btn_submit}}</button>
+        <button type="submit" class="btn btn-primary" style="width: 100%;" id="add-watch-submit-btn">Start Tracking</button>
       </form>
     </div>
   </div>
@@ -801,33 +801,33 @@
   <div class="modal-overlay" id="modal-edit-watch">
     <div class="modal">
       <button class="modal-close" onclick="closeModal('edit-watch')">×</button>
-      <h2>{{modals.edit_watch.title}}</h2>
-      <p class="modal-subtitle" id="edit-watch-name">{{modals.edit_watch.subtitle}}</p>
+      <h2>Edit Watch</h2>
+      <p class="modal-subtitle" id="edit-watch-name">Edit your watch settings</p>
       
       <form class="add-watch-form" onsubmit="handleEditWatch(event)">
         <div class="form-group">
-          <label>{{forms.set_number}}</label>
+          <label>Set Number</label>
           <input type="text" id="edit-watch-set" disabled style="opacity: 0.6; cursor: not-allowed;">
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label for="edit-watch-target">{{forms.target_price}} (€)</label>
+            <label for="edit-watch-target">Target Price (€)</label>
             <input type="number" id="edit-watch-target" placeholder="500" min="1" step="0.01" required>
           </div>
           <div class="form-group">
-            <label for="edit-watch-min">{{forms.min_price}} (€)</label>
+            <label for="edit-watch-min">Min Price (€)</label>
             <input type="number" id="edit-watch-min" placeholder="50" min="0" step="0.01" value="0">
           </div>
         </div>
         <div class="form-group">
-          <label for="edit-watch-condition">{{forms.condition}}</label>
+          <label for="edit-watch-condition">Condition</label>
           <select id="edit-watch-condition">
-            <option value="any">{{forms.condition_any}}</option>
-            <option value="new">{{forms.condition_new}}</option>
-            <label value="used">{{forms.condition_used}}</option>
+            <option value="any">Any</option>
+            <option value="new">New Only</option>
+            <option value="used">Used Only</option>
           </select>
         </div>
-        <button type="submit" class="btn btn-primary" style="width: 100%;" id="edit-watch-submit-btn">{{modals.edit_watch.btn_submit}}</button>
+        <button type="submit" class="btn btn-primary" style="width: 100%;" id="edit-watch-submit-btn">Save Changes</button>
       </form>
     </div>
   </div>
@@ -836,21 +836,21 @@
   <div class="modal-overlay" id="modal-settings">
     <div class="modal">
       <button class="modal-close" onclick="closeModal('settings')">×</button>
-      <h2>{{modals.settings.title}}</h2>
-      <p class="modal-subtitle">{{modals.settings.subtitle}}</p>
+      <h2>Settings</h2>
+      <p class="modal-subtitle">Manage your account</p>
       
       <form onsubmit="handleSettings(event)">
         <div class="form-group">
-          <label for="settings-country">{{forms.ship_to_country}}</label>
+          <label for="settings-country">Ship-to Country</label>
           <select id="settings-country">
-            <optgroup label="{{forms.countries.north_america}}">
+            <optgroup label="North America">
               <option value="US">United States 🇺🇸</option>
               <option value="CA">Canada 🇨🇦</option>
             </optgroup>
-            <optgroup label="{{forms.countries.united_kingdom}}">
+            <optgroup label="United Kingdom">
               <option value="GB">United Kingdom 🇬🇧</option>
             </optgroup>
-            <optgroup label="{{forms.countries.western_europe}}">
+            <optgroup label="Western Europe">
               <option value="DE">Germany 🇩🇪</option>
               <option value="FR">France 🇫🇷</option>
               <option value="NL">Netherlands 🇳🇱</option>
@@ -859,7 +859,7 @@
               <option value="AT">Austria 🇦🇹</option>
               <option value="IE">Ireland 🇮🇪</option>
             </optgroup>
-            <optgroup label="{{forms.countries.southern_europe}}">
+            <optgroup label="Southern Europe">
               <option value="ES">Spain 🇪🇸</option>
               <option value="IT">Italy 🇮🇹</option>
               <option value="PT">Portugal 🇵🇹</option>
@@ -867,7 +867,7 @@
               <option value="MT">Malta 🇲🇹</option>
               <option value="CY">Cyprus 🇨🇾</option>
             </optgroup>
-            <optgroup label="{{forms.countries.northern_europe}}">
+            <optgroup label="Northern Europe">
               <option value="SE">Sweden 🇸🇪</option>
               <option value="DK">Denmark 🇩🇰</option>
               <option value="FI">Finland 🇫🇮</option>
@@ -875,7 +875,7 @@
               <option value="LV">Latvia 🇱🇻</option>
               <option value="LT">Lithuania 🇱🇹</option>
             </optgroup>
-            <optgroup label="{{forms.countries.central_eastern_europe}}">
+            <optgroup label="Central/Eastern Europe">
               <option value="PL">Poland 🇵🇱</option>
               <option value="CZ">Czechia 🇨🇿</option>
               <option value="SK">Slovakia 🇸🇰</option>
@@ -891,9 +891,9 @@
           </div>
         </div>
         <div class="form-group">
-          <label for="settings-timezone">{{forms.timezone}}</label>
+          <label for="settings-timezone">Timezone</label>
           <select id="settings-timezone">
-            <optgroup label="{{forms.countries.north_america}}">
+            <optgroup label="North America">
               <option value="America/New_York">New York (Eastern)</option>
               <option value="America/Chicago">Chicago (Central)</option>
               <option value="America/Denver">Denver (Mountain)</option>
@@ -901,7 +901,7 @@
               <option value="America/Toronto">Toronto (Eastern)</option>
               <option value="America/Vancouver">Vancouver (Pacific)</option>
             </optgroup>
-            <optgroup label="{{forms.countries.united_kingdom}}">
+            <optgroup label="United Kingdom">
               <option value="Europe/London">London (GMT)</option>
               <option value="Europe/Dublin">Dublin (GMT)</option>
             </optgroup>
@@ -982,7 +982,7 @@
         <div class="checkbox-group">
           <input type="checkbox" id="settings-weekly-digest" checked>
           <div class="checkbox-label">
-            <div class="checkbox-title">{{forms.weekly_digest.title}}</div>
+            <div class="checkbox-title">📊 Weekly Digest</div>
             <div class="checkbox-desc">Sunday summary of all your watches</div>
           </div>
         </div>
@@ -996,25 +996,25 @@
         </div>
         
         <div style="margin-top: 24px;">
-          <button type="submit" class="btn btn-primary" style="width: 100%;" id="settings-submit-btn">{{modals.settings.btn_save}}</button>
+          <button type="submit" class="btn btn-primary" style="width: 100%;" id="settings-submit-btn">Save Settings</button>
         </div>
 
-        <div class="form-divider">{{modals.settings.security}}</div>
+        <div class="form-divider">Security</div>
 
         <button type="button" class="btn btn-secondary" style="width: 100%;" onclick="switchModal('settings', 'change-password')">
-          {{modals.settings.change_password_btn}}
+          🔐 Change Password
         </button>
 
         <div class="danger-zone">
-          <h3>{{modals.settings.danger_zone}}</h3>
-          <p class="danger-description">{{modals.settings.danger_description}}</p>
+          <h3>⚠️ Danger Zone</h3>
+          <p class="danger-description">Export your data or permanently delete your account.</p>
           
           <div style="display: flex; gap: 12px; flex-wrap: wrap;">
             <button type="button" class="btn btn-secondary btn-sm" onclick="exportUserData()">
-              {{modals.settings.export_data}}
+              📥 Export My Data
             </button>
             <button type="button" class="btn btn-outline-danger btn-sm" onclick="switchModal('settings', 'delete-account')">
-              {{modals.settings.delete_account_btn}}
+              🗑️ Delete Account
             </button>
           </div>
         </div>
@@ -1026,19 +1026,19 @@
   <div class="modal-overlay" id="modal-forgot-password">
     <div class="modal">
       <button class="modal-close" onclick="closeModal('forgot-password')">×</button>
-      <h2>{{modals.forgot_password.title}}</h2>
-      <p class="modal-subtitle">{{modals.forgot_password.subtitle}}</p>
+      <h2>Forgot Password?</h2>
+      <p class="modal-subtitle">Enter your email and we'll send you a reset link</p>
       
       <form onsubmit="handleForgotPassword(event)">
         <div class="form-group">
-          <label for="forgot-email">{{forms.email}}</label>
+          <label for="forgot-email">Email</label>
           <input type="email" id="forgot-email" placeholder="you@example.com" required>
         </div>
-        <button type="submit" class="btn btn-primary" style="width: 100%;" id="forgot-submit-btn">{{modals.forgot_password.btn_submit}}</button>
+        <button type="submit" class="btn btn-primary" style="width: 100%;" id="forgot-submit-btn">Send Reset Link</button>
       </form>
       
       <div class="modal-footer">
-        {{modals.forgot_password.remember_password}} <a href="#" onclick="switchModal('forgot-password', 'login'); return false;">{{nav.login}}</a>
+        Remember your password? <a href="#" onclick="switchModal('forgot-password', 'login'); return false;">{{nav.login}}</a>
       </div>
     </div>
   </div>
@@ -1047,19 +1047,19 @@
   <div class="modal-overlay" id="modal-reset-password">
     <div class="modal">
       <button class="modal-close" onclick="closeResetModal()">×</button>
-      <h2>{{modals.reset_password.title}}</h2>
-      <p class="modal-subtitle" id="reset-email-display">{{modals.reset_password.subtitle}}</p>
+      <h2>Reset Password</h2>
+      <p class="modal-subtitle" id="reset-email-display">Enter your new password</p>
       
       <form onsubmit="handleResetPassword(event)">
         <div class="form-group">
-          <label for="reset-password">{{forms.new_password}}</label>
+          <label for="reset-password">New Password</label>
           <input type="password" id="reset-password" placeholder="••••••••" minlength="8" required>
         </div>
         <div class="form-group">
-          <label for="reset-password-confirm">{{forms.confirm_password}}</label>
+          <label for="reset-password-confirm">Confirm Password</label>
           <input type="password" id="reset-password-confirm" placeholder="••••••••" minlength="8" required>
         </div>
-        <button type="submit" class="btn btn-primary" style="width: 100%;" id="reset-submit-btn">{{modals.reset_password.btn_submit}}</button>
+        <button type="submit" class="btn btn-primary" style="width: 100%;" id="reset-submit-btn">Reset Password</button>
       </form>
     </div>
   </div>
@@ -1068,27 +1068,27 @@
   <div class="modal-overlay" id="modal-change-password">
     <div class="modal">
       <button class="modal-close" onclick="closeModal('change-password'); openModal('settings');">×</button>
-      <h2>{{modals.change_password.title}}</h2>
-      <p class="modal-subtitle">{{modals.change_password.subtitle}}</p>
+      <h2>Change Password</h2>
+      <p class="modal-subtitle">Enter your current password and choose a new one</p>
       
       <form onsubmit="handleChangePassword(event)">
         <div class="form-group">
-          <label for="current-password">{{forms.current_password}}</label>
+          <label for="current-password">Current Password</label>
           <input type="password" id="current-password" placeholder="••••••••" required>
         </div>
         <div class="form-group">
-          <label for="new-password">{{forms.new_password}}</label>
+          <label for="new-password">New Password</label>
           <input type="password" id="new-password" placeholder="••••••••" minlength="8" required>
         </div>
         <div class="form-group">
-          <label for="confirm-new-password">{{forms.confirm_new_password}}</label>
+          <label for="confirm-new-password">Confirm New Password</label>
           <input type="password" id="confirm-new-password" placeholder="••••••••" minlength="8" required>
         </div>
-        <button type="submit" class="btn btn-primary" style="width: 100%;" id="change-password-btn">{{modals.change_password.btn_submit}}</button>
+        <button type="submit" class="btn btn-primary" style="width: 100%;" id="change-password-btn">Update Password</button>
       </form>
       
       <div class="modal-footer">
-        <a href="#" onclick="closeModal('change-password'); openModal('settings'); return false;">{{modals.change_password.back_to_settings}}</a>
+        <a href="#" onclick="closeModal('change-password'); openModal('settings'); return false;">← Back to Settings</a>
       </div>
     </div>
   </div>
@@ -1101,34 +1101,34 @@
       <div class="danger-header">
         <span class="danger-icon">⚠️</span>
         <div>
-          <h2 style="color: var(--error);">{{modals.delete_account.title}}</h2>
-          <p class="modal-subtitle" style="margin-bottom: 0;">{{modals.delete_account.subtitle}}</p>
+          <h2 style="color: var(--error);">Delete Account</h2>
+          <p class="modal-subtitle" style="margin-bottom: 0;">This action cannot be undone</p>
         </div>
       </div>
       
       <p style="margin-top: 16px; color: var(--text-secondary);">
-        {{modals.delete_account.warning_intro}}
+        This will permanently delete your ScoutLoot account and all associated data:
       </p>
       
       <ul class="delete-warning-list">
-        <li>{{modals.delete_account.warning_items.0}}</li>
-        <li>{{modals.delete_account.warning_items.1}}</li>
-        <li>{{modals.delete_account.warning_items.2}}</li>
-        <li>{{modals.delete_account.warning_items.3}}</li>
+        <li>Your profile and email address</li>
+        <li>All your watches and settings</li>
+        <li>All push notification subscriptions</li>
+        <li>Your alert history</li>
       </ul>
       
       <form onsubmit="handleDeleteAccount(event)">
         <div class="form-group">
-          <label for="delete-confirm-input">{{modals.delete_account.confirm_label}}</label>
+          <label for="delete-confirm-input">Type <strong>DELETE</strong> to confirm</label>
           <input type="text" id="delete-confirm-input" placeholder="DELETE" autocomplete="off" required>
         </div>
         <button type="submit" class="btn btn-danger" style="width: 100%;" id="delete-account-btn" disabled>
-          {{modals.delete_account.btn_delete}}
+          Delete My Account Permanently
         </button>
       </form>
       
       <div class="modal-footer">
-        <a href="#" onclick="closeModal('delete-account'); openModal('settings'); return false;">{{modals.delete_account.cancel}}</a>
+        <a href="#" onclick="closeModal('delete-account'); openModal('settings'); return false;">← Cancel, keep my account</a>
       </div>
     </div>
   </div>
@@ -1137,7 +1137,7 @@
   <div class="modal-overlay" id="modal-alert-detail">
     <div class="modal">
       <button class="modal-close" onclick="closeModal('alert-detail')">×</button>
-      <h2 id="alert-detail-title">{{modals.alert_detail.title}}</h2>
+      <h2 id="alert-detail-title">Deal Alert</h2>
       <p class="modal-subtitle" id="alert-detail-reason">{{modals.alert_reason}}</p>
       
       <div id="alert-detail-content">
@@ -1146,9 +1146,9 @@
       
       <div style="display: flex; gap: 12px; margin-top: 24px;">
         <a href="#" id="alert-detail-buy-btn" class="btn btn-primary" style="flex: 1; text-align: center;" target="_blank">
-          {{modals.alert_detail.buy_btn}}
+          🛒 Buy on eBay
         </a>
-        <button class="btn btn-secondary" onclick="closeModal('alert-detail')">{{modals.alert_detail.close}}</button>
+        <button class="btn btn-secondary" onclick="closeModal('alert-detail')">Close</button>
       </div>
     </div>
   </div>
@@ -1157,10 +1157,10 @@
   <div class="cookie-banner" id="cookie-banner">
     <div class="cookie-content">
       <p>
-        {{cookie_banner.message}} 
+        🍪 We use cookies to improve your experience. By using ScoutLoot, you agree to our 
         <a href="/privacy">{{footer.privacy}}</a> and <a href="/cookies">{{footer.cookies}}</a>.
       </p>
-      <button class="btn btn-primary btn-sm" onclick="acceptCookies()">{{cookie_banner.accept}}</button>
+      <button class="btn btn-primary btn-sm" onclick="acceptCookies()">Accept</button>
     </div>
   </div>
 

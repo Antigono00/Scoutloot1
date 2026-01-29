@@ -191,6 +191,7 @@ function renderI18nPage(
     
     // Set language cookie for future visits
     res.cookie('language', lang, {
+      path: '/',
       maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year
       httpOnly: false, // Accessible by JS
       sameSite: 'lax',
@@ -300,7 +301,8 @@ app.post('/api/language', express.json(), (req: Request, res: Response) => {
   }
   
   res.cookie('language', language, {
-    maxAge: 365 * 24 * 60 * 60 * 1000,
+    path: '/',
+      maxAge: 365 * 24 * 60 * 60 * 1000,
     httpOnly: false,
     sameSite: 'lax',
   });
@@ -626,6 +628,7 @@ const setDetailHandler = async (req: Request, res: Response) => {
     }
     
     res.cookie('language', lang, {
+      path: '/',
       maxAge: 365 * 24 * 60 * 60 * 1000,
       httpOnly: false,
       sameSite: 'lax',
