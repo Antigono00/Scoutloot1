@@ -1,6 +1,9 @@
 import { query, withTransaction } from '../db/index.js';
 
-// Region-based ship_from_countries defaults
+// ============================================
+// REGIONAL DEFAULTS
+// ============================================
+
 // EU+UK users can buy from any EU or UK seller
 const EU_UK_SHIP_FROM = [
   'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 
@@ -52,15 +55,25 @@ export function isEUUKCountry(country: string): boolean {
   return EU_UK_COUNTRIES.has(country.toUpperCase());
 }
 
+// ============================================
+// INTERFACES
+// ============================================
+
 export interface Watch {
   id: number;
   uuid: string;
   user_id: number;
-  set_number: string;
+  // NEW: item_type and item_id replace set_number for flexibility
+  item_type: 'set' | 'minifig';
+  item_id: string;  // set_number OR fig_num
+  // Legacy alias (for backwards compatibility during migration)
+  set_number?: string;
   target_total_price_eur: number;
   min_total_eur: number;
   bricklink_shipping_buffer: number;
   enable_bricklink_alerts: boolean;
+  // NEW: enable_brickowl_alerts for BrickOwl integration
+  enable_brickowl_alerts: boolean;
   condition: 'new' | 'used' | 'any';
   ship_from_countries: string[];
   min_seller_rating: number;
@@ -80,7 +93,10 @@ export interface Watch {
 
 export interface CreateWatchData {
   user_id: number;
-  set_number: string;
+  // NEW: Support both set_number (legacy) and item_id/item_type
+  set_number?: string;  // Legacy - will be converted to item_id + item_type='set'
+  item_type?: 'set' | 'minifig';
+  item_id?: string;
   target_total_price_eur: number;
   min_total_eur?: number;
   condition?: 'new' | 'used' | 'any';
@@ -88,15 +104,43 @@ export interface CreateWatchData {
   min_seller_rating?: number;
   min_seller_feedback?: number;
   exclude_words?: string[];
+  enable_brickowl_alerts?: boolean;
 }
+
+// ============================================
+// CREATE WATCH
+// ============================================
 
 export async function createWatch(data: CreateWatchData): Promise<Watch> {
   return withTransaction(async (client) => {
-    // Ensure set exists
-    await client.query(
-      `INSERT INTO sets (set_number) VALUES ($1) ON CONFLICT (set_number) DO NOTHING`,
-      [data.set_number]
-    );
+    // Handle legacy set_number vs new item_type/item_id
+    let itemType: 'set' | 'minifig' = 'set';
+    let itemNumber: string;
+    
+    if (data.item_id && data.item_type) {
+      itemType = data.item_type;
+      itemNumber = data.item_id;
+    } else if (data.set_number) {
+      // Legacy: set_number becomes item_id with item_type='set'
+      itemType = 'set';
+      itemNumber = data.set_number;
+    } else {
+      throw new Error('Either set_number or item_id+item_type must be provided');
+    }
+    
+    // Ensure item exists in appropriate table
+    if (itemType === 'set') {
+      await client.query(
+        `INSERT INTO sets (set_number) VALUES ($1) ON CONFLICT (set_number) DO NOTHING`,
+        [itemNumber]
+      );
+    } else {
+      await client.query(
+        `INSERT INTO minifigs (fig_num) VALUES ($1) ON CONFLICT (fig_num) DO NOTHING`,
+        [itemNumber.toLowerCase()]
+      );
+      itemNumber = itemNumber.toLowerCase(); // Normalize minifig IDs to lowercase
+    }
 
     // Get user's ship_to_country to determine default ship_from_countries
     const userResult = await client.query<{ ship_to_country: string }>(
@@ -108,31 +152,43 @@ export async function createWatch(data: CreateWatchData): Promise<Watch> {
     
     // Use provided ship_from_countries or calculate default based on user's region
     const shipFromCountries = data.ship_from_countries ?? getDefaultShipFromCountries(userCountry);
+    
+    // Default seller filters based on item type
+    // Minifigs have lower default feedback requirement since market is smaller
+    const defaultMinFeedback = itemType === 'minifig' ? 5 : 10;
 
     const result = await client.query<Watch>(
       `INSERT INTO watches (
-         user_id, set_number, target_total_price_eur, min_total_eur,
+         user_id, item_type, item_id, set_number,
+         target_total_price_eur, min_total_eur,
          condition, ship_from_countries, min_seller_rating, 
-         min_seller_feedback, exclude_words
+         min_seller_feedback, exclude_words, enable_brickowl_alerts
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
        RETURNING *`,
       [
         data.user_id,
-        data.set_number,
+        itemType,
+        itemNumber,
+        itemType === 'set' ? itemNumber : null, // Legacy set_number column
         data.target_total_price_eur,
         data.min_total_eur ?? 0,
         data.condition ?? 'any',
         shipFromCountries,
         data.min_seller_rating ?? 95.0,
-        data.min_seller_feedback ?? 10,
+        data.min_seller_feedback ?? defaultMinFeedback,
         data.exclude_words ?? null,
+        data.enable_brickowl_alerts ?? true, // Default: enable BrickOwl for new watches
       ]
     );
 
     return result.rows[0];
   });
 }
+
+// ============================================
+// READ OPERATIONS
+// ============================================
 
 export async function getWatchById(id: number): Promise<Watch | null> {
   const result = await query<Watch>(
@@ -164,9 +220,25 @@ export async function getActiveWatchesByUserId(userId: number): Promise<Watch[]>
   return result.rows;
 }
 
+export async function getWatchCountByUserId(userId: number): Promise<number> {
+  const result = await query<{ count: string }>(
+    `SELECT COUNT(*) as count FROM watches WHERE user_id = $1`,
+    [userId]
+  );
+  return parseInt(result.rows[0].count, 10);
+}
+
+// ============================================
+// UPDATE OPERATIONS
+// ============================================
+
 export async function updateWatch(
   watchId: number,
-  updates: Partial<Pick<Watch, 'target_total_price_eur' | 'min_total_eur' | 'condition' | 'ship_from_countries' | 'min_seller_rating' | 'min_seller_feedback' | 'exclude_words'>>
+  updates: Partial<Pick<Watch, 
+    'target_total_price_eur' | 'min_total_eur' | 'condition' | 
+    'ship_from_countries' | 'min_seller_rating' | 'min_seller_feedback' | 
+    'exclude_words' | 'enable_brickowl_alerts'
+  >>
 ): Promise<Watch | null> {
   const setClauses: string[] = [];
   const values: unknown[] = [];
@@ -199,6 +271,10 @@ export async function updateWatch(
   if (updates.exclude_words !== undefined) {
     setClauses.push(`exclude_words = $${paramIndex++}`);
     values.push(updates.exclude_words);
+  }
+  if (updates.enable_brickowl_alerts !== undefined) {
+    setClauses.push(`enable_brickowl_alerts = $${paramIndex++}`);
+    values.push(updates.enable_brickowl_alerts);
   }
 
   if (setClauses.length === 0) {
@@ -269,28 +345,35 @@ export async function incrementWatchAlertCount(watchId: number): Promise<void> {
   );
 }
 
-export async function getWatchCountByUserId(userId: number): Promise<number> {
-  const result = await query<{ count: string }>(
-    `SELECT COUNT(*) as count FROM watches WHERE user_id = $1`,
-    [userId]
-  );
-  return parseInt(result.rows[0].count, 10);
-}
+// ============================================
+// SCAN GROUP QUERIES
+// ============================================
 
 export interface ScanGroup {
-  set_number: string;
+  item_type: 'set' | 'minifig';
+  item_id: string;
+  // Legacy alias
+  set_number?: string;
   ship_to_country: string;
   watcher_count: number;
   max_scan_priority: string;
+  enable_brickowl: boolean;
 }
 
+/**
+ * Get active scan groups for the scanner
+ * Groups by (item_type, item_id, ship_to_country)
+ */
 export async function getActiveScanGroups(): Promise<ScanGroup[]> {
   const result = await query<ScanGroup>(
     `SELECT 
+       w.item_type,
+       w.item_id,
        w.set_number,
        u.ship_to_country,
        COUNT(*) as watcher_count,
-       MAX(t.scan_priority) as max_scan_priority
+       MAX(t.scan_priority) as max_scan_priority,
+       BOOL_OR(w.enable_brickowl_alerts) as enable_brickowl
      FROM watches w
      JOIN users u ON w.user_id = u.id
      JOIN subscription_tiers t ON u.subscription_tier = t.tier_id
@@ -298,30 +381,62 @@ export async function getActiveScanGroups(): Promise<ScanGroup[]> {
        AND u.deleted_at IS NULL
        AND u.subscription_status = 'active'
        AND (w.snoozed_until IS NULL OR w.snoozed_until < NOW())
-     GROUP BY w.set_number, u.ship_to_country
+     GROUP BY w.item_type, w.item_id, w.set_number, u.ship_to_country
      ORDER BY max_scan_priority DESC, watcher_count DESC`
   );
   return result.rows;
 }
 
+/**
+ * Get watches for a specific scan group
+ */
 export async function getWatchesForScanGroup(
-  setNumber: string,
+  itemType: 'set' | 'minifig',
+  itemNumber: string,
   shipToCountry: string
-): Promise<(Watch & { telegram_chat_id: number | null; timezone: string; quiet_hours_start: string | null; quiet_hours_end: string | null })[]> {
-  const result = await query<Watch & { telegram_chat_id: number | null; timezone: string; quiet_hours_start: string | null; quiet_hours_end: string | null }>(
+): Promise<(Watch & { 
+  telegram_chat_id: number | null; 
+  timezone: string; 
+  quiet_hours_start: string | null; 
+  quiet_hours_end: string | null;
+})[]> {
+  const result = await query<Watch & { 
+    telegram_chat_id: number | null; 
+    timezone: string; 
+    quiet_hours_start: string | null; 
+    quiet_hours_end: string | null;
+  }>(
     `SELECT w.*, u.telegram_chat_id, u.timezone, u.quiet_hours_start, u.quiet_hours_end
      FROM watches w
      JOIN users u ON w.user_id = u.id
-     WHERE w.set_number = $1
-       AND u.ship_to_country = $2
+     WHERE w.item_type = $1
+       AND w.item_id = $2
+       AND u.ship_to_country = $3
        AND w.status = 'active'
        AND u.deleted_at IS NULL
        AND u.subscription_status = 'active'
        AND (w.snoozed_until IS NULL OR w.snoozed_until < NOW())`,
-    [setNumber, shipToCountry]
+    [itemType, itemNumber, shipToCountry]
   );
   return result.rows;
 }
+
+// Legacy function for backwards compatibility
+export async function getWatchesForSetScanGroup(
+  setNumber: string,
+  shipToCountry: string
+): Promise<(Watch & { 
+  telegram_chat_id: number | null; 
+  timezone: string; 
+  quiet_hours_start: string | null; 
+  quiet_hours_end: string | null;
+})[]> {
+  return getWatchesForScanGroup('set', setNumber, shipToCountry);
+}
+
+// ============================================
+// REGION UPDATE
+// ============================================
 
 /**
  * Update ship_from_countries for all watches of a user
@@ -341,4 +456,51 @@ export async function updateUserWatchesShipFrom(
   );
   
   return result.rowCount ?? 0;
+}
+
+// ============================================
+// MINIFIG-SPECIFIC QUERIES
+// ============================================
+
+/**
+ * Get all active minifig watches
+ */
+export async function getActiveMinifigWatches(): Promise<Watch[]> {
+  const result = await query<Watch>(
+    `SELECT w.* FROM watches w
+     JOIN users u ON w.user_id = u.id
+     WHERE w.item_type = 'minifig'
+       AND w.status = 'active'
+       AND u.deleted_at IS NULL
+       AND u.subscription_status = 'active'
+       AND (w.snoozed_until IS NULL OR w.snoozed_until < NOW())
+     ORDER BY w.created_at DESC`
+  );
+  return result.rows;
+}
+
+/**
+ * Get count of watches by item type
+ */
+export async function getWatchCountsByType(): Promise<{
+  sets: number;
+  minifigs: number;
+  total: number;
+}> {
+  const result = await query<{ item_type: string; count: string }>(
+    `SELECT item_type, COUNT(*) as count 
+     FROM watches 
+     WHERE status = 'active'
+     GROUP BY item_type`
+  );
+  
+  let sets = 0;
+  let minifigs = 0;
+  
+  for (const row of result.rows) {
+    if (row.item_type === 'set') sets = parseInt(row.count);
+    if (row.item_type === 'minifig') minifigs = parseInt(row.count);
+  }
+  
+  return { sets, minifigs, total: sets + minifigs };
 }

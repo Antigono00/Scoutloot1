@@ -11,7 +11,7 @@ export interface Alert {
   listing_scanned_for_country: string | null;
   set_number: string;
   set_name: string | null;
-  alert_source: 'ebay' | 'bricklink';
+  alert_source: 'ebay' | 'bricklink' | 'brickowl';
   price_eur: number | null;
   shipping_eur: number | null;
   import_charges_eur: number | null;
@@ -43,7 +43,7 @@ export interface CreateAlertData {
   listing_scanned_for_country: string;
   set_number: string;
   set_name?: string;
-  alert_source: 'ebay' | 'bricklink';
+  alert_source: 'ebay' | 'bricklink' | 'brickowl';
   price_eur: number;
   shipping_eur: number;
   import_charges_eur?: number;
