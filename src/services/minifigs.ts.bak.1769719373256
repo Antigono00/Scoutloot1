@@ -778,8 +778,6 @@ export function getThemeName(figNum: string): string | null {
 /**
  * Get IDs needed for scanner
  * Returns the correct ID to use for each marketplace
- * 
- * V26 Fix: Also triggers lookup when bricklink_id is missing (not just when minifig doesn't exist)
  */
 export async function getMinifigScannerIds(figNum: string): Promise<{
   ebay_search: string;      // What to search on eBay (Bricklink code or name)
@@ -789,9 +787,8 @@ export async function getMinifigScannerIds(figNum: string): Promise<{
 }> {
   const minifig = await getMinifig(figNum);
   
-  // If minifig doesn't exist at all, do a full lookup
   if (!minifig) {
-    console.log(`[Scanner IDs] No cached data for ${figNum}, doing full lookup`);
+    // Try to look it up
     const lookup = await lookupMinifig(figNum);
     return {
       ebay_search: lookup.bricklink_id || lookup.name || figNum,
@@ -801,31 +798,7 @@ export async function getMinifigScannerIds(figNum: string): Promise<{
     };
   }
   
-  // If minifig exists but is missing bricklink_id, try to resolve it using the name
-  if (!minifig.bricklink_id && minifig.name) {
-    console.log(`[Scanner IDs] ${figNum} missing bricklink_id, searching by name: "${minifig.name}"`);
-    const lookup = await lookupMinifig(minifig.name);
-    
-    // If lookup found a bricklink_id, update the database record
-    if (lookup.bricklink_id) {
-      console.log(`[Scanner IDs] Found bricklink_id: ${lookup.bricklink_id}, BOID: ${lookup.brickowl_boid}`);
-      await updateMinifig(figNum, {
-        bricklink_id: lookup.bricklink_id,
-        brickowl_boid: lookup.brickowl_boid,
-      });
-      return {
-        ebay_search: lookup.bricklink_id,
-        brickowl_boid: lookup.brickowl_boid,
-        display_name: lookup.name || minifig.name,
-        image_url: lookup.image_url || minifig.image_url,
-      };
-    }
-    
-    // Lookup didn't find bricklink_id, fall back to name
-    console.log(`[Scanner IDs] Could not resolve bricklink_id for "${minifig.name}", using name for eBay search`);
-  }
-  
-  // Use cached data - prefer Bricklink code for eBay search (it's in listing titles)
+  // Prefer Bricklink code for eBay search (it's in listing titles)
   const ebaySearch = minifig.bricklink_id || minifig.name || minifig.minifig_id;
   
   return {

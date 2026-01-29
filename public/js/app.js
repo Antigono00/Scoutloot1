@@ -269,8 +269,6 @@ async function handleAddWatch(event) {
       method: 'POST',
       body: JSON.stringify({
         user_id: state.user.id,
-        item_type: selectedItemType || 'set',
-        item_id: (selectedItemType === 'minifig') ? selectedMinifigId : (selectedSetNumber || document.getElementById('watch-set').value.trim()),
         set_number: setNumber,
         target_total_price_eur: targetPrice,
         min_total_eur: minPrice,
@@ -282,12 +280,10 @@ async function handleAddWatch(event) {
     closeModal('add-watch');
     renderWatches();
     updateDashboardStats();
-    showToast(`Now tracking ${selectedItemType === 'minifig' ? 'minifig' : 'set'} ${(selectedItemType === 'minifig') ? selectedMinifigId : setNumber}! 🔔`, 'success');
+    showToast(`Now tracking set ${setNumber}! 🔔`, 'success');
     
     event.target.reset();
     selectedSetNumber = null;
-    selectedMinifigId = null;
-    selectedItemType = 'set';
   } catch (error) {
     showToast(error.message || 'Failed to add watch', 'error');
   } finally {
@@ -324,17 +320,22 @@ function renderWatches() {
     return;
   }
   
-  container.innerHTML = state.watches.map(watch => `
+  container.innerHTML = state.watches.map(watch => {
+    const isMinifig = watch.item_type === 'minifig';
+    const itemIcon = isMinifig ? '🧍' : '🧱';
+    const itemName = isMinifig ? (watch.minifig_name || watch.item_id) : (watch.set_name || watch.set_number || watch.item_id);
+    const itemImage = isMinifig ? watch.minifig_image_url : watch.set_image_url;
+    return `
     <div class="watch-item" data-watch-id="${watch.id}">
       <div class="watch-image">
-        ${watch.set_image_url 
-          ? `<img loading="lazy" src="${watch.set_image_url}" alt="${watch.set_number}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="watch-image-fallback" style="display:none">🧱</div>`
-          : '<div class="watch-image-fallback">🧱</div>'
+        ${itemImage 
+          ? `<img loading="lazy" src="${itemImage}" alt="${itemName}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="watch-image-fallback" style="display:none">${itemIcon}</div>`
+          : `<div class="watch-image-fallback">${itemIcon}</div>`
         }
       </div>
       <div class="watch-info">
-        <div class="watch-title">${watch.set_name || watch.set_number}${watch.set_year ? ` <span class="watch-year">(${watch.set_year})</span>` : ''}</div>
-        <div class="watch-set-number">${watch.set_name ? watch.set_number : ''}${watch.set_pieces ? ` • ${watch.set_pieces} pieces` : ''}</div>
+        <div class="watch-title">${itemName}${isMinifig ? ' <span style="color:#9333ea;font-size:0.7rem;">MINIFIG</span>' : ''}${watch.set_year ? ` <span class="watch-year">(${watch.set_year})</span>` : ''}</div>
+        <div class="watch-set-number">${isMinifig ? watch.item_id : (watch.set_name ? watch.set_number : '')}${watch.set_pieces ? ` • ${watch.set_pieces} pieces` : ''}</div>
         <div class="watch-meta">
           ${watch.condition !== 'any' ? watch.condition.charAt(0).toUpperCase() + watch.condition.slice(1) + ' • ' : ''}
           ${watch.total_alerts_sent || 0} alerts sent
@@ -351,7 +352,8 @@ function renderWatches() {
         <button onclick="deleteWatch(${watch.id})" title="Delete watch" class="btn-delete">🗑</button>
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 
 // ===========================================
@@ -670,7 +672,7 @@ function initAutocomplete() {
     }
     
     autocompleteTimeout = setTimeout(() => {
-      searchSetsAndMinifigs(query);
+      searchSets(query);
     }, 300);
   });
   
@@ -741,104 +743,11 @@ function selectSet(setNum, setName) {
   
   input.value = setNum;
   selectedSetNumber = setNum;
-  selectedMinifigId = null;
-  selectedItemType = 'set';
   results.classList.remove('active');
   
   document.getElementById('watch-target').focus();
   
   showToast(`Selected: ${setName}`, 'success');
-}
-
-
-// ===========================================
-// COMBINED SET + MINIFIG SEARCH (V24)
-// ===========================================
-
-// Track what type of item was selected
-let selectedItemType = 'set';
-let selectedMinifigId = null;
-
-// Combined search - queries both sets and minifigs
-async function searchSetsAndMinifigs(query) {
-  const results = document.getElementById('set-autocomplete');
-  
-  results.innerHTML = '<div class="autocomplete-loading">Searching...</div>';
-  results.classList.add('active');
-  
-  try {
-    // Query both APIs in parallel
-    const [setsResponse, minifigsResponse] = await Promise.all([
-      fetch(`/api/sets/search?q=${encodeURIComponent(query)}`),
-      fetch(`/api/minifigs/search?q=${encodeURIComponent(query)}`)
-    ]);
-    
-    const setsData = await setsResponse.json();
-    const minifigsData = await minifigsResponse.json();
-    
-    const sets = (setsData.results || []).map(set => ({ ...set, _type: 'set' }));
-    const minifigs = (minifigsData.results || []).map(fig => ({ ...fig, _type: 'minifig' }));
-    
-    // Combine results - sets first, then minifigs
-    const combined = [...sets.slice(0, 5), ...minifigs.slice(0, 5)];
-    
-    if (combined.length === 0) {
-      results.innerHTML = '<div class="autocomplete-empty">No sets or minifigures found</div>';
-      return;
-    }
-    
-    results.innerHTML = combined.map(item => {
-      if (item._type === 'minifig') {
-        return `
-          <div class="autocomplete-item" onclick="selectMinifig('${item.fig_num}', '${escapeHtml(item.name)}')">
-            <div class="autocomplete-item-image">
-              ${item.set_img_url 
-                ? `<img src="${item.set_img_url}" alt="${escapeHtml(item.name)}" onerror="this.parentElement.innerHTML='🧍'">`
-                : '🧍'
-              }
-            </div>
-            <div class="autocomplete-item-info">
-              <div class="autocomplete-item-name">${escapeHtml(item.name)} <span style="color: #9333ea; font-size: 0.75rem;">MINIFIG</span></div>
-              <div class="autocomplete-item-meta">${item.fig_num} • ${item.num_parts || '?'} parts</div>
-            </div>
-          </div>
-        `;
-      } else {
-        return `
-          <div class="autocomplete-item" onclick="selectSet('${item.set_num}', '${escapeHtml(item.name)}')">
-            <div class="autocomplete-item-image">
-              ${item.set_img_url 
-                ? `<img src="${item.set_img_url}" alt="${escapeHtml(item.name)}" onerror="this.parentElement.innerHTML='🧱'">`
-                : '🧱'
-              }
-            </div>
-            <div class="autocomplete-item-info">
-              <div class="autocomplete-item-name">${escapeHtml(item.name)}</div>
-              <div class="autocomplete-item-meta">${item.set_num} • ${item.year || '?'} • ${item.num_parts || '?'} pieces</div>
-            </div>
-          </div>
-        `;
-      }
-    }).join('');
-    
-  } catch (error) {
-    console.error('Search error:', error);
-    results.innerHTML = '<div class="autocomplete-empty">Search failed</div>';
-  }
-}
-
-function selectMinifig(figNum, figName) {
-  const input = document.getElementById('watch-set');
-  const results = document.getElementById('set-autocomplete');
-  
-  input.value = figNum;
-  selectedMinifigId = figNum;
-  selectedSetNumber = null;
-  selectedItemType = 'minifig';
-  results.classList.remove('active');
-  
-  document.getElementById('watch-target').focus();
-  showToast(`Selected: ${figName}`, 'success');
 }
 
 function escapeHtml(text) {

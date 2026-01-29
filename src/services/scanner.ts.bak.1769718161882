@@ -22,7 +22,7 @@ import { enqueuePushAlert } from '../jobs/pushQueue.js';
 import { formatDealAlertMessage } from '../telegram/escape.js';
 import { containsExcludeWord } from '../utils/normalize.js';
 import { getSet } from './sets.js';
-import { getMinifig, getMinifigScannerIds } from './minifigs.js';
+import { getMinifig } from './minifigs.js';
 import { getUserById } from './users.js';
 import { userHasPushEnabled } from './push.js';
 // Filters
@@ -325,17 +325,14 @@ async function processScanGroupMinifig(
   
   console.log(`[${requestId}] Scanning MINIFIG: ${figNum} -> ${shipToCountry}`);
 
-  // Resolve IDs for each marketplace
-  const scannerIds = await getMinifigScannerIds(figNum);
-  const figName = scannerIds.display_name;
-  const ebaySearchTerm = scannerIds.ebay_search;
-  
-  console.log(`[${requestId}] Resolved IDs: ebay="${ebaySearchTerm}", boid=${scannerIds.brickowl_boid ?? 'none'}, name="${figName ?? 'unknown'}"`);
+  // Get minifig info
+  const minifigInfo = await getMinifig(figNum);
+  const figName = minifigInfo?.name ?? null;
 
   // ============================================
   // EBAY SCAN (with minifig-specific filter)
   // ============================================
-  const ebayListings = await scanEbayForMinifig(figNum, ebaySearchTerm, figName, shipToCountry, requestId, result);
+  const ebayListings = await scanEbayForMinifig(figNum, figName, shipToCountry, requestId, result);
   
   // ============================================
   // BRICKOWL SCAN (if enabled)
@@ -382,17 +379,15 @@ async function processScanGroupMinifig(
 
 async function scanEbayForMinifig(
   figNum: string,
-  ebaySearchTerm: string,
   figName: string | null,
   shipToCountry: string,
   requestId: string,
   result: ScanResult
 ): Promise<NormalizedListing[]> {
   try {
-    // Search for minifig on eBay using Bricklink code (e.g., "sw0010 minifigure lego")
-    // Bricklink codes appear in eBay listing titles, Rebrickable IDs don't
-    const searchQuery = `${ebaySearchTerm} minifigure lego`;
-    console.log(`[${requestId}] eBay minifig search: "${searchQuery}"`);
+    // Search for minifig on eBay
+    // Use fig_num + "minifigure" to get relevant results
+    const searchQuery = figName ? `${figName} minifigure lego` : figNum;
     const searchResponse = await searchEbay(searchQuery, shipToCountry);
     const rawListings = searchResponse.itemSummaries ?? [];
     result.listingsFound += rawListings.length;
