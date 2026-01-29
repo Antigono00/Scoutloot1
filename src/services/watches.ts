@@ -65,7 +65,7 @@ export interface Watch {
   user_id: number;
   // NEW: item_type and item_id replace set_number for flexibility
   item_type: 'set' | 'minifig';
-  item_id: string;  // set_number OR fig_num
+  item_id: string;  // set_number OR minifig_id
   // Legacy alias (for backwards compatibility during migration)
   set_number?: string;
   target_total_price_eur: number;
@@ -136,7 +136,7 @@ export async function createWatch(data: CreateWatchData): Promise<Watch> {
       );
     } else {
       await client.query(
-        `INSERT INTO minifigs (fig_num) VALUES ($1) ON CONFLICT (fig_num) DO NOTHING`,
+        `INSERT INTO minifigs (minifig_id) VALUES ($1) ON CONFLICT (minifig_id) DO NOTHING`,
         [itemNumber.toLowerCase()]
       );
       itemNumber = itemNumber.toLowerCase(); // Normalize minifig IDs to lowercase

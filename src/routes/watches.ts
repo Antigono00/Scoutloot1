@@ -1,3 +1,11 @@
+/**
+ * Watches Routes
+ * 
+ * V24: Updated to support both sets and minifigures
+ * - Now joins with both sets AND minifigs tables
+ * - Supports item_type + item_id in POST body
+ */
+
 import { Router, Request, Response } from 'express';
 import {
   createWatch,
@@ -14,7 +22,7 @@ import { query } from '../db/index.js';
 const router = Router();
 
 // Rebrickable API key
-const REBRICKABLE_API_KEY = '05480b178b7ab764c21069f710e1380f';
+const REBRICKABLE_API_KEY = process.env.REBRICKABLE_API_KEY || '05480b178b7ab764c21069f710e1380f';
 
 interface RebrickableSet {
   set_num: string;
@@ -26,11 +34,18 @@ interface RebrickableSet {
   set_url: string;
 }
 
+interface RebrickableMinifig {
+  set_num: string;
+  name: string;
+  num_parts: number;
+  set_img_url: string | null;
+  set_url: string;
+}
+
 /**
  * Fetch set info from Rebrickable and update database
  */
 async function fetchAndUpdateSetInfo(setNumber: string): Promise<void> {
-  // Check if set already has name populated
   const existing = await query(
     `SELECT name FROM sets WHERE set_number = $1`,
     [setNumber]
@@ -41,7 +56,6 @@ async function fetchAndUpdateSetInfo(setNumber: string): Promise<void> {
     return;
   }
 
-  // Rebrickable uses format "75192-1" for set numbers
   const rebrickableSetNum = setNumber.includes('-') ? setNumber : `${setNumber}-1`;
   const url = `https://rebrickable.com/api/v3/lego/sets/${rebrickableSetNum}/`;
 
@@ -65,7 +79,6 @@ async function fetchAndUpdateSetInfo(setNumber: string): Promise<void> {
 
     const data = await response.json() as RebrickableSet;
 
-    // Update set in database
     await query(
       `UPDATE sets SET 
          name = $1,
@@ -88,15 +101,75 @@ async function fetchAndUpdateSetInfo(setNumber: string): Promise<void> {
     console.log(`✅ Updated set ${setNumber}: ${data.name} (${data.year})`);
   } catch (error) {
     console.error(`Error fetching set ${setNumber} from Rebrickable:`, error);
-    // Don't throw - we still want to create the watch even if Rebrickable fails
   }
 }
 
+/**
+ * Fetch minifig info from Rebrickable and update database
+ */
+async function fetchAndUpdateMinifigInfo(figNum: string): Promise<void> {
+  const existing = await query(
+    `SELECT name FROM minifigs WHERE minifig_id = $1`,
+    [figNum.toLowerCase()]
+  );
+  
+  if (existing.rows[0]?.name) {
+    console.log(`Minifig ${figNum} already has info, skipping Rebrickable fetch`);
+    return;
+  }
+
+  const url = `https://rebrickable.com/api/v3/lego/minifigs/${figNum}/`;
+
+  try {
+    console.log(`Fetching minifig info from Rebrickable: ${figNum}`);
+    
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `key ${REBRICKABLE_API_KEY}`,
+        'Accept': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        console.log(`Minifig ${figNum} not found on Rebrickable`);
+        return;
+      }
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const data = await response.json() as RebrickableMinifig;
+
+    await query(
+      `INSERT INTO minifigs (minifig_id, name, num_parts, image_url, rebrickable_url, updated_at)
+       VALUES ($1, $2, $3, $4, $5, NOW())
+       ON CONFLICT (minifig_id) 
+       DO UPDATE SET 
+         name = COALESCE(EXCLUDED.name, minifigs.name),
+         num_parts = COALESCE(EXCLUDED.num_parts, minifigs.num_parts),
+         image_url = COALESCE(EXCLUDED.image_url, minifigs.image_url),
+         rebrickable_url = COALESCE(EXCLUDED.rebrickable_url, minifigs.rebrickable_url),
+         updated_at = NOW()`,
+      [figNum.toLowerCase(), data.name, data.num_parts, data.set_img_url, data.set_url]
+    );
+
+    console.log(`✅ Updated minifig ${figNum}: ${data.name}`);
+  } catch (error) {
+    console.error(`Error fetching minifig ${figNum} from Rebrickable:`, error);
+  }
+}
+
+// ============================================
+// CREATE WATCH
+// POST /api/watches
+// ============================================
 router.post('/', async (req: Request, res: Response): Promise<void> => {
   try {
     const {
       user_id,
-      set_number,
+      set_number,      // Legacy support
+      item_type,       // NEW: 'set' or 'minifig'
+      item_id,         // NEW: set number or minifig ID
       target_total_price_eur,
       min_total_eur,
       condition,
@@ -104,19 +177,24 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       min_seller_rating,
       min_seller_feedback,
       exclude_words,
+      enable_brickowl_alerts,
     } = req.body;
 
-    if (!user_id || !set_number || !target_total_price_eur) {
+    // Validate required fields
+    const actualItemId = item_id || set_number;
+    if (!user_id || !actualItemId || !target_total_price_eur) {
       res.status(400).json({
-        error: 'Missing required fields: user_id, set_number, target_total_price_eur',
+        error: 'Missing required fields: user_id, item_id (or set_number), target_total_price_eur',
       });
       return;
     }
 
-    // Create the watch first
+    // Create the watch
     const watch = await createWatch({
       user_id,
-      set_number,
+      set_number: item_type === 'set' ? actualItemId : undefined,
+      item_type: item_type || 'set',
+      item_id: actualItemId,
       target_total_price_eur,
       min_total_eur,
       condition,
@@ -124,19 +202,29 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       min_seller_rating,
       min_seller_feedback,
       exclude_words,
+      enable_brickowl_alerts,
     });
 
-    // Fetch set info from Rebrickable (async, don't wait for response)
-    // This runs in background so user doesn't have to wait
-    fetchAndUpdateSetInfo(set_number).catch(err => {
-      console.error('Background Rebrickable fetch failed:', err);
-    });
+    // Fetch item info from Rebrickable in background
+    const watchItemType = item_type || 'set';
+    if (watchItemType === 'minifig') {
+      fetchAndUpdateMinifigInfo(actualItemId).catch(err => {
+        console.error('Background Rebrickable minifig fetch failed:', err);
+      });
+    } else {
+      fetchAndUpdateSetInfo(actualItemId).catch(err => {
+        console.error('Background Rebrickable set fetch failed:', err);
+      });
+    }
 
-    // Return watch with set info if available
+    // Return watch with item info if available
     const result = await query(
-      `SELECT w.*, s.name as set_name, s.image_url as set_image_url, s.year as set_year, s.pieces as set_pieces
+      `SELECT w.*, 
+              s.name as set_name, s.image_url as set_image_url, s.year as set_year, s.pieces as set_pieces,
+              m.name as minifig_name, m.image_url as minifig_image_url, m.num_parts as minifig_parts
        FROM watches w
-       LEFT JOIN sets s ON w.set_number = s.set_number
+       LEFT JOIN sets s ON w.item_type = 'set' AND w.item_id = s.set_number
+       LEFT JOIN minifigs m ON w.item_type = 'minifig' AND LOWER(w.item_id) = m.minifig_id
        WHERE w.id = $1`,
       [watch.id]
     );
@@ -146,7 +234,7 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
     const err = error as { code?: string };
     if (err.code === '23505') {
       res.status(409).json({
-        error: 'Watch already exists for this user and set',
+        error: 'Watch already exists for this user and item',
       });
       return;
     }
@@ -158,6 +246,10 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
+// ============================================
+// GET USER'S WATCHES
+// GET /api/watches/user/:userId
+// ============================================
 router.get('/user/:userId', async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = parseInt(req.params.userId, 10);
@@ -166,11 +258,14 @@ router.get('/user/:userId', async (req: Request, res: Response): Promise<void> =
       return;
     }
 
-    // Get watches with set info (name, image)
+    // Get watches with BOTH set and minifig info
     const result = await query(
-      `SELECT w.*, s.name as set_name, s.image_url as set_image_url, s.year as set_year, s.pieces as set_pieces
+      `SELECT w.*, 
+              s.name as set_name, s.image_url as set_image_url, s.year as set_year, s.pieces as set_pieces,
+              m.name as minifig_name, m.image_url as minifig_image_url, m.num_parts as minifig_parts
        FROM watches w
-       LEFT JOIN sets s ON w.set_number = s.set_number
+       LEFT JOIN sets s ON w.item_type = 'set' AND w.item_id = s.set_number
+       LEFT JOIN minifigs m ON w.item_type = 'minifig' AND LOWER(w.item_id) = m.minifig_id
        WHERE w.user_id = $1
        ORDER BY w.created_at DESC`,
       [userId]
@@ -185,6 +280,10 @@ router.get('/user/:userId', async (req: Request, res: Response): Promise<void> =
   }
 });
 
+// ============================================
+// GET SINGLE WATCH
+// GET /api/watches/:id
+// ============================================
 router.get('/:id', async (req: Request, res: Response): Promise<void> => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -206,7 +305,10 @@ router.get('/:id', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
-// Edit watch - update multiple fields
+// ============================================
+// UPDATE WATCH
+// PATCH /api/watches/:id
+// ============================================
 router.patch('/:id', async (req: Request, res: Response): Promise<void> => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -217,7 +319,6 @@ router.patch('/:id', async (req: Request, res: Response): Promise<void> => {
 
     const { target_total_price_eur, min_total_eur, condition } = req.body;
 
-    // Build dynamic update query
     const updates: string[] = [];
     const values: (string | number)[] = [];
     let paramCount = 1;
@@ -265,6 +366,10 @@ router.patch('/:id', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
+// ============================================
+// UPDATE TARGET PRICE ONLY
+// PATCH /api/watches/:id/target
+// ============================================
 router.patch('/:id/target', async (req: Request, res: Response): Promise<void> => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -288,6 +393,10 @@ router.patch('/:id/target', async (req: Request, res: Response): Promise<void> =
   }
 });
 
+// ============================================
+// STOP WATCH
+// POST /api/watches/:id/stop
+// ============================================
 router.post('/:id/stop', async (req: Request, res: Response): Promise<void> => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -309,6 +418,10 @@ router.post('/:id/stop', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
+// ============================================
+// RESUME WATCH
+// POST /api/watches/:id/resume
+// ============================================
 router.post('/:id/resume', async (req: Request, res: Response): Promise<void> => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -330,6 +443,10 @@ router.post('/:id/resume', async (req: Request, res: Response): Promise<void> =>
   }
 });
 
+// ============================================
+// DELETE WATCH
+// DELETE /api/watches/:id
+// ============================================
 router.delete('/:id', async (req: Request, res: Response): Promise<void> => {
   try {
     const id = parseInt(req.params.id, 10);

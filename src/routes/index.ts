@@ -1,36 +1,32 @@
 /**
  * Main Router
  * 
- * Aggregates all API routes
+ * Aggregates all API route modules.
+ * V24: Added minifigs routes for minifigure watch support.
  */
 
 import { Router } from 'express';
-import usersRouter from './users.js';
-import watchesRouter from './watches.js';
-import alertsRouter from './alerts.js';
-import scanRouter from './scan.js';
-import setsRouter from './sets.js';
-import pushRouter from './push.js';
-import jobsRouter from './jobs.js';
+
+// Import route modules
+import alertsRoutes from './alerts.js';
+import jobsRoutes from './jobs.js';
+import scanRoutes from './scan.js';
+import setsRoutes from './sets.js';
+import pushRoutes from './push.js';
+import usersRoutes from './users.js';
+import watchesRoutes from './watches.js';
+import minifigsRoutes from './minifigs.js';  // NEW V24
 
 const router = Router();
 
 // Mount routes
-router.use('/users', usersRouter);
-router.use('/watches', watchesRouter);
-router.use('/alerts', alertsRouter);
-router.use('/scan', scanRouter);
-router.use('/sets', setsRouter);
-router.use('/push', pushRouter);
-router.use('/jobs', jobsRouter);
-
-// Health check
-router.get('/health', (_req, res) => {
-  res.json({ 
-    status: 'ok', 
-    timestamp: new Date().toISOString(),
-    version: 'v14.2',
-  });
-});
+router.use('/alerts', alertsRoutes);
+router.use('/jobs', jobsRoutes);
+router.use('/scan', scanRoutes);
+router.use('/sets', setsRoutes);
+router.use('/push', pushRoutes);
+router.use('/users', usersRoutes);
+router.use('/watches', watchesRoutes);
+router.use('/minifigs', minifigsRoutes);  // NEW V24: /api/minifigs/*
 
 export default router;
