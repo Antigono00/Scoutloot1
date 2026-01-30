@@ -269,7 +269,7 @@ async function cacheMinifigData(data: {
   num_parts: number | null;
 }): Promise<Minifig> {
   // Determine primary ID (prefer Rebrickable, then Bricklink, then BOID)
-  const primaryId = data.rebrickable_id || data.bricklink_id || data.brickowl_boid || 'unknown';
+  const primaryId = data.bricklink_id || data.rebrickable_id || data.brickowl_boid || 'unknown';
   
   const result = await query<Minifig>(
     `INSERT INTO minifigs (minifig_id, bricklink_id, brickowl_boid, name, num_parts, image_url, updated_at)
@@ -693,7 +693,7 @@ export async function searchMinifigs(
   const result = await query<MinifigSearchResult>(
     `SELECT minifig_id, bricklink_id, brickowl_boid, name, num_parts, image_url
      FROM minifigs
-     WHERE name IS NOT NULL
+     WHERE name IS NOT NULL AND bricklink_id IS NOT NULL
        AND (
          minifig_id ILIKE $1
          OR bricklink_id ILIKE $1

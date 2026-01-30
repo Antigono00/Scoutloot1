@@ -32,7 +32,7 @@
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -45,7 +45,7 @@
     /* Minifig Page Specific Styles */
     .minifig-page {
       min-height: 100vh;
-      background: var(--bg-dark);
+      background: var(--bg-primary);
       padding-top: 80px;
     }
     
@@ -97,7 +97,7 @@
     .minifig-name {
       font-size: 2rem;
       font-weight: 700;
-      color: var(--text);
+      color: var(--text-primary);
       margin-bottom: 12px;
     }
     
@@ -186,7 +186,7 @@
     }
     
     .tab:hover {
-      color: var(--text);
+      color: var(--text-primary);
     }
     
     .tab.active {
@@ -226,7 +226,7 @@
     .deals-title {
       font-size: 1.25rem;
       font-weight: 600;
-      color: var(--text);
+      color: var(--text-primary);
     }
     
     .deal-count {
@@ -306,7 +306,7 @@
       text-align: center;
       padding: 10px;
       background: var(--accent);
-      color: var(--bg-dark);
+      color: var(--bg-primary);
       font-weight: 600;
       border-radius: 8px;
       text-decoration: none;
@@ -359,7 +359,7 @@
     
     .chart-btn.active {
       background: var(--accent);
-      color: var(--bg-dark);
+      color: var(--bg-primary);
       border-color: var(--accent);
     }
     
@@ -434,7 +434,7 @@
     .stat-card-value {
       font-size: 1.5rem;
       font-weight: 700;
-      color: var(--text);
+      color: var(--text-primary);
     }
     
     .stat-card-value.positive {
@@ -482,26 +482,57 @@
   </style>
 </head>
 <body>
-  <!-- Navigation -->
+  <div class="bg-pattern"></div>
+  
+  <!-- Navigation (matches index.html structure) -->
   <nav>
     <a href="/" class="logo">
-      <img src="/logo.svg" alt="ScoutLoot" height="32">
+      <img src="/logo-icon.png" alt="ScoutLoot" class="logo-icon">
+      <span>ScoutLoot</span>
     </a>
+    
     <div class="nav-links">
+      <a href="/#how-it-works">{{nav.how_it_works}}</a>
       <a href="/#features">{{nav.features}}</a>
       <a href="/#pricing">{{nav.pricing}}</a>
-      <a href="/faq">{{nav.faq}}</a>
     </div>
-    <div class="nav-actions">
-      <div class="language-switcher">
-        <button class="language-btn" id="language-btn">
-          <span id="current-lang-flag">🇬🇧</span>
-          <span id="current-lang-code">EN</span>
+    
+    <div class="nav-right">
+      <!-- Language Switcher -->
+      <div class="language-switcher" id="language-switcher">
+        <button class="language-btn" id="language-btn" aria-label="Select language">
+          <span class="language-flag" id="current-lang-flag">🇬🇧</span>
+          <span class="language-code" id="current-lang-code">EN</span>
+          <span class="dropdown-arrow">▼</span>
         </button>
-        <div class="language-dropdown" id="language-dropdown"></div>
+        <div class="language-dropdown" id="language-dropdown">
+          <!-- Populated by JS from window.__SCOUTLOOT_LANGUAGES__ -->
+        </div>
       </div>
-      <button class="btn btn-secondary" onclick="openModal('login')">{{nav.login}}</button>
-      <button class="btn btn-primary" onclick="openModal('signup')">{{nav.signup}}</button>
+      
+      <div class="nav-auth" id="nav-auth">
+        <button class="btn btn-ghost" onclick="openModal('login')">{{nav.login}}</button>
+        <button class="btn btn-primary" onclick="openModal('signup')">{{nav.get_started}}</button>
+      </div>
+    </div>
+    
+    <div class="user-menu" id="user-menu" style="display: none;">
+      <button class="user-btn">
+        <div class="user-avatar" id="user-avatar">J</div>
+        <span id="user-email">user@example.com</span>
+        <span>▼</span>
+      </button>
+      <div class="user-dropdown">
+        <a href="#" onclick="showDashboard(); return false;">
+          {{dashboard.user_menu.dashboard}}
+        </a>
+        <a href="#" onclick="openModal('settings'); return false;">
+          {{dashboard.user_menu.settings}}
+        </a>
+        <button class="logout-btn" onclick="logout()">
+          {{dashboard.user_menu.logout}}
+        </button>
+      </div>
     </div>
   </nav>
 
@@ -554,9 +585,6 @@
               <button class="btn btn-primary" onclick="createWatchFromPage()">
                 ➕ Watch This Minifig
               </button>
-              <a class="btn btn-secondary" id="bricklink-link" href="#" target="_blank" rel="noopener">
-                🔗 BrickLink
-              </a>
             </div>
           </div>
         </div>
@@ -653,24 +681,33 @@
     </div>
   </main>
 
-  <!-- Footer -->
+  <!-- Footer (matches index.html structure) -->
   <footer>
     <div class="footer-content">
       <div class="footer-brand">
-        <img src="/logo.svg" alt="ScoutLoot" height="28">
-        <p>Find the best LEGO deals across marketplaces.</p>
+        <a href="/" class="logo">
+          <img src="/logo-icon.png" alt="ScoutLoot" class="logo-icon">
+          <span>ScoutLoot</span>
+        </a>
+        <p>{{footer.tagline}}</p>
       </div>
-      <div class="footer-links">
-        <h4>Product</h4>
-        <a href="/#features">Features</a>
-        <a href="/#pricing">Pricing</a>
-        <a href="/faq">FAQ</a>
+      
+      <div class="footer-column">
+        <h4>{{footer.product}}</h4>
+        <ul>
+          <li><a href="/#how-it-works">{{nav.how_it_works}}</a></li>
+          <li><a href="/#features">{{nav.features}}</a></li>
+          <li><a href="/#pricing">{{nav.pricing}}</a></li>
+        </ul>
       </div>
-      <div class="footer-links">
-        <h4>Legal</h4>
-        <a href="/privacy">Privacy Policy</a>
-        <a href="/terms">Terms of Service</a>
-        <a href="/cookies">Cookie Policy</a>
+      
+      <div class="footer-column">
+        <h4>{{footer.legal}}</h4>
+        <ul>
+          <li><a href="/privacy">{{footer.privacy}}</a></li>
+          <li><a href="/terms">{{footer.terms}}</a></li>
+          <li><a href="/cookies">{{footer.cookies}}</a></li>
+        </ul>
       </div>
     </div>
     <div class="footer-bottom">
@@ -739,10 +776,6 @@
         document.getElementById('minifig-theme-item').style.display = 'flex';
       }
       
-      // BrickLink link
-      const bricklinkId = minifig.bricklink_id || minifig.fig_num;
-      document.getElementById('bricklink-link').href = `https://www.bricklink.com/v2/catalog/catalogitem.page?M=${bricklinkId}`;
-      
       // Watchers
       if (stats.watchers > 0) {
         document.getElementById('minifig-watchers').textContent = stats.watchers;
@@ -761,126 +794,77 @@
       }
       
       // Stats grid
-      if (stats.lowest_seen || stats.trend_7d !== null || history.days_tracked > 0) {
+      if (stats.lowest_new || stats.trend_7d !== null || stats.trend_30d !== null || stats.days_tracked > 0) {
         document.getElementById('stats-grid').style.display = 'grid';
-        document.getElementById('stat-lowest').textContent = stats.lowest_seen 
-          ? `€${stats.lowest_seen.toFixed(2)}` 
-          : '-';
         
-        // 7-day trend
+        if (stats.lowest_new) {
+          document.getElementById('stat-lowest').textContent = `€${stats.lowest_new.toFixed(2)}`;
+        }
+        
         if (stats.trend_7d !== null) {
-          const trend7dEl = document.getElementById('stat-trend-7d');
-          trend7dEl.textContent = stats.trend_7d > 0 ? `+${stats.trend_7d}%` : `${stats.trend_7d}%`;
-          trend7dEl.classList.add(stats.trend_7d > 0 ? 'negative' : 'positive');
+          const trend7d = document.getElementById('stat-trend-7d');
+          trend7d.textContent = `${stats.trend_7d > 0 ? '+' : ''}${stats.trend_7d.toFixed(1)}%`;
+          trend7d.classList.add(stats.trend_7d < 0 ? 'positive' : stats.trend_7d > 0 ? 'negative' : '');
         }
         
-        // 30-day trend
         if (stats.trend_30d !== null) {
-          const trend30dEl = document.getElementById('stat-trend-30d');
-          trend30dEl.textContent = stats.trend_30d > 0 ? `+${stats.trend_30d}%` : `${stats.trend_30d}%`;
-          trend30dEl.classList.add(stats.trend_30d > 0 ? 'negative' : 'positive');
+          const trend30d = document.getElementById('stat-trend-30d');
+          trend30d.textContent = `${stats.trend_30d > 0 ? '+' : ''}${stats.trend_30d.toFixed(1)}%`;
+          trend30d.classList.add(stats.trend_30d < 0 ? 'positive' : stats.trend_30d > 0 ? 'negative' : '');
         }
         
-        document.getElementById('stat-days-tracked').textContent = history.days_tracked;
+        if (stats.days_tracked > 0) {
+          document.getElementById('stat-days-tracked').textContent = `${stats.days_tracked} days`;
+        }
       }
       
       // Render deals
-      renderDeals(deals);
+      renderDeals(deals.new, 'new-deals-grid', 'new-deal-count');
+      renderDeals(deals.used, 'used-deals-grid', 'used-deal-count');
       
-      // Update page title
-      document.title = `${minifig.fig_num} ${minifig.name} - Price Tracker | ScoutLoot`;
+      // Initialize chart
+      initChart(history);
     }
     
-    // Render deals grids
-    function renderDeals(deals) {
-      // New deals
-      const newGrid = document.getElementById('new-deals-grid');
-      document.getElementById('new-deal-count').textContent = `${deals.new.length} deals`;
+    // Render deals grid
+    function renderDeals(deals, gridId, countId) {
+      const grid = document.getElementById(gridId);
+      const count = document.getElementById(countId);
       
-      if (deals.new.length > 0) {
-        newGrid.innerHTML = deals.new.map(deal => renderDealCard(deal)).join('');
+      count.textContent = `${deals.length} deal${deals.length !== 1 ? 's' : ''}`;
+      
+      if (deals.length === 0) {
+        return;
       }
       
-      // Used deals
-      const usedGrid = document.getElementById('used-deals-grid');
-      document.getElementById('used-deal-count').textContent = `${deals.used.length} deals`;
-      
-      if (deals.used.length > 0) {
-        usedGrid.innerHTML = deals.used.map(deal => renderDealCard(deal)).join('');
-      }
-    }
-    
-    // Render single deal card
-    function renderDealCard(deal) {
-      const sourceIcon = deal.source === 'brickowl' ? '🦉' : '🛒';
-      const sourceName = deal.source === 'brickowl' ? 'BrickOwl' : 'eBay';
-      
-      return `
-        <div class="deal-card">
-          <div class="deal-header">
-            <div class="deal-price">€${deal.total_eur.toFixed(2)}</div>
-            <div class="deal-source">${sourceIcon} ${sourceName}</div>
+      grid.innerHTML = deals.map(deal => {
+        const sourceIcon = deal.source === 'ebay' ? '🛒 eBay' : '🦉 BrickOwl';
+        const rating = deal.seller_feedback ? `⭐ ${deal.seller_feedback}%` : '';
+        const country = deal.ship_from_country ? `📍 ${deal.ship_from_country}` : '';
+        
+        return `
+          <div class="deal-card">
+            <div class="deal-header">
+              <div class="deal-price">€${deal.total_eur.toFixed(2)}</div>
+              <div class="deal-source">${sourceIcon}</div>
+            </div>
+            <div class="deal-breakdown">
+              <span>💰 Item: €${deal.price_eur.toFixed(2)}</span>
+              <span>📦 Shipping: €${(deal.shipping_eur || 0).toFixed(2)}</span>
+            </div>
+            <div class="deal-seller">
+              <span>👤 ${deal.seller || 'Unknown'}</span>
+              ${rating ? `<span class="deal-seller-rating">${rating}</span>` : ''}
+              ${country ? `<span>${country}</span>` : ''}
+            </div>
+            <a href="${deal.url}" target="_blank" rel="noopener" class="deal-link">View Deal →</a>
           </div>
-          <div class="deal-breakdown">
-            <span>💰 Item: €${deal.price_eur.toFixed(2)}</span>
-            <span>📦 Shipping: €${deal.shipping_eur.toFixed(2)}</span>
-            ${deal.import_charges_eur > 0 ? `<span>📋 Import: €${deal.import_charges_eur.toFixed(2)}</span>` : ''}
-          </div>
-          <div class="deal-seller">
-            ${deal.seller_username ? `<span>👤 ${deal.seller_username}</span>` : ''}
-            ${deal.seller_rating ? `<span class="deal-seller-rating">⭐ ${deal.seller_rating}%</span>` : ''}
-            ${deal.seller_country ? `<span>📍 ${deal.seller_country}</span>` : ''}
-          </div>
-          <a class="deal-link" href="${deal.url}" target="_blank" rel="noopener">View Deal →</a>
-        </div>
-      `;
+        `;
+      }).join('');
     }
     
-    // Show error state
-    function showError() {
-      document.getElementById('loading-state').style.display = 'none';
-      document.getElementById('error-state').style.display = 'block';
-    }
-    
-    // Tab switching
-    function setupTabs() {
-      const tabs = document.querySelectorAll('.tab');
-      tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-          // Remove active from all tabs
-          tabs.forEach(t => t.classList.remove('active'));
-          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-          
-          // Add active to clicked tab
-          tab.classList.add('active');
-          const tabId = `tab-${tab.dataset.tab}`;
-          document.getElementById(tabId).classList.add('active');
-          
-          // Initialize chart on first view
-          if (tab.dataset.tab === 'chart' && !priceChart && minifigData) {
-            initChart();
-          }
-        });
-      });
-    }
-    
-    // Chart controls
-    function setupChartControls() {
-      const buttons = document.querySelectorAll('.chart-btn');
-      buttons.forEach(btn => {
-        btn.addEventListener('click', () => {
-          buttons.forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          currentChartDays = parseInt(btn.dataset.days);
-          if (priceChart) {
-            updateChart();
-          }
-        });
-      });
-    }
-    
-    // Initialize chart
-    function initChart() {
+    // Initialize price chart
+    function initChart(history) {
       const ctx = document.getElementById('price-chart').getContext('2d');
       
       priceChart = new Chart(ctx, {
@@ -897,22 +881,21 @@
           },
           plugins: {
             legend: {
-              display: true,
               position: 'top',
               labels: {
-                color: '#94a3b8',
-                usePointStyle: true,
+                color: '#A0A0B0',
+                font: { family: "'Outfit', sans-serif" }
               }
             },
             tooltip: {
-              backgroundColor: '#1e293b',
-              borderColor: '#334155',
+              backgroundColor: '#1A1A25',
+              titleColor: '#FFFFFF',
+              bodyColor: '#A0A0B0',
+              borderColor: 'rgba(255,255,255,0.1)',
               borderWidth: 1,
-              titleColor: '#f1f5f9',
-              bodyColor: '#cbd5e1',
               callbacks: {
                 label: function(context) {
-                  return `${context.dataset.label}: €${context.parsed.y?.toFixed(2) || '-'}`;
+                  return `${context.dataset.label}: €${context.raw.y.toFixed(2)}`;
                 }
               }
             }
@@ -922,24 +905,15 @@
               type: 'time',
               time: {
                 unit: 'day',
-                displayFormats: {
-                  day: 'MMM d'
-                }
+                displayFormats: { day: 'MMM d' }
               },
-              grid: {
-                color: 'rgba(255,255,255,0.05)',
-              },
-              ticks: {
-                color: '#64748b',
-              }
+              grid: { color: 'rgba(255,255,255,0.05)' },
+              ticks: { color: '#606070' }
             },
             y: {
-              beginAtZero: false,
-              grid: {
-                color: 'rgba(255,255,255,0.05)',
-              },
+              grid: { color: 'rgba(255,255,255,0.05)' },
               ticks: {
-                color: '#64748b',
+                color: '#606070',
                 callback: function(value) {
                   return '€' + value;
                 }
@@ -949,36 +923,31 @@
         }
       });
       
-      updateChart();
+      loadChartData(currentChartDays);
     }
     
-    // Update chart with new data
-    async function updateChart() {
+    // Load chart data for specified days
+    async function loadChartData(days) {
       if (!minifigData) return;
       
-      const figNum = minifigData.minifig.fig_num;
+      const figNum = getMinifigIdFromUrl();
       
       try {
-        const response = await fetch(`/api/minifigs/${figNum}/history?days=${currentChartDays}`);
-        const data = await response.json();
+        const response = await fetch(`/api/minifigs/${figNum}/history?days=${days}`);
+        if (!response.ok) throw new Error('Failed to load history');
         
-        // Process data for chart
-        const newData = [];
-        const usedData = [];
+        const history = await response.json();
         
-        for (const point of data.data) {
-          const dataPoint = {
-            x: new Date(point.recorded_date),
-            y: point.min_price_eur
-          };
-          
-          if (point.condition === 'new') {
-            newData.push(dataPoint);
-          } else if (point.condition === 'used') {
-            usedData.push(dataPoint);
-          }
-        }
+        // Process data
+        const newData = history
+          .filter(h => h.condition === 'new' && h.min_price)
+          .map(h => ({ x: new Date(h.date), y: h.min_price }));
         
+        const usedData = history
+          .filter(h => h.condition === 'used' && h.min_price)
+          .map(h => ({ x: new Date(h.date), y: h.min_price }));
+        
+        // Update chart
         priceChart.data.datasets = [];
         
         if (newData.length > 0) {
@@ -1016,6 +985,46 @@
       }
     }
     
+    // Show error state
+    function showError() {
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('error-state').style.display = 'block';
+    }
+    
+    // Setup tabs
+    function setupTabs() {
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          const tabId = tab.dataset.tab;
+          
+          // Update active tab
+          document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          
+          // Update active content
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          document.getElementById(`tab-${tabId}`).classList.add('active');
+        });
+      });
+    }
+    
+    // Setup chart controls
+    function setupChartControls() {
+      document.querySelectorAll('.chart-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const days = parseInt(btn.dataset.days);
+          currentChartDays = days;
+          
+          // Update active button
+          document.querySelectorAll('.chart-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          
+          // Load new data
+          loadChartData(days);
+        });
+      });
+    }
+    
     // Create watch from page
     function createWatchFromPage() {
       if (!minifigData) return;
@@ -1049,7 +1058,7 @@
     });
   </script>
   
-  <!-- Main App JS (for modals, etc.) -->
+  <!-- Main App JS (for modals, auth, etc.) -->
   <script src="/js/app.js"></script>
 </body>
 </html>

@@ -392,7 +392,7 @@ async function scanEbayForMinifig(
   try {
     // Search for minifig on eBay using Bricklink code (e.g., "sw0010 minifigure lego")
     // Bricklink codes appear in eBay listing titles, Rebrickable IDs don't
-    const searchQuery = `${ebaySearchTerm} minifigure lego`;
+    const searchQuery = `${ebaySearchTerm} lego`;
     console.log(`[${requestId}] eBay minifig search: "${searchQuery}"`);
     const searchResponse = await searchEbay(searchQuery, shipToCountry);
     const rawListings = searchResponse.itemSummaries ?? [];

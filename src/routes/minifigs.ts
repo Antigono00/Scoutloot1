@@ -1,6 +1,11 @@
 /**
  * Minifigs Routes
  * 
+ * V28: BrickLink-only ID policy
+ * - Only BrickLink codes (sw0001, st005) are accepted for watching
+ * - Rebrickable IDs (fig-XXXXXX) are rejected with helpful message
+ * - Search results from Rebrickable are displayed but NOT cached
+ * 
  * V27: Added detail endpoint with deals, history, and stats for minifig pages
  * V26: Updated to use cross-marketplace ID lookup
  */
@@ -13,8 +18,12 @@ import { getMinifigPriceHistory, getMinifigPriceStats } from '../services/minifi
 
 const router = Router();
 
-// Rebrickable API key
-const REBRICKABLE_API_KEY = process.env.REBRICKABLE_API_KEY || '05480b178b7ab764c21069f710e1380f';
+// ============================================
+// HELPER: Detect Rebrickable ID format
+// ============================================
+function isRebrickableId(input: string): boolean {
+  return /^fig-\d{6}$/i.test(input.trim());
+}
 
 // ============================================
 // SEARCH MINIFIGS
@@ -29,6 +38,17 @@ router.get('/search', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    // V28: Reject Rebrickable IDs with helpful message
+    if (isRebrickableId(searchQuery)) {
+      console.log(`[Minifigs Route] Rebrickable ID rejected: ${searchQuery}`);
+      res.json({
+        results: [],
+        error: 'rebrickable_id_not_supported',
+        message: 'Please use the LEGO minifig code (e.g., sw0001, st005). You can find this code on BrickLink or BrickOwl.',
+      });
+      return;
+    }
+
     // V26: If it looks like a Bricklink code, use the lookup service
     if (isBricklinkCode(searchQuery)) {
       console.log(`[Minifigs Route] Bricklink code detected: ${searchQuery}`);
@@ -36,13 +56,22 @@ router.get('/search', async (req: Request, res: Response): Promise<void> => {
       const lookupResult = await lookupMinifig(searchQuery);
       
       if (lookupResult.success && lookupResult.name) {
+        // Cache this result since it has a valid BrickLink code
+        await cacheMinifigWithBricklink(
+          lookupResult.bricklink_id || searchQuery.toLowerCase(),
+          lookupResult.name,
+          lookupResult.num_parts,
+          lookupResult.image_url,
+          lookupResult.brickowl_boid
+        );
+        
         res.json({
           results: [{
-            fig_num: lookupResult.bricklink_id || lookupResult.minifig_id,
+            fig_num: lookupResult.bricklink_id || searchQuery.toLowerCase(),
             name: lookupResult.name,
             num_parts: lookupResult.num_parts,
             set_img_url: lookupResult.image_url,
-            bricklink_id: lookupResult.bricklink_id,
+            bricklink_id: lookupResult.bricklink_id || searchQuery.toLowerCase(),
             brickowl_boid: lookupResult.brickowl_boid,
           }],
           source: lookupResult.source,
@@ -51,10 +80,11 @@ router.get('/search', async (req: Request, res: Response): Promise<void> => {
       }
     }
 
-    // Check local database first
+    // Check local database for name searches
+    // Our database only contains entries with valid BrickLink IDs
     const localResults = await searchMinifigs(searchQuery, 10);
 
-    if (localResults.length >= 3) {
+    if (localResults.length > 0) {
       res.json({
         results: localResults.map(row => ({
           fig_num: row.bricklink_id || row.minifig_id,
@@ -69,59 +99,38 @@ router.get('/search', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // Search Rebrickable by name
-    const url = new URL('https://rebrickable.com/api/v3/lego/minifigs/');
-    url.searchParams.set('search', searchQuery);
-    url.searchParams.set('page_size', '10');
-
-    const response = await fetch(url.toString(), {
-      headers: {
-        'Authorization': `key ${REBRICKABLE_API_KEY}`,
-        'Accept': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Rebrickable API error: ${response.status}`);
-    }
-
-    const data = await response.json() as any;
-
-    if (!data.results || data.results.length === 0) {
-      // Try BrickOwl as fallback for name searches
-      const lookupResult = await lookupMinifig(searchQuery);
-      if (lookupResult.success && lookupResult.name) {
-        res.json({
-          results: [{
-            fig_num: lookupResult.bricklink_id || lookupResult.minifig_id,
-            name: lookupResult.name,
-            num_parts: lookupResult.num_parts,
-            set_img_url: lookupResult.image_url,
-          }],
-          source: lookupResult.source,
-        });
-        return;
-      }
+    // Try BrickOwl lookup as fallback (might find something by partial name)
+    const lookupResult = await lookupMinifig(searchQuery);
+    if (lookupResult.success && lookupResult.name && lookupResult.bricklink_id) {
+      // Found with BrickLink ID - cache it and return
+      await cacheMinifigWithBricklink(
+        lookupResult.bricklink_id,
+        lookupResult.name,
+        lookupResult.num_parts,
+        lookupResult.image_url,
+        lookupResult.brickowl_boid
+      );
       
-      res.json({ results: [], source: 'rebrickable' });
+      res.json({
+        results: [{
+          fig_num: lookupResult.bricklink_id,
+          name: lookupResult.name,
+          num_parts: lookupResult.num_parts,
+          set_img_url: lookupResult.image_url,
+          bricklink_id: lookupResult.bricklink_id,
+          brickowl_boid: lookupResult.brickowl_boid,
+        }],
+        source: lookupResult.source,
+      });
       return;
     }
 
-    // Cache results in database (fire and forget)
-    for (const minifig of data.results) {
-      cacheMinifig(minifig).catch((err: Error) => 
-        console.error(`[Minifigs] Cache error for ${minifig.set_num}:`, err)
-      );
-    }
-
-    res.json({
-      results: data.results.map((minifig: any) => ({
-        fig_num: minifig.set_num,
-        name: minifig.name,
-        num_parts: minifig.num_parts,
-        set_img_url: minifig.set_img_url,
-      })),
-      source: 'rebrickable',
+    // Nothing found in our database or BrickOwl
+    // Suggest user search with LEGO minifig code
+    res.json({ 
+      results: [], 
+      source: 'none',
+      notice: 'No minifig found. Try searching with the LEGO minifig code (e.g., sw0001, st005). As our database grows, more name searches will work!',
     });
 
   } catch (error) {
@@ -141,6 +150,14 @@ router.get('/:figNum/detail', async (req: Request, res: Response): Promise<void>
   try {
     const { figNum } = req.params;
     const normalizedFigNum = figNum.toLowerCase();
+    
+    // V28: Reject Rebrickable IDs
+    if (isRebrickableId(figNum)) {
+      res.status(400).json({ 
+        error: 'Please use LEGO minifig code (e.g., sw0001) instead of Rebrickable ID',
+      });
+      return;
+    }
     
     // 1. Get minifig info (lookup or from database)
     const lookupResult = await lookupMinifig(figNum);
@@ -312,6 +329,14 @@ router.get('/:figNum', async (req: Request, res: Response): Promise<void> => {
   try {
     const { figNum } = req.params;
 
+    // V28: Reject Rebrickable IDs
+    if (isRebrickableId(figNum)) {
+      res.status(400).json({ 
+        error: 'Please use LEGO minifig code (e.g., sw0001) instead of Rebrickable ID',
+      });
+      return;
+    }
+
     // V26: Use the lookup service
     const lookupResult = await lookupMinifig(figNum);
 
@@ -337,23 +362,43 @@ router.get('/:figNum', async (req: Request, res: Response): Promise<void> => {
 });
 
 // ============================================
-// HELPER: Cache minifig in database
+// V28: HELPER: Cache minifig ONLY with BrickLink ID
 // ============================================
-async function cacheMinifig(minifig: { set_num: string; name: string; num_parts: number; set_img_url: string | null; set_url: string }): Promise<void> {
-  const figNum = minifig.set_num.toLowerCase();
+async function cacheMinifigWithBricklink(
+  bricklinkId: string,
+  name: string | null,
+  numParts: number | null,
+  imageUrl: string | null,
+  brickowlBoid: string | null
+): Promise<void> {
+  if (!bricklinkId) {
+    console.log('[Minifigs] Skipping cache - no BrickLink ID');
+    return;
+  }
+  
+  const normalizedId = bricklinkId.toLowerCase();
+  
+  // Validate it looks like a BrickLink code
+  if (!isBricklinkCode(normalizedId)) {
+    console.log(`[Minifigs] Skipping cache - invalid BrickLink code: ${normalizedId}`);
+    return;
+  }
   
   await query(
-    `INSERT INTO minifigs (minifig_id, name, num_parts, image_url, rebrickable_url, updated_at)
-     VALUES ($1, $2, $3, $4, $5, NOW())
+    `INSERT INTO minifigs (minifig_id, bricklink_id, brickowl_boid, name, num_parts, image_url, updated_at)
+     VALUES ($1, $1, $2, $3, $4, $5, NOW())
      ON CONFLICT (minifig_id) 
      DO UPDATE SET 
+       bricklink_id = COALESCE(EXCLUDED.bricklink_id, minifigs.bricklink_id),
+       brickowl_boid = COALESCE(EXCLUDED.brickowl_boid, minifigs.brickowl_boid),
        name = COALESCE(EXCLUDED.name, minifigs.name),
        num_parts = COALESCE(EXCLUDED.num_parts, minifigs.num_parts),
        image_url = COALESCE(EXCLUDED.image_url, minifigs.image_url),
-       rebrickable_url = COALESCE(EXCLUDED.rebrickable_url, minifigs.rebrickable_url),
        updated_at = NOW()`,
-    [figNum, minifig.name, minifig.num_parts, minifig.set_img_url, minifig.set_url]
+    [normalizedId, brickowlBoid, name, numParts, imageUrl]
   );
+  
+  console.log(`[Minifigs] Cached minifig with BrickLink ID: ${normalizedId}`);
 }
 
 export default router;

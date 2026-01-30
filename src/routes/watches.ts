@@ -221,6 +221,16 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    // V28: Reject Rebrickable IDs for minifigs (fig-XXXXXX format)
+    const watchType = item_type || 'set';
+    if (watchType === 'minifig' && /^fig-\d{6}$/i.test(actualItemId)) {
+      res.status(400).json({
+        error: 'Invalid minifig ID format',
+        message: 'Please use LEGO minifig code (e.g., sw0001, st005) instead of Rebrickable ID',
+      });
+      return;
+    }
+
     // Create the watch
     const watch = await createWatch({
       user_id,
