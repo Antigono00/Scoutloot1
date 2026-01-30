@@ -39,6 +39,7 @@ import {
   NotificationDecision 
 } from './notificationState.js';
 import { updateSetCurrentDeals } from './currentDeals.js';
+import { updateMinifigCurrentDeals } from './minifigCurrentDeals.js';
 
 // ============================================
 // RATE LIMITING CONFIG
@@ -633,6 +634,16 @@ async function processMinifigWatchMatches(
   });
 
   // ============================================
+  // Update current deals (for minifig pages)
+  if (filteredEbay.length > 0) {
+    try {
+      await updateMinifigCurrentDeals(watch.item_id, filteredEbay, shipToCountry);
+      result.currentDealsUpdated++;
+    } catch (error) {
+      console.error(`[${requestId}] Failed to update minifig current deals:`, error);
+    }
+  }
+
   // COMBINE AND FIND BEST DEAL
   // ============================================
   const allListings = [

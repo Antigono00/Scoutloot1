@@ -4,8 +4,10 @@
  * Contains:
  * - Weekly Digest: Sunday 9:00 AM UTC - summarizes all watches
  * - Still-Available Reminders: Daily check for 3-day-old deals >20% off
- * - Daily Price Snapshot: 00:05 UTC - aggregates current deals into history
- * - Expired Deals Cleanup: 00:10 UTC - removes stale current deals
+ * - Daily Price Snapshot: 00:05 UTC - aggregates current deals into history (sets + minifigs)
+ * - Expired Deals Cleanup: 00:10 UTC - removes stale current deals (sets + minifigs)
+ * 
+ * V27: Added minifig price snapshot and cleanup
  */
 
 import { query } from '../db/index.js';
@@ -18,6 +20,8 @@ import {
 } from '../telegram/escape.js';
 import { searchEbay, normalizeEbayListing } from '../providers/ebay/index.js';
 import { snapshotDailyPrices, cleanupExpiredDeals } from '../services/currentDeals.js';
+import { snapshotMinifigDailyPrices } from '../services/minifigPriceHistory.js';
+import { cleanupExpiredMinifigDeals } from '../services/minifigCurrentDeals.js';
 
 // ============================================
 // TYPES
@@ -103,15 +107,11 @@ async function getUserWatches(userId: number): Promise<DigestWatch[]> {
  */
 async function getWeeklyAlerts(userId: number): Promise<DigestAlert[]> {
   const result = await query<DigestAlert>(
-    `SELECT set_number, MIN(total_eur) as total_eur, 
-            listing_url, MAX(created_at) as created_at
+    `SELECT DISTINCT ON (set_number) set_number, total_eur, listing_url, created_at
      FROM alert_history
      WHERE user_id = $1
        AND created_at >= NOW() - INTERVAL '7 days'
-       AND status = 'sent'
-     GROUP BY set_number, listing_url
-     ORDER BY total_eur ASC
-     LIMIT 10`,
+     ORDER BY set_number, total_eur ASC`,
     [userId]
   );
   return result.rows;
@@ -120,135 +120,107 @@ async function getWeeklyAlerts(userId: number): Promise<DigestAlert[]> {
 /**
  * Format the weekly digest message
  */
-function formatWeeklyDigest(
-  watches: DigestWatch[],
+function formatDigestMessage(
+  watches: DigestWatch[], 
   alerts: DigestAlert[]
 ): string {
-  const activeWatches = watches.filter(w => w.status === 'active');
-  const totalAlerts = watches.reduce((sum, w) => sum + (w.total_alerts_sent || 0), 0);
-  
-  let message = `📊 *Weekly ScoutLoot Digest*\n\n`;
-  
+  const lines: string[] = [
+    '📊 *Your Weekly ScoutLoot Digest*',
+    '',
+  ];
+
   // Summary stats
-  message += `📋 *Your Watches:* ${activeWatches.length} active`;
-  if (watches.length > activeWatches.length) {
-    message += ` \\(${watches.length - activeWatches.length} paused\\)`;
-  }
-  message += `\n`;
-  message += `🔔 *Alerts This Week:* ${alerts.length}\n`;
-  message += `📈 *Total Alerts Ever:* ${totalAlerts}\n\n`;
+  const activeWatches = watches.filter(w => w.status === 'active').length;
+  const totalAlerts = alerts.length;
   
-  // Best deals this week
+  lines.push(`📍 *Active Watches:* ${activeWatches}`);
+  lines.push(`🔔 *Alerts This Week:* ${totalAlerts}`);
+  lines.push('');
+
+  // Best deals of the week
   if (alerts.length > 0) {
-    message += `🏆 *Best Deals This Week:*\n`;
+    lines.push('🏆 *Best Deals Found:*');
     for (const alert of alerts.slice(0, 5)) {
-      const watch = watches.find(w => w.set_number === alert.set_number);
-      const setName = watch?.set_name || alert.set_number;
-      const targetPrice = watch ? Number(watch.target_total_price_eur) : 0;
-      const savings = targetPrice > 0 ? targetPrice - Number(alert.total_eur) : 0;
-      const savingsPercent = targetPrice > 0 
-        ? Math.round((savings / targetPrice) * 100) 
-        : 0;
-      
-      message += `\n• *${escapeMarkdownV2(alert.set_number)}* \\- ${escapeMarkdownV2(setName)}\n`;
-      message += `  💰 ${formatPrice(alert.total_eur)}`;
-      if (savingsPercent > 0) {
-        message += ` \\(${savingsPercent}% off\\)`;
-      }
-      message += `\n`;
+      const priceStr = formatPrice(alert.total_eur);
+      const link = formatLink(alert.listing_url, `${alert.set_number} @ ${priceStr}`);
+      lines.push(`  • ${link}`);
     }
-    message += `\n`;
-  } else {
-    message += `_No deals found this week matching your criteria\\._\n\n`;
+    lines.push('');
   }
+
+  // Watches needing attention
+  const staleWatches = watches.filter(w => 
+    w.status === 'active' && 
+    (!w.last_alert_at || (Date.now() - new Date(w.last_alert_at).getTime()) > 14 * 24 * 60 * 60 * 1000)
+  );
   
-  // Active watches summary
-  if (activeWatches.length > 0) {
-    message += `👀 *Active Watches:*\n`;
-    for (const watch of activeWatches.slice(0, 10)) {
-      const setName = watch.set_name || watch.set_number;
-      message += `• ${escapeMarkdownV2(watch.set_number)} \\- ${escapeMarkdownV2(setName)} \\(target: ${formatPrice(watch.target_total_price_eur)}\\)\n`;
+  if (staleWatches.length > 0) {
+    lines.push('⚠️ *No deals found recently:*');
+    for (const watch of staleWatches.slice(0, 3)) {
+      const name = watch.set_name ? escapeMarkdownV2(watch.set_name) : watch.set_number;
+      lines.push(`  • ${watch.set_number} \\- ${name}`);
     }
-    if (activeWatches.length > 10) {
-      message += `_\\.\\.\\. and ${activeWatches.length - 10} more_\n`;
-    }
-    message += `\n`;
+    lines.push('');
   }
-  
-  // Footer with unsubscribe instructions
-  message += `_Manage your watches at ${formatLink('scoutloot\\.com', 'https://scoutloot.com')}_\n\n`;
-  message += `📧 _To unsubscribe from weekly digests:_\n`;
-  message += `_1\\. Go to ${formatLink('scoutloot\\.com', 'https://scoutloot.com')}_\n`;
-  message += `_2\\. Click Settings \\(⚙️\\)_\n`;
-  message += `_3\\. Uncheck "Weekly Digest"_`;
-  
-  return message;
+
+  lines.push('_Visit scoutloot\\.com to manage your watches_');
+
+  return lines.join('\n');
 }
 
 /**
  * Run the weekly digest job
  */
 export async function runWeeklyDigest(): Promise<{
-  usersProcessed: number;
-  messagesSent: number;
+  usersSent: number;
   errors: string[];
 }> {
   console.log('[Weekly Digest] Starting...');
   
   const result = {
-    usersProcessed: 0,
-    messagesSent: 0,
+    usersSent: 0,
     errors: [] as string[],
   };
-  
+
   try {
     const users = await getDigestUsers();
     console.log(`[Weekly Digest] Found ${users.length} users with digest enabled`);
-    
+
     for (const user of users) {
       try {
-        const watches = await getUserWatches(user.id);
-        const alerts = await getWeeklyAlerts(user.id);
-        
-        // Skip if user has no watches
-        if (watches.length === 0) {
-          console.log(`[Weekly Digest] Skipping user ${user.id} - no watches`);
-          continue;
-        }
-        
-        const message = formatWeeklyDigest(watches, alerts);
+        const [watches, alerts] = await Promise.all([
+          getUserWatches(user.id),
+          getWeeklyAlerts(user.id),
+        ]);
+
+        // Skip if no watches
+        if (watches.length === 0) continue;
+
+        const message = formatDigestMessage(watches, alerts);
         
         const sendResult = await sendMessage(user.telegram_chat_id, message, {
           parse_mode: 'MarkdownV2',
         });
-        
+
         if (sendResult.success) {
-          result.messagesSent++;
-          console.log(`[Weekly Digest] Sent to user ${user.id}`);
+          result.usersSent++;
         } else {
           result.errors.push(`User ${user.id}: ${sendResult.error}`);
-          console.error(`[Weekly Digest] Failed for user ${user.id}: ${sendResult.error}`);
         }
-        
-        result.usersProcessed++;
-        
-        // Small delay to avoid rate limiting
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
+
+        // Rate limit: 30 messages per second max
+        await new Promise(resolve => setTimeout(resolve, 50));
+
       } catch (error) {
-        const errorMsg = `User ${user.id}: ${error}`;
-        result.errors.push(errorMsg);
-        console.error(`[Weekly Digest] Error:`, errorMsg);
+        result.errors.push(`User ${user.id}: ${error}`);
       }
     }
-    
+
   } catch (error) {
-    const errorMsg = `Fatal error: ${error}`;
-    result.errors.push(errorMsg);
-    console.error(`[Weekly Digest] ${errorMsg}`);
+    result.errors.push(`Fatal error: ${error}`);
   }
-  
-  console.log(`[Weekly Digest] Complete - ${result.messagesSent}/${result.usersProcessed} sent`);
+
+  console.log(`[Weekly Digest] Complete - sent to ${result.usersSent} users`);
   return result;
 }
 
@@ -257,78 +229,67 @@ export async function runWeeklyDigest(): Promise<{
 // ============================================
 
 /**
- * Get candidates for "still available" reminders:
- * - User has still_available_reminders enabled
- * - User has Telegram connected
- * - Notification was sent 3+ days ago
- * - Deal is >20% below target price
- * - Haven't sent more than 2 reminders for this watch
+ * Get candidates for still-available reminders
+ * Criteria: notified 3+ days ago, not yet reminded, deal was 20%+ off target
  */
-async function getReminderCandidates(): Promise<ReminderCandidate[]> {
+async function getStillAvailableCandidates(): Promise<ReminderCandidate[]> {
   const result = await query<ReminderCandidate>(
     `SELECT 
+       wns.user_id,
        wns.watch_id,
+       w.set_number,
+       s.name as set_name,
+       w.target_total_price_eur,
        wns.listing_id,
        wns.listing_price,
-       wns.listing_url,
+       l.listing_url,
        wns.notified_at,
-       wns.reminder_count,
-       w.user_id,
-       w.set_number,
-       w.target_total_price_eur,
-       s.name as set_name,
        u.telegram_chat_id,
-       u.ship_to_country
+       u.ship_to_country,
+       wns.reminder_count
      FROM watch_notification_state wns
-     JOIN watches w ON wns.watch_id = w.id
-     JOIN users u ON w.user_id = u.id
-     LEFT JOIN sets s ON w.set_number = s.set_number
-     WHERE u.still_available_reminders = true
+     JOIN watches w ON w.id = wns.watch_id
+     JOIN users u ON u.id = wns.user_id
+     LEFT JOIN sets s ON s.set_number = w.set_number
+     LEFT JOIN listings l ON l.listing_id = wns.listing_id
+     WHERE wns.notified_at <= NOW() - INTERVAL '3 days'
+       AND wns.reminder_count = 0
        AND u.telegram_chat_id IS NOT NULL
        AND u.deleted_at IS NULL
-       AND u.subscription_status = 'active'
        AND w.status = 'active'
-       AND wns.notified_at <= NOW() - INTERVAL '3 days'
-       AND wns.reminder_count < 2
-       AND (wns.reminder_sent_at IS NULL OR wns.reminder_sent_at <= NOW() - INTERVAL '3 days')
-       AND wns.listing_price < w.target_total_price_eur * 0.80  -- >20% off
-     ORDER BY wns.notified_at ASC`
+       AND wns.listing_price <= w.target_total_price_eur * 0.8
+     ORDER BY wns.notified_at ASC
+     LIMIT 50`
   );
   return result.rows;
 }
 
 /**
- * Check if a listing is still available on eBay
+ * Check if a listing is still available
  */
 async function isListingStillAvailable(
-  listingId: string,
   setNumber: string,
+  listingId: string,
+  maxPrice: number,
   shipToCountry: string
-): Promise<{ available: boolean; currentPrice?: number }> {
+): Promise<boolean> {
   try {
-    // Search for the set to get current listings
-    const searchResults = await searchEbay(setNumber, shipToCountry, { limit: 50 });
+    // Search eBay for the set
+    const response = await searchEbay(setNumber, shipToCountry);
+    const listings = response.itemSummaries || [];
     
-    if (!searchResults.itemSummaries) {
-      return { available: false };
+    // Check if our listing is still there and under price
+    for (const raw of listings) {
+      const listing = normalizeEbayListing(raw, setNumber, shipToCountry);
+      if (listing.id === listingId && listing.total_eur <= maxPrice) {
+        return true;
+      }
     }
     
-    // Look for our specific listing
-    const listing = searchResults.itemSummaries.find(item => item.itemId === listingId);
-    
-    if (listing) {
-      const normalized = normalizeEbayListing(listing, setNumber, shipToCountry);
-      return { 
-        available: true, 
-        currentPrice: normalized.total_eur 
-      };
-    }
-    
-    return { available: false };
+    return false;
   } catch (error) {
-    console.error(`[Reminder] Error checking listing ${listingId}:`, error);
-    // On error, assume not available to avoid spamming
-    return { available: false };
+    console.error(`[Still-Available] Check failed for ${listingId}:`, error);
+    return false;
   }
 }
 
@@ -338,9 +299,8 @@ async function isListingStillAvailable(
 async function updateReminderState(watchId: number): Promise<void> {
   await query(
     `UPDATE watch_notification_state 
-     SET reminder_sent_at = NOW(), 
-         reminder_count = reminder_count + 1,
-         updated_at = NOW()
+     SET reminder_count = reminder_count + 1,
+         last_reminder_at = NOW()
      WHERE watch_id = $1`,
     [watchId]
   );
@@ -363,45 +323,38 @@ export async function runStillAvailableReminders(): Promise<{
     remindersSent: 0,
     errors: [] as string[],
   };
-  
+
   try {
-    const candidates = await getReminderCandidates();
+    const candidates = await getStillAvailableCandidates();
     result.candidatesFound = candidates.length;
     console.log(`[Still-Available Reminders] Found ${candidates.length} candidates`);
-    
+
     for (const candidate of candidates) {
       try {
         // Check if listing is still available
-        const availability = await isListingStillAvailable(
-          candidate.listing_id,
+        const stillAvailable = await isListingStillAvailable(
           candidate.set_number,
+          candidate.listing_id,
+          candidate.target_total_price_eur,
           candidate.ship_to_country
         );
-        
-        if (!availability.available) {
-          console.log(`[Still-Available Reminders] Listing ${candidate.listing_id} no longer available`);
+
+        if (!stillAvailable) {
+          // Mark as reminded anyway to prevent re-checking
+          await updateReminderState(candidate.watch_id);
           continue;
         }
-        
+
         result.stillAvailable++;
-        
-        // Calculate days since notification
-        const notifiedAt = new Date(candidate.notified_at);
-        const daysAvailable = Math.floor(
-          (Date.now() - notifiedAt.getTime()) / (1000 * 60 * 60 * 24)
-        );
-        
-        // Use current price if we got it, otherwise use stored price
-        const price = availability.currentPrice || Number(candidate.listing_price);
-        
-        // Format and send the reminder
+
+        // Send reminder
         const message = formatStillAvailableReminder({
           setNumber: candidate.set_number,
-          setName: candidate.set_name || candidate.set_number,
-          price: price,
-          targetPrice: Number(candidate.target_total_price_eur),
-          daysAvailable: daysAvailable,
-          listingUrl: candidate.listing_url || '',
+          setName: candidate.set_name || 'Unknown Set',
+          targetPrice: candidate.target_total_price_eur,
+          price: candidate.listing_price,
+          listingUrl: candidate.listing_url || '#',
+          daysAvailable: Math.floor((Date.now() - new Date(candidate.notified_at).getTime()) / (24 * 60 * 60 * 1000)),
         });
         
         const sendResult = await sendMessage(candidate.telegram_chat_id, message, {
@@ -438,28 +391,44 @@ export async function runStillAvailableReminders(): Promise<{
 }
 
 // ============================================
-// DAILY PRICE SNAPSHOT JOB (NEW)
+// DAILY PRICE SNAPSHOT JOB (V27: Sets + Minifigs)
 // ============================================
 
 /**
  * Run the daily price snapshot job
- * Aggregates current deals into historical price data
+ * Aggregates current deals into historical price data for BOTH sets and minifigs
  */
 export async function runDailyPriceSnapshot(): Promise<{
   setsProcessed: number;
-  rowsInserted: number;
+  setsRowsInserted: number;
+  minifigsProcessed: number;
+  minifigsRowsInserted: number;
   error: string | null;
 }> {
   console.log('[Daily Price Snapshot] Starting...');
   
   try {
-    const result = await snapshotDailyPrices();
+    // Snapshot sets
+    const setResult = await snapshotDailyPrices();
+    console.log(`[Daily Price Snapshot] Sets: ${setResult.setsProcessed} processed, ${setResult.rowsInserted} rows`);
     
-    console.log(`[Daily Price Snapshot] Complete - ${result.setsProcessed} sets, ${result.rowsInserted} rows`);
+    // V27: Snapshot minifigs
+    let minifigResult = { minifigsProcessed: 0, rowsInserted: 0 };
+    try {
+      minifigResult = await snapshotMinifigDailyPrices();
+      console.log(`[Daily Price Snapshot] Minifigs: ${minifigResult.minifigsProcessed} processed, ${minifigResult.rowsInserted} rows`);
+    } catch (minifigError) {
+      console.error('[Daily Price Snapshot] Minifig snapshot error:', minifigError);
+      // Don't fail the whole job if minifig snapshot fails
+    }
+    
+    console.log('[Daily Price Snapshot] Complete');
     
     return {
-      setsProcessed: result.setsProcessed,
-      rowsInserted: result.rowsInserted,
+      setsProcessed: setResult.setsProcessed,
+      setsRowsInserted: setResult.rowsInserted,
+      minifigsProcessed: minifigResult.minifigsProcessed,
+      minifigsRowsInserted: minifigResult.rowsInserted,
       error: null,
     };
   } catch (error) {
@@ -467,40 +436,57 @@ export async function runDailyPriceSnapshot(): Promise<{
     console.error(`[Daily Price Snapshot] ${errorMsg}`);
     return {
       setsProcessed: 0,
-      rowsInserted: 0,
+      setsRowsInserted: 0,
+      minifigsProcessed: 0,
+      minifigsRowsInserted: 0,
       error: errorMsg,
     };
   }
 }
 
 // ============================================
-// EXPIRED DEALS CLEANUP JOB (NEW)
+// EXPIRED DEALS CLEANUP JOB (V27: Sets + Minifigs)
 // ============================================
 
 /**
  * Run the expired deals cleanup job
- * Removes stale current deals that have expired
+ * Removes stale current deals that have expired for BOTH sets and minifigs
  */
 export async function runExpiredDealsCleanup(): Promise<{
-  dealsRemoved: number;
+  setDealsRemoved: number;
+  minifigDealsRemoved: number;
   error: string | null;
 }> {
   console.log('[Expired Deals Cleanup] Starting...');
   
   try {
-    const dealsRemoved = await cleanupExpiredDeals();
+    // Cleanup set deals
+    const setDealsRemoved = await cleanupExpiredDeals();
+    console.log(`[Expired Deals Cleanup] Sets: removed ${setDealsRemoved} expired deals`);
     
-    console.log(`[Expired Deals Cleanup] Complete - removed ${dealsRemoved} expired deals`);
+    // V27: Cleanup minifig deals
+    let minifigDealsRemoved = 0;
+    try {
+      minifigDealsRemoved = await cleanupExpiredMinifigDeals();
+      console.log(`[Expired Deals Cleanup] Minifigs: removed ${minifigDealsRemoved} expired deals`);
+    } catch (minifigError) {
+      console.error('[Expired Deals Cleanup] Minifig cleanup error:', minifigError);
+      // Don't fail the whole job if minifig cleanup fails
+    }
+    
+    console.log('[Expired Deals Cleanup] Complete');
     
     return {
-      dealsRemoved,
+      setDealsRemoved,
+      minifigDealsRemoved,
       error: null,
     };
   } catch (error) {
     const errorMsg = `Error: ${error}`;
     console.error(`[Expired Deals Cleanup] ${errorMsg}`);
     return {
-      dealsRemoved: 0,
+      setDealsRemoved: 0,
+      minifigDealsRemoved: 0,
       error: errorMsg,
     };
   }

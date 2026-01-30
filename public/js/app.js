@@ -1611,15 +1611,27 @@ async function searchSetsForExplorer(query, resultsContainer) {
   resultsContainer.classList.add('active');
   
   try {
-    const response = await fetch('/api/sets/search?q=' + encodeURIComponent(query));
-    const data = await response.json();
+    // V27: Search both sets AND minifigs in parallel
+    const [setsResponse, minifigsResponse] = await Promise.all([
+      fetch('/api/sets/search?q=' + encodeURIComponent(query)),
+      fetch('/api/minifigs/search?q=' + encodeURIComponent(query))
+    ]);
     
-    if (!data.results || data.results.length === 0) {
-      resultsContainer.innerHTML = '<div class="explorer-empty">No sets found for "' + escapeHtml(query) + '"</div>';
+    const setsData = await setsResponse.json();
+    const minifigsData = await minifigsResponse.json();
+    
+    const sets = (setsData.results || []).slice(0, 5);
+    const minifigs = (minifigsData.results || []).slice(0, 5);
+    
+    if (sets.length === 0 && minifigs.length === 0) {
+      resultsContainer.innerHTML = '<div class="explorer-empty">No sets or minifigures found for "' + escapeHtml(query) + '"</div>';
       return;
     }
     
-    resultsContainer.innerHTML = data.results.map(function(set) {
+    let html = '';
+    
+    // Sets
+    html += sets.map(function(set) {
       return '<a href="/set/' + set.set_num + '" class="explorer-item">' +
         '<div class="explorer-item-image">' +
         (set.set_img_url 
@@ -1633,6 +1645,24 @@ async function searchSetsForExplorer(query, resultsContainer) {
         '<span class="explorer-item-arrow">→</span>' +
         '</a>';
     }).join('');
+    
+    // Minifigs
+    html += minifigs.map(function(fig) {
+      return '<a href="/minifig/' + fig.fig_num + '" class="explorer-item explorer-item-minifig">' +
+        '<div class="explorer-item-image">' +
+        (fig.set_img_url 
+          ? '<img src="' + fig.set_img_url + '" alt="' + escapeHtml(fig.name) + '" onerror="this.parentElement.innerHTML=\'<span class=placeholder>🧍</span>\'">'
+          : '<span class="placeholder">🧍</span>') +
+        '</div>' +
+        '<div class="explorer-item-info">' +
+        '<div class="explorer-item-name">' + escapeHtml(fig.name) + ' <span class="minifig-badge">MINIFIG</span></div>' +
+        '<div class="explorer-item-meta">#' + fig.fig_num + ' • ' + (fig.num_parts || '?') + ' parts</div>' +
+        '</div>' +
+        '<span class="explorer-item-arrow">→</span>' +
+        '</a>';
+    }).join('');
+    
+    resultsContainer.innerHTML = html;
     
   } catch (error) {
     console.error('Explorer search error:', error);

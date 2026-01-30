@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LEGO Minifigure Price Tracker | ScoutLoot</title>
+  <meta name="description" content="Track prices for LEGO minifigures. Find the best deals on eBay and BrickOwl.">
+  <link rel="canonical" href="https://scoutloot.com/minifig/">
+  
+  <!-- Open Graph -->
+  <meta property="og:type" content="product">
+  <meta property="og:title" content="LEGO Minifigure Price Tracker | ScoutLoot">
+  <meta property="og:description" content="Track prices for LEGO minifigures. Find the best deals on eBay and BrickOwl.">
+  <meta property="og:url" content="https://scoutloot.com/minifig/">
+  <meta property="og:image" content="https://scoutloot.com/og-image.png">
+  <meta property="og:site_name" content="ScoutLoot">
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="LEGO Minifigure Price Tracker | ScoutLoot">
+  <meta name="twitter:description" content="Track prices for LEGO minifigures. Find the best deals on eBay and BrickOwl.">
+  <meta name="twitter:image" content="https://scoutloot.com/og-image.png">
+  
+  <!-- JSON-LD Schema (replaced server-side) -->
+  <script id="json-ld" type="application/ld+json"></script>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="/css/styles.css">
+  
+  <style>
+    /* Minifig Page Specific Styles */
+    .minifig-page {
+      min-height: 100vh;
+      background: var(--bg-dark);
+      padding-top: 80px;
+    }
+    
+    .minifig-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    
+    .minifig-header {
+      display: flex;
+      gap: 32px;
+      margin-bottom: 40px;
+    }
+    
+    .minifig-image {
+      flex-shrink: 0;
+      width: 200px;
+      height: 200px;
+      background: var(--bg-card);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .minifig-image img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    
+    .minifig-image-placeholder {
+      font-size: 80px;
+    }
+    
+    .minifig-info {
+      flex: 1;
+    }
+    
+    .minifig-fig-num {
+      font-size: 0.9rem;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    .minifig-name {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+    
+    .minifig-meta {
+      display: flex;
+      gap: 24px;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 16px;
+    }
+    
+    .minifig-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .minifig-badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    
+    .minifig-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 12px;
+      background: rgba(147, 51, 234, 0.2);
+      border: 1px solid rgba(147, 51, 234, 0.3);
+      border-radius: 20px;
+      font-size: 0.8rem;
+      color: #c084fc;
+    }
+    
+    .minifig-stats {
+      display: flex;
+      gap: 24px;
+      margin-top: 16px;
+    }
+    
+    .minifig-stat {
+      text-align: left;
+    }
+    
+    .minifig-stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    
+    .minifig-stat-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    
+    .minifig-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    
+    /* Tabs */
+    .tabs-container {
+      margin-bottom: 32px;
+    }
+    
+    .tabs {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 0;
+    }
+    
+    .tab {
+      padding: 12px 20px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 500;
+      position: relative;
+      transition: color 0.2s;
+    }
+    
+    .tab:hover {
+      color: var(--text);
+    }
+    
+    .tab.active {
+      color: var(--accent);
+    }
+    
+    .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--accent);
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    /* Deals Grid */
+    .deals-section {
+      margin-bottom: 32px;
+    }
+    
+    .deals-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    
+    .deals-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    
+    .deal-count {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    
+    .deals-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+    
+    .deal-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 16px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    
+    .deal-card:hover {
+      border-color: rgba(255,255,255,0.2);
+      transform: translateY(-2px);
+    }
+    
+    .deal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    
+    .deal-price {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    
+    .deal-source {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      padding: 4px 8px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 4px;
+    }
+    
+    .deal-breakdown {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+    
+    .deal-breakdown span {
+      display: block;
+      margin-bottom: 2px;
+    }
+    
+    .deal-seller {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    
+    .deal-seller-rating {
+      color: #fbbf24;
+    }
+    
+    .deal-link {
+      display: block;
+      text-align: center;
+      padding: 10px;
+      background: var(--accent);
+      color: var(--bg-dark);
+      font-weight: 600;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    
+    .deal-link:hover {
+      opacity: 0.9;
+    }
+    
+    /* Chart Section */
+    .chart-section {
+      background: var(--bg-card);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+    
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .chart-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    
+    .chart-controls {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .chart-btn {
+      padding: 6px 12px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+    
+    .chart-btn:hover {
+      background: rgba(255,255,255,0.1);
+    }
+    
+    .chart-btn.active {
+      background: var(--accent);
+      color: var(--bg-dark);
+      border-color: var(--accent);
+    }
+    
+    .chart-container {
+      height: 300px;
+      position: relative;
+    }
+    
+    /* No Data State */
+    .no-data {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+    
+    .no-data-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+    
+    .no-data-text {
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+    }
+    
+    .no-data-sub {
+      font-size: 0.9rem;
+      opacity: 0.7;
+    }
+    
+    /* Loading State */
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+    
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255,255,255,0.1);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    
+    .stat-card {
+      background: var(--bg-card);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    
+    .stat-card-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    
+    .stat-card-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    
+    .stat-card-value.positive {
+      color: #22c55e;
+    }
+    
+    .stat-card-value.negative {
+      color: #ef4444;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .minifig-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      
+      .minifig-meta {
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      
+      .minifig-stats {
+        justify-content: center;
+      }
+      
+      .minifig-actions {
+        justify-content: center;
+      }
+      
+      .minifig-name {
+        font-size: 1.5rem;
+      }
+      
+      .deals-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .chart-header {
+        flex-direction: column;
+        gap: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav>
+    <a href="/" class="logo">
+      <img src="/logo.svg" alt="ScoutLoot" height="32">
+    </a>
+    <div class="nav-links">
+      <a href="/#features">{{nav.features}}</a>
+      <a href="/#pricing">{{nav.pricing}}</a>
+      <a href="/faq">{{nav.faq}}</a>
+    </div>
+    <div class="nav-actions">
+      <div class="language-switcher">
+        <button class="language-btn" id="language-btn">
+          <span id="current-lang-flag">🇬🇧</span>
+          <span id="current-lang-code">EN</span>
+        </button>
+        <div class="language-dropdown" id="language-dropdown"></div>
+      </div>
+      <button class="btn btn-secondary" onclick="openModal('login')">{{nav.login}}</button>
+      <button class="btn btn-primary" onclick="openModal('signup')">{{nav.signup}}</button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="minifig-page">
+    <div class="minifig-container" id="minifig-container">
+      <!-- Loading State -->
+      <div class="loading" id="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Loading minifigure data...</p>
+      </div>
+      
+      <!-- Minifig Content (populated by JS) -->
+      <div id="minifig-content" style="display: none;">
+        <!-- Header -->
+        <div class="minifig-header">
+          <div class="minifig-image" id="minifig-image">
+            <span class="minifig-image-placeholder">🧍</span>
+          </div>
+          <div class="minifig-info">
+            <div class="minifig-fig-num" id="minifig-fig-num">sw0001</div>
+            <h1 class="minifig-name" id="minifig-name">Loading...</h1>
+            <div class="minifig-meta">
+              <span class="minifig-meta-item" id="minifig-parts">
+                <span>🧩</span>
+                <span id="minifig-parts-count">? parts</span>
+              </span>
+              <span class="minifig-meta-item" id="minifig-theme-item" style="display: none;">
+                <span>🏷️</span>
+                <span id="minifig-theme">Theme</span>
+              </span>
+            </div>
+            <div class="minifig-badges">
+              <span class="minifig-badge">🧍 MINIFIG</span>
+              <span class="minifig-badge" id="minifig-watchers-badge" style="display: none;">
+                👁️ <span id="minifig-watchers">0</span> watching
+              </span>
+            </div>
+            <div class="minifig-stats" id="minifig-price-stats" style="display: none;">
+              <div class="minifig-stat">
+                <div class="minifig-stat-value" id="best-price-new">-</div>
+                <div class="minifig-stat-label">Best New</div>
+              </div>
+              <div class="minifig-stat">
+                <div class="minifig-stat-value" id="best-price-used">-</div>
+                <div class="minifig-stat-label">Best Used</div>
+              </div>
+            </div>
+            <div class="minifig-actions">
+              <button class="btn btn-primary" onclick="createWatchFromPage()">
+                ➕ Watch This Minifig
+              </button>
+              <a class="btn btn-secondary" id="bricklink-link" href="#" target="_blank" rel="noopener">
+                🔗 BrickLink
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Stats Grid -->
+        <div class="stats-grid" id="stats-grid" style="display: none;">
+          <div class="stat-card">
+            <div class="stat-card-label">Lowest Ever (New)</div>
+            <div class="stat-card-value" id="stat-lowest">-</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-label">7-Day Trend</div>
+            <div class="stat-card-value" id="stat-trend-7d">-</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-label">30-Day Trend</div>
+            <div class="stat-card-value" id="stat-trend-30d">-</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-label">Days Tracked</div>
+            <div class="stat-card-value" id="stat-days-tracked">-</div>
+          </div>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="tabs-container">
+          <div class="tabs">
+            <button class="tab active" data-tab="deals">Current Deals</button>
+            <button class="tab" data-tab="chart">Price History</button>
+          </div>
+        </div>
+        
+        <!-- Deals Tab -->
+        <div class="tab-content active" id="tab-deals">
+          <!-- New Condition -->
+          <div class="deals-section">
+            <div class="deals-header">
+              <h2 class="deals-title">🆕 New Condition</h2>
+              <span class="deal-count" id="new-deal-count">0 deals</span>
+            </div>
+            <div class="deals-grid" id="new-deals-grid">
+              <div class="no-data">
+                <div class="no-data-icon">📭</div>
+                <div class="no-data-text">No new condition deals found</div>
+                <div class="no-data-sub">Check back later or create a watch to get alerts</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Used Condition -->
+          <div class="deals-section">
+            <div class="deals-header">
+              <h2 class="deals-title">📦 Used Condition</h2>
+              <span class="deal-count" id="used-deal-count">0 deals</span>
+            </div>
+            <div class="deals-grid" id="used-deals-grid">
+              <div class="no-data">
+                <div class="no-data-icon">📭</div>
+                <div class="no-data-text">No used condition deals found</div>
+                <div class="no-data-sub">Check back later or create a watch to get alerts</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Chart Tab -->
+        <div class="tab-content" id="tab-chart">
+          <div class="chart-section">
+            <div class="chart-header">
+              <h2 class="chart-title">📈 Price History</h2>
+              <div class="chart-controls">
+                <button class="chart-btn active" data-days="30">30D</button>
+                <button class="chart-btn" data-days="90">90D</button>
+                <button class="chart-btn" data-days="180">180D</button>
+                <button class="chart-btn" data-days="365">1Y</button>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="price-chart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Error State -->
+      <div id="error-state" style="display: none;">
+        <div class="no-data">
+          <div class="no-data-icon">😕</div>
+          <div class="no-data-text">Minifigure not found</div>
+          <div class="no-data-sub">The minifigure you're looking for doesn't exist or hasn't been tracked yet.</div>
+          <a href="/" class="btn btn-primary" style="margin-top: 20px;">← Back to Home</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-brand">
+        <img src="/logo.svg" alt="ScoutLoot" height="28">
+        <p>Find the best LEGO deals across marketplaces.</p>
+      </div>
+      <div class="footer-links">
+        <h4>Product</h4>
+        <a href="/#features">Features</a>
+        <a href="/#pricing">Pricing</a>
+        <a href="/faq">FAQ</a>
+      </div>
+      <div class="footer-links">
+        <h4>Legal</h4>
+        <a href="/privacy">Privacy Policy</a>
+        <a href="/terms">Terms of Service</a>
+        <a href="/cookies">Cookie Policy</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 ScoutLoot. Not affiliated with the LEGO Group.</p>
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+    // Global state
+    let minifigData = null;
+    let priceChart = null;
+    let currentChartDays = 30;
+    
+    // Get minifig ID from URL
+    function getMinifigIdFromUrl() {
+      const path = window.location.pathname;
+      const match = path.match(/\/minifig\/([^\/]+)/);
+      return match ? match[1] : null;
+    }
+    
+    // Load minifig data
+    async function loadMinifigData() {
+      const figNum = getMinifigIdFromUrl();
+      if (!figNum) {
+        showError();
+        return;
+      }
+      
+      try {
+        const response = await fetch(`/api/minifigs/${figNum}/detail`);
+        if (!response.ok) {
+          throw new Error('Minifig not found');
+        }
+        
+        minifigData = await response.json();
+        renderMinifig();
+        
+      } catch (error) {
+        console.error('Error loading minifig:', error);
+        showError();
+      }
+    }
+    
+    // Render minifig data
+    function renderMinifig() {
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('minifig-content').style.display = 'block';
+      
+      const { minifig, deals, history, stats } = minifigData;
+      
+      // Basic info
+      document.getElementById('minifig-fig-num').textContent = minifig.fig_num;
+      document.getElementById('minifig-name').textContent = minifig.name;
+      document.getElementById('minifig-parts-count').textContent = minifig.num_parts ? `${minifig.num_parts} parts` : 'Parts unknown';
+      
+      // Image
+      const imageEl = document.getElementById('minifig-image');
+      if (minifig.image_url) {
+        imageEl.innerHTML = `<img src="${minifig.image_url}" alt="${minifig.name}" onerror="this.parentElement.innerHTML='<span class=\\'minifig-image-placeholder\\'>🧍</span>'">`;
+      }
+      
+      // Theme
+      if (minifig.theme) {
+        document.getElementById('minifig-theme').textContent = minifig.theme;
+        document.getElementById('minifig-theme-item').style.display = 'flex';
+      }
+      
+      // BrickLink link
+      const bricklinkId = minifig.bricklink_id || minifig.fig_num;
+      document.getElementById('bricklink-link').href = `https://www.bricklink.com/v2/catalog/catalogitem.page?M=${bricklinkId}`;
+      
+      // Watchers
+      if (stats.watchers > 0) {
+        document.getElementById('minifig-watchers').textContent = stats.watchers;
+        document.getElementById('minifig-watchers-badge').style.display = 'inline-flex';
+      }
+      
+      // Best prices
+      if (deals.new.length > 0 || deals.used.length > 0) {
+        document.getElementById('minifig-price-stats').style.display = 'flex';
+        document.getElementById('best-price-new').textContent = deals.new.length > 0 
+          ? `€${deals.new[0].total_eur.toFixed(2)}` 
+          : '-';
+        document.getElementById('best-price-used').textContent = deals.used.length > 0 
+          ? `€${deals.used[0].total_eur.toFixed(2)}` 
+          : '-';
+      }
+      
+      // Stats grid
+      if (stats.lowest_seen || stats.trend_7d !== null || history.days_tracked > 0) {
+        document.getElementById('stats-grid').style.display = 'grid';
+        document.getElementById('stat-lowest').textContent = stats.lowest_seen 
+          ? `€${stats.lowest_seen.toFixed(2)}` 
+          : '-';
+        
+        // 7-day trend
+        if (stats.trend_7d !== null) {
+          const trend7dEl = document.getElementById('stat-trend-7d');
+          trend7dEl.textContent = stats.trend_7d > 0 ? `+${stats.trend_7d}%` : `${stats.trend_7d}%`;
+          trend7dEl.classList.add(stats.trend_7d > 0 ? 'negative' : 'positive');
+        }
+        
+        // 30-day trend
+        if (stats.trend_30d !== null) {
+          const trend30dEl = document.getElementById('stat-trend-30d');
+          trend30dEl.textContent = stats.trend_30d > 0 ? `+${stats.trend_30d}%` : `${stats.trend_30d}%`;
+          trend30dEl.classList.add(stats.trend_30d > 0 ? 'negative' : 'positive');
+        }
+        
+        document.getElementById('stat-days-tracked').textContent = history.days_tracked;
+      }
+      
+      // Render deals
+      renderDeals(deals);
+      
+      // Update page title
+      document.title = `${minifig.fig_num} ${minifig.name} - Price Tracker | ScoutLoot`;
+    }
+    
+    // Render deals grids
+    function renderDeals(deals) {
+      // New deals
+      const newGrid = document.getElementById('new-deals-grid');
+      document.getElementById('new-deal-count').textContent = `${deals.new.length} deals`;
+      
+      if (deals.new.length > 0) {
+        newGrid.innerHTML = deals.new.map(deal => renderDealCard(deal)).join('');
+      }
+      
+      // Used deals
+      const usedGrid = document.getElementById('used-deals-grid');
+      document.getElementById('used-deal-count').textContent = `${deals.used.length} deals`;
+      
+      if (deals.used.length > 0) {
+        usedGrid.innerHTML = deals.used.map(deal => renderDealCard(deal)).join('');
+      }
+    }
+    
+    // Render single deal card
+    function renderDealCard(deal) {
+      const sourceIcon = deal.source === 'brickowl' ? '🦉' : '🛒';
+      const sourceName = deal.source === 'brickowl' ? 'BrickOwl' : 'eBay';
+      
+      return `
+        <div class="deal-card">
+          <div class="deal-header">
+            <div class="deal-price">€${deal.total_eur.toFixed(2)}</div>
+            <div class="deal-source">${sourceIcon} ${sourceName}</div>
+          </div>
+          <div class="deal-breakdown">
+            <span>💰 Item: €${deal.price_eur.toFixed(2)}</span>
+            <span>📦 Shipping: €${deal.shipping_eur.toFixed(2)}</span>
+            ${deal.import_charges_eur > 0 ? `<span>📋 Import: €${deal.import_charges_eur.toFixed(2)}</span>` : ''}
+          </div>
+          <div class="deal-seller">
+            ${deal.seller_username ? `<span>👤 ${deal.seller_username}</span>` : ''}
+            ${deal.seller_rating ? `<span class="deal-seller-rating">⭐ ${deal.seller_rating}%</span>` : ''}
+            ${deal.seller_country ? `<span>📍 ${deal.seller_country}</span>` : ''}
+          </div>
+          <a class="deal-link" href="${deal.url}" target="_blank" rel="noopener">View Deal →</a>
+        </div>
+      `;
+    }
+    
+    // Show error state
+    function showError() {
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('error-state').style.display = 'block';
+    }
+    
+    // Tab switching
+    function setupTabs() {
+      const tabs = document.querySelectorAll('.tab');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          // Remove active from all tabs
+          tabs.forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          
+          // Add active to clicked tab
+          tab.classList.add('active');
+          const tabId = `tab-${tab.dataset.tab}`;
+          document.getElementById(tabId).classList.add('active');
+          
+          // Initialize chart on first view
+          if (tab.dataset.tab === 'chart' && !priceChart && minifigData) {
+            initChart();
+          }
+        });
+      });
+    }
+    
+    // Chart controls
+    function setupChartControls() {
+      const buttons = document.querySelectorAll('.chart-btn');
+      buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          buttons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentChartDays = parseInt(btn.dataset.days);
+          if (priceChart) {
+            updateChart();
+          }
+        });
+      });
+    }
+    
+    // Initialize chart
+    function initChart() {
+      const ctx = document.getElementById('price-chart').getContext('2d');
+      
+      priceChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          datasets: []
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false,
+          },
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top',
+              labels: {
+                color: '#94a3b8',
+                usePointStyle: true,
+              }
+            },
+            tooltip: {
+              backgroundColor: '#1e293b',
+              borderColor: '#334155',
+              borderWidth: 1,
+              titleColor: '#f1f5f9',
+              bodyColor: '#cbd5e1',
+              callbacks: {
+                label: function(context) {
+                  return `${context.dataset.label}: €${context.parsed.y?.toFixed(2) || '-'}`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              type: 'time',
+              time: {
+                unit: 'day',
+                displayFormats: {
+                  day: 'MMM d'
+                }
+              },
+              grid: {
+                color: 'rgba(255,255,255,0.05)',
+              },
+              ticks: {
+                color: '#64748b',
+              }
+            },
+            y: {
+              beginAtZero: false,
+              grid: {
+                color: 'rgba(255,255,255,0.05)',
+              },
+              ticks: {
+                color: '#64748b',
+                callback: function(value) {
+                  return '€' + value;
+                }
+              }
+            }
+          }
+        }
+      });
+      
+      updateChart();
+    }
+    
+    // Update chart with new data
+    async function updateChart() {
+      if (!minifigData) return;
+      
+      const figNum = minifigData.minifig.fig_num;
+      
+      try {
+        const response = await fetch(`/api/minifigs/${figNum}/history?days=${currentChartDays}`);
+        const data = await response.json();
+        
+        // Process data for chart
+        const newData = [];
+        const usedData = [];
+        
+        for (const point of data.data) {
+          const dataPoint = {
+            x: new Date(point.recorded_date),
+            y: point.min_price_eur
+          };
+          
+          if (point.condition === 'new') {
+            newData.push(dataPoint);
+          } else if (point.condition === 'used') {
+            usedData.push(dataPoint);
+          }
+        }
+        
+        priceChart.data.datasets = [];
+        
+        if (newData.length > 0) {
+          priceChart.data.datasets.push({
+            label: 'New (Min)',
+            data: newData,
+            borderColor: '#22c55e',
+            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+            borderWidth: 2,
+            fill: false,
+            tension: 0.1,
+            pointRadius: 2,
+            pointHoverRadius: 5,
+          });
+        }
+        
+        if (usedData.length > 0) {
+          priceChart.data.datasets.push({
+            label: 'Used (Min)',
+            data: usedData,
+            borderColor: '#f59e0b',
+            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+            borderWidth: 2,
+            fill: false,
+            tension: 0.1,
+            pointRadius: 2,
+            pointHoverRadius: 5,
+          });
+        }
+        
+        priceChart.update();
+        
+      } catch (error) {
+        console.error('Error loading chart data:', error);
+      }
+    }
+    
+    // Create watch from page
+    function createWatchFromPage() {
+      if (!minifigData) return;
+      
+      // Check if logged in (simple check - look for auth token)
+      const token = localStorage.getItem('token');
+      if (!token) {
+        openModal('login');
+        return;
+      }
+      
+      // Pre-fill watch modal with this minifig
+      const event = new CustomEvent('prefillWatch', {
+        detail: {
+          type: 'minifig',
+          id: minifigData.minifig.fig_num,
+          name: minifigData.minifig.name,
+          imageUrl: minifigData.minifig.image_url,
+        }
+      });
+      window.dispatchEvent(event);
+      
+      openModal('add-watch');
+    }
+    
+    // Initialize on load
+    document.addEventListener('DOMContentLoaded', () => {
+      setupTabs();
+      setupChartControls();
+      loadMinifigData();
+    });
+  </script>
+  
+  <!-- Main App JS (for modals, etc.) -->
+  <script src="/js/app.js"></script>
+</body>
+</html>

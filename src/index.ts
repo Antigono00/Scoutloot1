@@ -670,6 +670,192 @@ app.get('/', (req: Request, res: Response, next: NextFunction) => {
 */
 
 // ============================================
+
+// ============================================
+// MINIFIG DETAIL PAGE WITH SERVER-SIDE SEO (V27)
+// ============================================
+
+interface MinifigSEOData {
+  fig_num: string;
+  name: string | null;
+  num_parts: number | null;
+  theme: string | null;
+  image_url: string | null;
+  best_price_new: number | null;
+  best_price_used: number | null;
+  watchers: number;
+}
+
+async function getMinifigSEOData(figNum: string): Promise<MinifigSEOData | null> {
+  try {
+    const minifigResult = await pool.query(`
+      SELECT minifig_id, bricklink_id, name, num_parts, theme, image_url
+      FROM minifigs 
+      WHERE minifig_id = $1 OR bricklink_id = $1
+    `, [figNum.toLowerCase()]);
+    
+    if (minifigResult.rows.length === 0) {
+      return null;
+    }
+    
+    const minifig = minifigResult.rows[0];
+    const minifigId = minifig.minifig_id;
+    
+    const pricesResult = await pool.query(`
+      SELECT condition, MIN(total_eur) as best_price
+      FROM minifig_current_deals
+      WHERE minifig_id = $1 AND expires_at > NOW()
+      GROUP BY condition
+    `, [minifigId]);
+    
+    const prices: Record<string, number> = {};
+    for (const row of pricesResult.rows) {
+      prices[row.condition] = parseFloat(row.best_price);
+    }
+    
+    const watchersResult = await pool.query(`
+      SELECT COUNT(*) as count FROM watches
+      WHERE item_type = 'minifig' 
+        AND item_id = $1 
+        AND status = 'active'
+    `, [minifigId]);
+    
+    return {
+      fig_num: minifig.bricklink_id || minifig.minifig_id,
+      name: minifig.name,
+      num_parts: minifig.num_parts,
+      theme: minifig.theme,
+      image_url: minifig.image_url,
+      best_price_new: prices['new'] || null,
+      best_price_used: prices['used'] || null,
+      watchers: parseInt(watchersResult.rows[0]?.count || '0'),
+    };
+  } catch (error) {
+    console.error('[SEO] Error fetching minifig data:', error);
+    return null;
+  }
+}
+
+function generateMinifigProductJsonLd(data: MinifigSEOData, lang: SupportedLanguage): string {
+  const bestPrice = data.best_price_new || data.best_price_used;
+  
+  const jsonLd: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    'name': `LEGO ${data.fig_num} ${data.name || 'Minifigure'}`,
+    'description': `Track prices for LEGO minifigure ${data.fig_num} ${data.name || ''}. ${data.num_parts ? `${data.num_parts} parts.` : ''} ${data.theme ? `Theme: ${data.theme}.` : ''}`,
+    'sku': data.fig_num,
+    'mpn': data.fig_num,
+    'brand': { '@type': 'Brand', 'name': 'LEGO' },
+    'category': data.theme ? `LEGO ${data.theme} Minifigure` : 'LEGO Minifigure',
+    'inLanguage': lang,
+  };
+  
+  if (data.image_url) {
+    jsonLd['image'] = data.image_url;
+  }
+  
+  if (bestPrice) {
+    const offers: Record<string, unknown> = {
+      '@type': 'AggregateOffer',
+      'lowPrice': bestPrice.toFixed(2),
+      'priceCurrency': 'EUR',
+      'availability': 'https://schema.org/InStock',
+      'offerCount': data.best_price_new && data.best_price_used ? 2 : 1,
+    };
+    if (data.best_price_new && data.best_price_used) {
+      offers['highPrice'] = Math.max(data.best_price_new, data.best_price_used).toFixed(2);
+    }
+    jsonLd['offers'] = offers;
+  }
+  
+  return JSON.stringify(jsonLd, null, 2);
+}
+
+function injectMinifigSEOData(html: string, data: MinifigSEOData, lang: SupportedLanguage): string {
+  const minifigName = data.name || 'LEGO Minifigure';
+  const fullName = `LEGO ${data.fig_num} ${minifigName}`;
+  const bestPrice = data.best_price_new || data.best_price_used;
+  
+  const title = `${fullName} - Price Tracker | ScoutLoot`;
+  
+  let description = `Track prices for ${fullName}.`;
+  if (bestPrice) description += ` Currently from €${bestPrice.toFixed(2)}.`;
+  if (data.num_parts) description += ` ${data.num_parts} parts.`;
+  if (data.theme) description += ` Theme: ${data.theme}.`;
+  
+  const langPath = lang === 'en' ? '' : `/${lang}`;
+  const canonicalUrl = `https://scoutloot.com${langPath}/minifig/${data.fig_num}`;
+  const imageUrl = data.image_url || 'https://scoutloot.com/og-image.png';
+  const jsonLd = generateMinifigProductJsonLd(data, lang);
+  
+  html = html.replace(/<title>[^<]*<\/title>/i, `<title>${escapeHtml(title)}</title>`);
+  html = html.replace(/<meta\s+name="description"\s+content="[^"]*"\s*\/?>/i, `<meta name="description" content="${escapeHtml(description)}">`);
+  html = html.replace(/<link\s+rel="canonical"\s+href="[^"]*"\s*\/?>/i, `<link rel="canonical" href="${canonicalUrl}">`);
+  html = html.replace(/<meta\s+property="og:url"\s+content="[^"]*"\s*\/?>/i, `<meta property="og:url" content="${canonicalUrl}">`);
+  html = html.replace(/<meta\s+property="og:title"\s+content="[^"]*"\s*\/?>/i, `<meta property="og:title" content="${escapeHtml(fullName)} | ScoutLoot">`);
+  html = html.replace(/<meta\s+property="og:description"\s+content="[^"]*"\s*\/?>/i, `<meta property="og:description" content="${escapeHtml(description)}">`);
+  html = html.replace(/<meta\s+property="og:image"\s+content="[^"]*"\s*\/?>/i, `<meta property="og:image" content="${imageUrl}">`);
+  html = html.replace(/<meta\s+name="twitter:title"\s+content="[^"]*"\s*\/?>/i, `<meta name="twitter:title" content="${escapeHtml(fullName)} | ScoutLoot">`);
+  html = html.replace(/<meta\s+name="twitter:description"\s+content="[^"]*"\s*\/?>/i, `<meta name="twitter:description" content="${escapeHtml(description)}">`);
+  html = html.replace(/<meta\s+name="twitter:image"\s+content="[^"]*"\s*\/?>/i, `<meta name="twitter:image" content="${imageUrl}">`);
+  html = html.replace(/<script\s+id="json-ld"\s+type="application\/ld\+json">\s*<\/script>/i, `<script id="json-ld" type="application/ld+json">\n${jsonLd}\n</script>`);
+  
+  return html;
+}
+
+const minifigDetailHandler = async (req: Request, res: Response) => {
+  const { figNum } = req.params;
+  const { lang: pathLang, cleanPath } = extractLangFromPath(req.path);
+  const lang = pathLang || detectLanguage(req);
+  
+  const normalizedFigNum = figNum.toLowerCase();
+  
+  if ((pathLang as string) === 'en') {
+    res.redirect(301, `/minifig/${normalizedFigNum}`);
+    return;
+  }
+  
+  if (figNum !== normalizedFigNum) {
+    const langPath = pathLang && (pathLang as string) !== 'en' ? `/${pathLang}` : '';
+    res.redirect(301, `${langPath}/minifig/${normalizedFigNum}`);
+    return;
+  }
+  
+  try {
+    const seoData = await getMinifigSEOData(normalizedFigNum);
+    let html = getTemplate('minifig.html');
+    const translations = loadTranslations(lang, translationsPath);
+    
+    html = injectTranslations(html, translations, lang, req.path);
+    
+    if (seoData) {
+      html = injectMinifigSEOData(html, seoData, lang);
+    }
+    
+    res.cookie('language', lang, {
+      path: '/',
+      maxAge: 365 * 24 * 60 * 60 * 1000,
+      httpOnly: false,
+      sameSite: 'lax',
+    });
+    
+    res.set('Content-Type', 'text/html; charset=utf-8');
+    res.set('Cache-Control', 'public, max-age=300');
+    res.send(html);
+  } catch (error) {
+    console.error('[SEO] Error serving minifig page:', error);
+    res.sendFile(path.join(publicPath, 'minifig.html'));
+  }
+};
+
+// Minifig detail routes
+app.get('/minifig/:figNum', minifigDetailHandler);
+for (const lang of SUPPORTED_LANGUAGES) {
+  if (lang !== 'en') {
+    app.get(`/${lang}/minifig/:figNum`, minifigDetailHandler);
+  }
+}
 // CATCH-ALL ROUTE (SPA)
 // ============================================
 app.get('*', (req, res) => {
