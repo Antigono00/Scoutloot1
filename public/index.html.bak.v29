@@ -572,12 +572,6 @@
         <div class="watches-section">
           <div class="watches-header">
             <h2>{{dashboard.your_watchlist}}</h2>
-            <select id="bulk-condition-select" onchange="handleBulkConditionChange(this.value)" style="background:var(--bg-tertiary);color:var(--text-secondary);border:1px solid rgba(255,255,255,0.1);padding:8px 12px;border-radius:8px;font-size:0.85rem;cursor:pointer;">
-              <option value="">Change All...</option>
-              <option value="new">All → New</option>
-              <option value="used">All → Used</option>
-              <option value="any">All → Any</option>
-            </select>
           </div>
           <div class="watches-list" id="watches-list">
             <div class="empty-state">
@@ -793,9 +787,9 @@
         <div class="form-group">
           <label for="watch-condition">{{forms.condition}}</label>
           <select id="watch-condition">
-            <option value="new" selected>{{forms.condition_new}}</option>
-            <option value="used">{{forms.condition_used}}</option>
             <option value="any">{{forms.condition_any}}</option>
+            <option value="new">{{forms.condition_new}}</option>
+            <label value="used">{{forms.condition_used}}</option>
           </select>
         </div>
         <button type="submit" class="btn btn-primary" style="width: 100%;" id="add-watch-submit-btn">{{modals.add_watch.btn_submit}}</button>
@@ -828,9 +822,9 @@
         <div class="form-group">
           <label for="edit-watch-condition">{{forms.condition}}</label>
           <select id="edit-watch-condition">
-            <option value="new">{{forms.condition_new}}</option>
-            <option value="used">{{forms.condition_used}}</option>
             <option value="any">{{forms.condition_any}}</option>
+            <option value="new">{{forms.condition_new}}</option>
+            <label value="used">{{forms.condition_used}}</option>
           </select>
         </div>
         <button type="submit" class="btn btn-primary" style="width: 100%;" id="edit-watch-submit-btn">{{modals.edit_watch.btn_submit}}</button>

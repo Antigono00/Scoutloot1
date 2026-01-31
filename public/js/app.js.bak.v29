@@ -54,7 +54,7 @@ function acceptCookies() {
 // ===========================================
 
 function getUserCurrencySymbol() {
-  if (!localStorage.getItem('scoutloot_user') || !state.user.ship_to_country) return '€';
+  if (!state.user || !state.user.ship_to_country) return '€';
   const country = state.user.ship_to_country.toUpperCase();
   if (country === 'US') return '$';
   if (country === 'CA') return 'C$';
@@ -141,7 +141,6 @@ async function handleSignup(event) {
     closeModal('signup');
     updateUI();
     showDashboard();
-    checkForPendingWatch();
     showToast('Account created! Welcome to ScoutLoot 🎉', 'success');
     
     // Show setup modal for Telegram/Push
@@ -182,7 +181,6 @@ async function handleLogin(event) {
     closeModal('login');
     updateUI();
     showDashboard();
-    checkForPendingWatch();
     await loadWatches();
     await loadAlerts();
     showToast('Welcome back! 👋', 'success');
@@ -235,7 +233,7 @@ async function setupPush() {
 // ===========================================
 
 async function loadWatches() {
-  if (!localStorage.getItem('scoutloot_user')) return;
+  if (!state.user) return;
   
   try {
     const data = await apiCall(`/watches/user/${state.user.id}`);
@@ -250,7 +248,7 @@ async function loadWatches() {
 async function handleAddWatch(event) {
   event.preventDefault();
   
-  if (!localStorage.getItem('scoutloot_user')) {
+  if (!state.user) {
     showToast('Please log in first', 'error');
     return;
   }
@@ -289,9 +287,6 @@ async function handleAddWatch(event) {
     showToast(`Now tracking ${selectedItemType === 'minifig' ? 'minifig' : 'set'} ${selectedItemType === 'minifig' ? selectedMinifigId : setNumber}! 🔔`, 'success');
     
     event.target.reset();
-    // V29: Clear any pending watch from sessionStorage
-    sessionStorage.removeItem('pendingWatchSet');
-    sessionStorage.removeItem('pendingWatchMinifig');
     selectedSetNumber = null;
     // V26: Reset minifig state
     selectedMinifigId = null;
@@ -437,7 +432,7 @@ async function handleEditWatch(event) {
 // ===========================================
 
 async function loadAlerts(reset = true) {
-  if (!localStorage.getItem('scoutloot_user')) return;
+  if (!state.user) return;
   
   try {
     const cursor = reset ? '' : (state.alertsCursor ? `&cursor=${state.alertsCursor}` : '');
@@ -464,7 +459,7 @@ async function loadMoreAlerts() {
 }
 
 async function updateUnreadCount() {
-  if (!localStorage.getItem('scoutloot_user')) return;
+  if (!state.user) return;
   
   try {
     const data = await apiCall(`/alerts/unread-count/${state.user.id}`);
@@ -499,7 +494,7 @@ async function markAlertRead(alertId) {
 }
 
 async function markAllRead() {
-  if (!localStorage.getItem('scoutloot_user')) return;
+  if (!state.user) return;
   
   try {
     await apiCall(`/alerts/mark-all-read/${state.user.id}`, { method: 'POST' });
@@ -695,7 +690,7 @@ function initAutocomplete() {
     autocompleteTimeout = setTimeout(() => {
       // V26: Use combined search instead of sets-only
       searchSetsAndMinifigs(query);
-    }, 500);
+    }, 300);
   });
   
   document.addEventListener('click', (e) => {
@@ -879,7 +874,7 @@ async function initPush() {
 }
 
 async function checkPushSubscription() {
-  if (!state.pushSupported || !localStorage.getItem('scoutloot_user')) return;
+  if (!state.pushSupported || !state.user) return;
   
   try {
     const registration = await navigator.serviceWorker.ready;
@@ -934,7 +929,7 @@ async function togglePushNotifications() {
     return;
   }
   
-  if (!localStorage.getItem('scoutloot_user')) {
+  if (!state.user) {
     showToast('Please log in first', 'error');
     return;
   }
@@ -1035,7 +1030,7 @@ function urlBase64ToUint8Array(base64String) {
 async function handleSettings(event) {
   event.preventDefault();
   
-  if (!localStorage.getItem('scoutloot_user')) return;
+  if (!state.user) return;
   
   const country = document.getElementById('settings-country').value;
   const timezone = document.getElementById('settings-timezone').value;
@@ -1096,7 +1091,7 @@ function connectTelegram() {
 async function handleChangePassword(event) {
   event.preventDefault();
   
-  if (!localStorage.getItem('scoutloot_user')) return;
+  if (!state.user) return;
   
   const currentPassword = document.getElementById('current-password').value;
   const newPassword = document.getElementById('new-password').value;
@@ -1145,7 +1140,7 @@ async function handleChangePassword(event) {
 }
 
 async function exportUserData() {
-  if (!localStorage.getItem('scoutloot_user')) return;
+  if (!state.user) return;
   
   showToast('Preparing your data export...', 'info');
   
@@ -1178,7 +1173,7 @@ async function exportUserData() {
 async function handleDeleteAccount(event) {
   event.preventDefault();
   
-  if (!localStorage.getItem('scoutloot_user')) return;
+  if (!state.user) return;
   
   const confirmInput = document.getElementById('delete-confirm-input').value;
   
@@ -1520,15 +1515,13 @@ async function init() {
       state.user = user;
       updateUI();
       showDashboard();
-      checkForPendingWatch();
     } catch (error) {
-      if (error.status === 401) clearStorage();
+      clearStorage();
     }
   }
   
   await checkForResetToken();
   await checkForAlertDeepLink();
-  await checkForUrlActions();
 }
 
 document.addEventListener('DOMContentLoaded', init);
@@ -1557,7 +1550,7 @@ function initSetExplorer() {
       
       explorerDebounceTimer = setTimeout(() => {
         searchSetsForExplorer(query, heroResults);
-      }, 500);
+      }, 300);
     });
     
     document.addEventListener('click', (e) => {
@@ -1593,7 +1586,7 @@ function initSetExplorer() {
       
       explorerDebounceTimer = setTimeout(() => {
         searchSetsForExplorer(query, dashResults);
-      }, 500);
+      }, 300);
     });
     
     document.addEventListener('click', (e) => {
@@ -1685,151 +1678,3 @@ async function searchSetsForExplorer(query, resultsContainer) {
     initSetExplorer();
   }
 })();
-
-
-// ===========================================
-// PREFILL WATCH FROM DETAIL PAGES (V29)
-// ===========================================
-
-window.addEventListener('prefillWatch', function(event) {
-  var detail = event.detail;
-  var type = detail.type;
-  var id = detail.id;
-  var name = detail.name;
-  var imageUrl = detail.imageUrl;
-  
-  var input = document.getElementById('watch-set');
-  if (input) {
-    input.value = id;
-  }
-  
-  if (type === 'minifig') {
-    selectedMinifigId = id;
-    selectedMinifigImageUrl = imageUrl || null;
-    selectedSetNumber = null;
-    selectedItemType = 'minifig';
-  } else {
-    selectedSetNumber = id;
-    selectedMinifigId = null;
-    selectedMinifigImageUrl = null;
-    selectedItemType = 'set';
-  }
-  
-  // Update the modal subtitle if name is provided
-  var subtitle = document.querySelector('#modal-add-watch .modal-subtitle');
-  if (subtitle && name) {
-    subtitle.textContent = name;
-  }
-});
-
-// ===========================================
-// BULK CONDITION CHANGE (V29)
-// ===========================================
-
-async function handleBulkConditionChange(condition) {
-  if (!condition) return;
-  if (!localStorage.getItem('scoutloot_user')) {
-    showToast('Please log in first', 'error');
-    return;
-  }
-  
-  if (state.watches.length === 0) {
-    showToast('No watches to update', 'info');
-    document.getElementById('bulk-condition-select').value = '';
-    return;
-  }
-  
-  var conditionLabel = condition === 'any' ? 'Any Condition' : condition.charAt(0).toUpperCase() + condition.slice(1);
-  
-  if (!confirm('Change condition for ALL ' + state.watches.length + ' watches to "' + conditionLabel + '"?')) {
-    document.getElementById('bulk-condition-select').value = '';
-    return;
-  }
-  
-  try {
-    var response = await apiCall('/watches/bulk-condition/' + state.user.id, {
-      method: 'PATCH',
-      body: JSON.stringify({ condition: condition }),
-    });
-    
-    state.watches.forEach(function(watch) {
-      watch.condition = condition;
-    });
-    
-    renderWatches();
-    showToast('All watches updated to ' + conditionLabel + '! 🎯', 'success');
-  } catch (error) {
-    showToast(error.message || 'Failed to update watches', 'error');
-  } finally {
-    document.getElementById('bulk-condition-select').value = '';
-  }
-}
-
-// ===========================================
-// URL ACTION HANDLER (V29)
-// ===========================================
-
-async function checkForUrlActions() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const action = urlParams.get('action');
-  const setNumber = urlParams.get('set');
-  const minifigId = urlParams.get('minifig');
-  
-  if (!action) return;
-  
-  // Clean URL first
-  const url = new URL(window.location);
-  url.searchParams.delete('action');
-  url.searchParams.delete('set');
-  url.searchParams.delete('minifig');
-  window.history.replaceState({}, '', url);
-  
-  if (action === 'signup' && !localStorage.getItem('scoutloot_user')) {
-    // Store the item to watch after signup
-    if (setNumber) {
-      sessionStorage.setItem('pendingWatchSet', setNumber);
-    } else if (minifigId) {
-      sessionStorage.setItem('pendingWatchMinifig', minifigId);
-    }
-    openModal('signup');
-    return;
-  }
-  
-  if (action === 'add-watch' && state.user) {
-    // Pre-fill and open add watch modal
-    if (setNumber) {
-      document.getElementById('watch-set').value = setNumber;
-      selectedSetNumber = setNumber;
-      selectedItemType = 'set';
-      selectedMinifigId = null;
-      selectedMinifigImageUrl = null;
-    } else if (minifigId) {
-      document.getElementById('watch-set').value = minifigId;
-      selectedMinifigId = minifigId;
-      selectedItemType = 'minifig';
-      selectedSetNumber = null;
-      selectedMinifigImageUrl = null;
-    }
-    openModal('add-watch');
-  }
-}
-
-// Check for pending watch after signup/login
-function checkForPendingWatch() {
-  const pendingSet = sessionStorage.getItem('pendingWatchSet');
-  const pendingMinifig = sessionStorage.getItem('pendingWatchMinifig');
-  
-  if (pendingSet) {
-    sessionStorage.removeItem('pendingWatchSet');
-    document.getElementById('watch-set').value = pendingSet;
-    selectedSetNumber = pendingSet;
-    selectedItemType = 'set';
-    openModal('add-watch');
-  } else if (pendingMinifig) {
-    sessionStorage.removeItem('pendingWatchMinifig');
-    document.getElementById('watch-set').value = pendingMinifig;
-    selectedMinifigId = pendingMinifig;
-    selectedItemType = 'minifig';
-    openModal('add-watch');
-  }
-}

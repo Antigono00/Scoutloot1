@@ -290,44 +290,6 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
 });
 
 // ============================================
-
-// ============================================
-// BULK UPDATE ALL WATCHES CONDITION (V29)
-// PATCH /api/watches/bulk-condition/:userId
-// ============================================
-router.patch('/bulk-condition/:userId', async (req: Request, res: Response): Promise<void> => {
-  try {
-    const userId = parseInt(req.params.userId, 10);
-    const { condition } = req.body;
-    
-    if (isNaN(userId)) {
-      res.status(400).json({ error: 'Invalid user ID' });
-      return;
-    }
-    
-    if (!condition || !['new', 'used', 'any'].includes(condition)) {
-      res.status(400).json({ error: 'Invalid condition. Must be: new, used, or any' });
-      return;
-    }
-    
-    const result = await query(
-      `UPDATE watches 
-       SET condition = $1, updated_at = NOW() 
-       WHERE user_id = $2 AND status = 'active'`,
-      [condition, userId]
-    );
-    
-    res.json({
-      success: true,
-      updated: result.rowCount,
-      condition: condition,
-    });
-  } catch (error) {
-    console.error('Bulk update condition error:', error);
-    res.status(500).json({ error: 'Failed to update watches' });
-  }
-});
-
 // GET USER'S WATCHES
 // GET /api/watches/user/:userId
 // ============================================

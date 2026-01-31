@@ -1028,8 +1028,8 @@
     // AUTH
     // ============================================
     function checkAuth() {
-      const token = localStorage.getItem('scoutloot_user');
-      const user = JSON.parse(localStorage.getItem('scoutloot_user') || 'null');
+      const token = localStorage.getItem('token');
+      const user = JSON.parse(localStorage.getItem('user') || 'null');
       
       if (token && user) {
         document.getElementById('nav-auth').style.display = 'none';
@@ -1485,20 +1485,19 @@
     // ACTIONS
     // ============================================
     function trackSet() {
-      const token = localStorage.getItem('scoutloot_user');
-      const user = JSON.parse(localStorage.getItem('scoutloot_user') || 'null');
-      const setNumber = currentSetData?.set?.set_number;
+      const token = localStorage.getItem('token');
+      const user = JSON.parse(localStorage.getItem('user') || 'null');
       
       if (!token || !user) {
-        // Not logged in - store set and show signup
-        sessionStorage.setItem('pendingWatchSet', setNumber);
-        window.location.href = '/?action=signup&set=' + setNumber;
+        // Redirect to signup with set number
+        const setNumber = currentSetData?.set?.set_number;
+        window.location.href = `/?action=signup&set=${setNumber}`;
         return;
       }
       
-      // User is logged in - store in sessionStorage and redirect to dashboard
-      sessionStorage.setItem('pendingWatchSet', setNumber);
-      window.location.href = '/';
+      // User is logged in - redirect to dashboard with pre-filled set
+      const setNumber = currentSetData?.set?.set_number;
+      window.location.href = `/?action=add-watch&set=${setNumber}`;
     }
     
     // ============================================
