@@ -511,7 +511,7 @@
       </div>
       
       <div class="nav-auth" id="nav-auth">
-        <button class="btn btn-ghost" onclick="openModal('login')">{{nav.login}}</button>
+        <button class="btn btn-ghost" onclick="openModal('signup')">{{nav.login}}</button>
         <button class="btn btn-primary" onclick="openModal('signup')">{{nav.get_started}}</button>
       </div>
     </div>
@@ -939,11 +939,11 @@
         const history = await response.json();
         
         // Process data
-        const newData = history
+        const newData = (history.data || [])
           .filter(h => h.condition === 'new' && h.min_price)
           .map(h => ({ x: new Date(h.date), y: h.min_price }));
         
-        const usedData = history
+        const usedData = (history.data || [])
           .filter(h => h.condition === 'used' && h.min_price)
           .map(h => ({ x: new Date(h.date), y: h.min_price }));
         
@@ -1030,24 +1030,15 @@
       if (!minifigData) return;
       
       // Check if logged in (simple check - look for auth token)
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('scoutloot_user');
       if (!token) {
-        openModal('login');
+        window.location.href = '/?action=signup&minifig=' + minifigData.minifig.fig_num;
         return;
       }
       
-      // Pre-fill watch modal with this minifig
-      const event = new CustomEvent('prefillWatch', {
-        detail: {
-          type: 'minifig',
-          id: minifigData.minifig.fig_num,
-          name: minifigData.minifig.name,
-          imageUrl: minifigData.minifig.image_url,
-        }
-      });
-      window.dispatchEvent(event);
-      
-      openModal('add-watch');
+      // User is logged in - store in sessionStorage and redirect to dashboard
+      sessionStorage.setItem('pendingWatchMinifig', minifigData.minifig.fig_num);
+      window.location.href = '/';
     }
     
     // Initialize on load

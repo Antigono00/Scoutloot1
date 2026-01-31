@@ -1,3 +1,19 @@
+/**
+ * Sets Routes (V30)
+ * 
+ * V30: Regional price history with native currency support
+ * - /history endpoint accepts region parameter
+ * - Returns currency and symbol in response
+ * - Supports EU, UK, US, CA regions
+ * 
+ * Handles:
+ * - GET /api/sets/popular - Most watched sets
+ * - GET /api/sets/search?q=... - Search sets
+ * - GET /api/sets/:setNumber/detail - Full set details
+ * - GET /api/sets/:setNumber/history?days=90&condition=new&region=EU - Price history
+ * - POST /api/sets/:setNumber/view - Track page view
+ */
+
 import { Router, Request, Response } from 'express';
 import { query } from '../db/index.js';
 import { 
@@ -6,8 +22,13 @@ import {
   getPriceStats,
   getSetWatcherCount,
   trackSetPageView,
-  getMostWatchedSets
+  getMostViewedSets
 } from '../services/currentDeals.js';
+import { 
+  getCurrencyForRegion, 
+  getSymbolForRegion, 
+  getRegionFromCountry 
+} from '../utils/currency.js';
 
 const router = Router();
 
@@ -31,8 +52,43 @@ interface RebrickableSearchResponse {
   results: RebrickableSearchResult[];
 }
 
+// Helper: Get most watched sets from watches table
+async function getMostWatchedSets(limit: number = 20): Promise<Array<{
+  set_number: string;
+  name: string | null;
+  image_url: string | null;
+  watch_count: number;
+}>> {
+  const result = await query<{
+    set_number: string;
+    name: string | null;
+    image_url: string | null;
+    watch_count: string;
+  }>(
+    `SELECT 
+       w.set_number, 
+       s.name, 
+       s.image_url,
+       COUNT(*) as watch_count
+     FROM watches w
+     LEFT JOIN sets s ON w.set_number = s.set_number
+     WHERE w.status = 'active' AND w.set_number IS NOT NULL
+     GROUP BY w.set_number, s.name, s.image_url
+     ORDER BY watch_count DESC
+     LIMIT $1`,
+    [limit]
+  );
+
+  return result.rows.map(r => ({
+    set_number: r.set_number,
+    name: r.name,
+    image_url: r.image_url,
+    watch_count: parseInt(r.watch_count),
+  }));
+}
+
 // ============================================
-// NEW: Popular Sets Endpoint
+// Popular Sets Endpoint
 // GET /api/sets/popular?limit=20
 // Must be BEFORE /:setNumber routes!
 // ============================================
@@ -54,7 +110,7 @@ router.get('/popular', async (req: Request, res: Response): Promise<void> => {
 });
 
 // ============================================
-// NEW: Set Detail Endpoint
+// Set Detail Endpoint
 // GET /api/sets/:setNumber/detail
 // ============================================
 router.get('/:setNumber/detail', async (req: Request, res: Response): Promise<void> => {
@@ -167,6 +223,9 @@ router.get('/:setNumber/detail', async (req: Request, res: Response): Promise<vo
           url: d.listing_url,
           image_url: d.image_url,
           title: d.title,
+          // V30: Include original currency info
+          currency_original: d.currency_original,
+          price_original: d.price_original,
         })),
         used: deals.used.map(d => ({
           source: d.source,
@@ -182,6 +241,9 @@ router.get('/:setNumber/detail', async (req: Request, res: Response): Promise<vo
           url: d.listing_url,
           image_url: d.image_url,
           title: d.title,
+          // V30: Include original currency info
+          currency_original: d.currency_original,
+          price_original: d.price_original,
         })),
       },
       history: {
@@ -208,8 +270,25 @@ router.get('/:setNumber/detail', async (req: Request, res: Response): Promise<vo
 });
 
 // ============================================
-// NEW: Price History Endpoint
-// GET /api/sets/:setNumber/history?days=90&condition=new
+// V30: Price History Endpoint with Country/Region Support
+// GET /api/sets/:setNumber/history?days=90&condition=new&country=ES
+// 
+// Parameters:
+// - days: Number of days (default 90, max 365)
+// - condition: 'new', 'used', or 'any' (default 'new')
+// - country: Country code (ES, DE, GB, US, CA, etc.) - optional
+//
+// Logic:
+// 1. If country specified, try country-specific data first
+// 2. If no country data, fall back to regional aggregate
+// 3. Returns currency symbol based on country's region
+//
+// Response includes:
+// - country: The requested country (or null)
+// - region: Derived region (EU, UK, US, CA)
+// - currency: Currency code (EUR, GBP, USD, CAD)
+// - symbol: Currency symbol (€, £, $, C$)
+// - source: 'country', 'region', or 'all' (indicates data source)
 // ============================================
 router.get('/:setNumber/history', async (req: Request, res: Response): Promise<void> => {
   try {
@@ -217,6 +296,7 @@ router.get('/:setNumber/history', async (req: Request, res: Response): Promise<v
     const normalizedSetNumber = setNumber.replace(/-\d+$/, '');
     const days = Math.min(parseInt(req.query.days as string) || 90, 365);
     const condition = (req.query.condition as string) || 'new';
+    const country = (req.query.country as string)?.toUpperCase() || null;
     
     // Validate condition
     if (!['new', 'used', 'any'].includes(condition)) {
@@ -224,16 +304,29 @@ router.get('/:setNumber/history', async (req: Request, res: Response): Promise<v
       return;
     }
     
-    // Get history for requested condition
-    const history = await getPriceHistory(normalizedSetNumber, days, condition === 'any' ? 'new' : condition);
+    // Get history for requested condition and country
+    const effectiveCondition = condition === 'any' ? 'new' : condition;
+    const historyResult = await getPriceHistory(normalizedSetNumber, days, effectiveCondition, country || undefined);
     
-    // Get stats
-    const stats = await getPriceStats(normalizedSetNumber, condition === 'any' ? 'new' : condition);
+    // Get stats for the same country
+    const stats = await getPriceStats(normalizedSetNumber, effectiveCondition, country || undefined);
+    
+    // Determine region and currency info from country
+    const region = country ? getRegionFromCountry(country) : 'EU';
+    const currency = getCurrencyForRegion(region);
+    const symbol = getSymbolForRegion(region);
     
     res.json({
       set_number: normalizedSetNumber,
       condition,
       days_requested: days,
+      // V30: Country/region info
+      country: country,
+      region: region,
+      currency,
+      symbol,
+      source: historyResult.source, // 'country', 'region', or 'all'
+      // Stats
       days_tracked: stats.days_tracked,
       first_tracked: stats.first_tracked,
       stats: {
@@ -243,7 +336,8 @@ router.get('/:setNumber/history', async (req: Request, res: Response): Promise<v
         trend_7d: stats.trend_7d,
         trend_30d: stats.trend_30d,
       },
-      data: history,
+      // Price data
+      data: historyResult.data,
     });
     
   } catch (error) {
@@ -253,7 +347,7 @@ router.get('/:setNumber/history', async (req: Request, res: Response): Promise<v
 });
 
 // ============================================
-// NEW: Track Page View Endpoint
+// Track Page View Endpoint
 // POST /api/sets/:setNumber/view
 // ============================================
 router.post('/:setNumber/view', async (req: Request, res: Response): Promise<void> => {
@@ -287,7 +381,7 @@ router.post('/:setNumber/view', async (req: Request, res: Response): Promise<voi
 });
 
 // ============================================
-// EXISTING: Search sets on Rebrickable
+// Search sets on Rebrickable
 // GET /api/sets/search?q=millennium
 // ============================================
 router.get('/search', async (req: Request, res: Response): Promise<void> => {
@@ -343,83 +437,35 @@ router.get('/search', async (req: Request, res: Response): Promise<void> => {
     }
 
     const data = await response.json() as RebrickableSearchResponse;
+    
+    // Cache the results in our database
+    for (const result of data.results) {
+      const setNum = result.set_num.replace(/-\d+$/, ''); // Normalize "75192-1" to "75192"
+      try {
+        await query(
+          `INSERT INTO sets (set_number, name, year, pieces, image_url)
+           VALUES ($1, $2, $3, $4, $5)
+           ON CONFLICT (set_number) DO UPDATE SET
+             name = COALESCE(sets.name, EXCLUDED.name),
+             year = COALESCE(sets.year, EXCLUDED.year),
+             pieces = COALESCE(sets.pieces, EXCLUDED.pieces),
+             image_url = COALESCE(sets.image_url, EXCLUDED.image_url),
+             updated_at = NOW()`,
+          [setNum, result.name, result.year, result.num_parts, result.set_img_url]
+        );
+      } catch (cacheError) {
+        // Ignore caching errors, just continue
+      }
+    }
 
-    // Return formatted results
     res.json({
-      results: data.results.map(set => ({
-        set_num: set.set_num.replace(/-\d+$/, ''), // Remove "-1" suffix
-        name: set.name,
-        year: set.year,
-        num_parts: set.num_parts,
-        set_img_url: set.set_img_url,
-      })),
+      results: data.results,
       source: 'rebrickable',
     });
-
+    
   } catch (error) {
     console.error('Set search error:', error);
-    res.status(500).json({ 
-      error: 'Search failed',
-      results: [],
-    });
-  }
-});
-
-// ============================================
-// EXISTING: Get a specific set by number
-// GET /api/sets/:setNumber
-// ============================================
-router.get('/:setNumber', async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { setNumber } = req.params;
-    const normalizedSetNumber = setNumber.replace(/-\d+$/, '');
-
-    // Check local database first
-    const local = await query(
-      `SELECT set_number, name, year, pieces, image_url, theme, msrp_eur
-       FROM sets WHERE set_number = $1`,
-      [normalizedSetNumber]
-    );
-
-    if (local.rows[0]?.name) {
-      res.json(local.rows[0]);
-      return;
-    }
-
-    // Fetch from Rebrickable
-    const rebrickableSetNum = normalizedSetNumber.includes('-') 
-      ? normalizedSetNumber 
-      : `${normalizedSetNumber}-1`;
-    const url = `https://rebrickable.com/api/v3/lego/sets/${rebrickableSetNum}/`;
-
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': `key ${REBRICKABLE_API_KEY}`,
-        'Accept': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        res.status(404).json({ error: 'Set not found' });
-        return;
-      }
-      throw new Error(`Rebrickable API error: ${response.status}`);
-    }
-
-    const data = await response.json() as RebrickableSearchResult;
-
-    res.json({
-      set_number: normalizedSetNumber,
-      name: data.name,
-      year: data.year,
-      pieces: data.num_parts,
-      image_url: data.set_img_url,
-    });
-
-  } catch (error) {
-    console.error('Get set error:', error);
-    res.status(500).json({ error: 'Failed to get set' });
+    res.status(500).json({ error: 'Search failed' });
   }
 });
 

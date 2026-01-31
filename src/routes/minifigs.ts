@@ -1,13 +1,16 @@
 /**
- * Minifigs Routes
+ * Minifigs Routes (V30)
+ * 
+ * V30: Regional price history with native currency support
+ * - /history endpoint accepts region parameter
+ * - Returns currency and symbol in response
+ * - Supports EU, UK, US, CA regions
  * 
  * V28: BrickLink-only ID policy
  * - Only BrickLink codes (sw0001, st005) are accepted for watching
  * - Rebrickable IDs (fig-XXXXXX) are rejected with helpful message
- * - Search results from Rebrickable are displayed but NOT cached
  * 
  * V27: Added detail endpoint with deals, history, and stats for minifig pages
- * V26: Updated to use cross-marketplace ID lookup
  */
 
 import { Router, Request, Response } from 'express';
@@ -15,6 +18,11 @@ import { query } from '../db/index.js';
 import { lookupMinifig, isBricklinkCode, searchMinifigs, getThemeName } from '../services/minifigs.js';
 import { getMinifigDeals, getMinifigWatcherCount, trackMinifigPageView } from '../services/minifigCurrentDeals.js';
 import { getMinifigPriceHistory, getMinifigPriceStats } from '../services/minifigPriceHistory.js';
+import { 
+  getCurrencyForRegion, 
+  getSymbolForRegion, 
+  getRegionFromCountry 
+} from '../utils/currency.js';
 
 const router = Router();
 
@@ -49,156 +57,82 @@ router.get('/search', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // V26: If it looks like a Bricklink code, use the lookup service
-    if (isBricklinkCode(searchQuery)) {
-      console.log(`[Minifigs Route] Bricklink code detected: ${searchQuery}`);
-      
-      const lookupResult = await lookupMinifig(searchQuery);
-      
-      if (lookupResult.success && lookupResult.name) {
-        // Cache this result since it has a valid BrickLink code
-        await cacheMinifigWithBricklink(
-          lookupResult.bricklink_id || searchQuery.toLowerCase(),
-          lookupResult.name,
-          lookupResult.num_parts,
-          lookupResult.image_url,
-          lookupResult.brickowl_boid
-        );
-        
-        res.json({
-          results: [{
-            fig_num: lookupResult.bricklink_id || searchQuery.toLowerCase(),
-            name: lookupResult.name,
-            num_parts: lookupResult.num_parts,
-            set_img_url: lookupResult.image_url,
-            bricklink_id: lookupResult.bricklink_id || searchQuery.toLowerCase(),
-            brickowl_boid: lookupResult.brickowl_boid,
-          }],
-          source: lookupResult.source,
-        });
-        return;
-      }
-    }
-
-    // Check local database for name searches
-    // Our database only contains entries with valid BrickLink IDs
-    const localResults = await searchMinifigs(searchQuery, 10);
-
-    if (localResults.length > 0) {
-      res.json({
-        results: localResults.map(row => ({
-          fig_num: row.bricklink_id || row.minifig_id,
-          name: row.name,
-          num_parts: row.num_parts,
-          set_img_url: row.image_url,
-          bricklink_id: row.bricklink_id,
-          brickowl_boid: row.brickowl_boid,
-        })),
-        source: 'cache',
-      });
-      return;
-    }
-
-    // Try BrickOwl lookup as fallback (might find something by partial name)
-    const lookupResult = await lookupMinifig(searchQuery);
-    if (lookupResult.success && lookupResult.name && lookupResult.bricklink_id) {
-      // Found with BrickLink ID - cache it and return
-      await cacheMinifigWithBricklink(
-        lookupResult.bricklink_id,
-        lookupResult.name,
-        lookupResult.num_parts,
-        lookupResult.image_url,
-        lookupResult.brickowl_boid
-      );
-      
-      res.json({
-        results: [{
-          fig_num: lookupResult.bricklink_id,
-          name: lookupResult.name,
-          num_parts: lookupResult.num_parts,
-          set_img_url: lookupResult.image_url,
-          bricklink_id: lookupResult.bricklink_id,
-          brickowl_boid: lookupResult.brickowl_boid,
-        }],
-        source: lookupResult.source,
-      });
-      return;
-    }
-
-    // Nothing found in our database or BrickOwl
-    // Suggest user search with LEGO minifig code
-    res.json({ 
-      results: [], 
-      source: 'none',
-      notice: 'No minifig found. Try searching with the LEGO minifig code (e.g., sw0001, st005). As our database grows, more name searches will work!',
+    // Use our enhanced search function (only returns minifigs with bricklink_id)
+    const results = await searchMinifigs(searchQuery, 10);
+    
+    res.json({
+      results: results.map(m => ({
+        fig_num: m.bricklink_id || m.minifig_id, // Prefer BrickLink ID for display
+        minifig_id: m.minifig_id,
+        bricklink_id: m.bricklink_id,
+        name: m.name,
+        num_parts: m.num_parts,
+        image_url: m.image_url,
+      })),
+      source: 'database',
     });
-
+    
   } catch (error) {
     console.error('Minifig search error:', error);
-    res.status(500).json({ 
-      error: 'Search failed',
-      results: [],
-    });
+    res.status(500).json({ error: 'Search failed' });
   }
 });
 
 // ============================================
-// V27: GET MINIFIG DETAIL WITH DEALS & HISTORY
+// V27: MINIFIG DETAIL ENDPOINT
 // GET /api/minifigs/:figNum/detail
+// Returns full minifig data, deals, history, and stats
 // ============================================
 router.get('/:figNum/detail', async (req: Request, res: Response): Promise<void> => {
   try {
     const { figNum } = req.params;
     const normalizedFigNum = figNum.toLowerCase();
     
-    // V28: Reject Rebrickable IDs
-    if (isRebrickableId(figNum)) {
-      res.status(400).json({ 
-        error: 'Please use LEGO minifig code (e.g., sw0001) instead of Rebrickable ID',
-      });
-      return;
-    }
+    // Look up minifig (handles both BrickLink and Rebrickable IDs)
+    const minifigLookup = await lookupMinifig(normalizedFigNum);
     
-    // 1. Get minifig info (lookup or from database)
-    const lookupResult = await lookupMinifig(figNum);
-    
-    if (!lookupResult.success || !lookupResult.name) {
+    if (!minifigLookup.success) {
       res.status(404).json({ error: 'Minifig not found' });
       return;
     }
     
+    // Get theme from prefix
+    const theme = getThemeName(minifigLookup.bricklink_id || normalizedFigNum);
+    
     // Build minifig info object
     const minifigInfo = {
-      fig_num: lookupResult.bricklink_id || lookupResult.minifig_id,
-      name: lookupResult.name,
-      num_parts: lookupResult.num_parts,
-      image_url: lookupResult.image_url,
-      bricklink_id: lookupResult.bricklink_id,
-      brickowl_boid: lookupResult.brickowl_boid,
-      theme: getThemeName(lookupResult.bricklink_id || lookupResult.minifig_id || figNum),
+      fig_num: minifigLookup.bricklink_id || minifigLookup.minifig_id,
+      minifig_id: minifigLookup.minifig_id,
+      bricklink_id: minifigLookup.bricklink_id,
+      name: minifigLookup.name || 'Unknown Minifig',
+      num_parts: minifigLookup.num_parts,
+      image_url: minifigLookup.image_url,
+      theme,
     };
     
-    // 2. Get current deals
-    const deals = await getMinifigDeals(normalizedFigNum, 10);
+    // Get current deals
+    const deals = await getMinifigDeals(minifigLookup.minifig_id);
     
-    // 3. Get price history (last 90 days)
-    const [newHistory, usedHistory] = await Promise.all([
-      getMinifigPriceHistory(normalizedFigNum, 90, 'new'),
-      getMinifigPriceHistory(normalizedFigNum, 90, 'used'),
+    // Get price history (last 90 days)
+    const [newHistoryResult, usedHistoryResult] = await Promise.all([
+      getMinifigPriceHistory(minifigLookup.minifig_id, 90, 'new'),
+      getMinifigPriceHistory(minifigLookup.minifig_id, 90, 'used'),
     ]);
+    const newHistory = newHistoryResult.data;
+    const usedHistory = usedHistoryResult.data;
     
-    // 4. Get price stats
-    const priceStats = await getMinifigPriceStats(normalizedFigNum, 'new');
+    // Get price stats
+    const priceStats = await getMinifigPriceStats(minifigLookup.minifig_id, 'new');
     
-    // 5. Get watcher count
-    const watchers = await getMinifigWatcherCount(normalizedFigNum);
+    // Get watcher count
+    const watchers = await getMinifigWatcherCount(minifigLookup.minifig_id);
     
-    // 6. Track page view (fire and forget)
-    trackMinifigPageView(normalizedFigNum).catch(err => 
-      console.error('Failed to track minifig page view:', err)
+    // Track page view (fire and forget)
+    trackMinifigPageView(minifigLookup.minifig_id).catch(err =>
+      console.error('Failed to track minifig view:', err)
     );
     
-    // 7. Build response
+    // Build response
     res.json({
       minifig: minifigInfo,
       deals: {
@@ -237,8 +171,20 @@ router.get('/:figNum/detail', async (req: Request, res: Response): Promise<void>
         days_tracked: priceStats.days_tracked,
         first_tracked: priceStats.first_tracked,
         data: {
-          new: newHistory,
-          used: usedHistory,
+          new: newHistory.map(h => ({
+            date: h.recorded_date,
+            min: h.min_price_eur,
+            avg: h.avg_price_eur,
+            max: h.max_price_eur,
+            count: h.listing_count,
+          })),
+          used: usedHistory.map(h => ({
+            date: h.recorded_date,
+            min: h.min_price_eur,
+            avg: h.avg_price_eur,
+            max: h.max_price_eur,
+            count: h.listing_count,
+          })),
         },
       },
       stats: {
@@ -257,8 +203,25 @@ router.get('/:figNum/detail', async (req: Request, res: Response): Promise<void>
 });
 
 // ============================================
-// V27: PRICE HISTORY ENDPOINT
-// GET /api/minifigs/:figNum/history?days=90&condition=new
+// V30: PRICE HISTORY ENDPOINT with Country/Region Support
+// GET /api/minifigs/:figNum/history?days=90&condition=new&country=ES
+// 
+// Parameters:
+// - days: Number of days (default 90, max 365)
+// - condition: 'new', 'used', or 'any' (default 'new')
+// - country: Country code (ES, DE, GB, US, CA, etc.) - optional
+//
+// Logic:
+// 1. If country specified, try country-specific data first
+// 2. If no country data, fall back to regional aggregate
+// 3. Returns currency symbol based on country's region
+//
+// Response includes:
+// - country: The requested country (or null)
+// - region: Derived region (EU, UK, US, CA)
+// - currency: Currency code (EUR, GBP, USD, CAD)
+// - symbol: Currency symbol (€, £, $, C$)
+// - source: 'country', 'region', or 'all' (indicates data source)
 // ============================================
 router.get('/:figNum/history', async (req: Request, res: Response): Promise<void> => {
   try {
@@ -266,6 +229,7 @@ router.get('/:figNum/history', async (req: Request, res: Response): Promise<void
     const normalizedFigNum = figNum.toLowerCase();
     const days = Math.min(parseInt(req.query.days as string) || 90, 365);
     const condition = (req.query.condition as string) || 'new';
+    const country = (req.query.country as string)?.toUpperCase() || null;
     
     // Validate condition
     if (!['new', 'used', 'any'].includes(condition)) {
@@ -273,16 +237,38 @@ router.get('/:figNum/history', async (req: Request, res: Response): Promise<void
       return;
     }
     
-    // Get history for requested condition
-    const history = await getMinifigPriceHistory(normalizedFigNum, days, condition === 'any' ? 'new' : condition);
+    // Get history for requested condition and country
+    const effectiveCondition = condition === 'any' ? 'new' : condition;
+    const historyResult = await getMinifigPriceHistory(normalizedFigNum, days, effectiveCondition, country || undefined);
     
-    // Get stats
-    const stats = await getMinifigPriceStats(normalizedFigNum, condition === 'any' ? 'new' : condition);
+    // Get stats for the same country
+    const stats = await getMinifigPriceStats(normalizedFigNum, effectiveCondition, country || undefined);
+    
+    // Determine region and currency info from country
+    const region = country ? getRegionFromCountry(country) : 'EU';
+    const currency = getCurrencyForRegion(region);
+    const symbol = getSymbolForRegion(region);
+    
+    // Format history data
+    const formattedHistory = historyResult.data.map(h => ({
+      date: h.recorded_date,
+      min: h.min_price_eur,
+      avg: h.avg_price_eur,
+      max: h.max_price_eur,
+      count: h.listing_count,
+    }));
     
     res.json({
       fig_num: normalizedFigNum,
       condition,
       days_requested: days,
+      // V30: Country/region info
+      country: country,
+      region: region,
+      currency,
+      symbol,
+      source: historyResult.source, // 'country', 'region', or 'all'
+      // Stats
       days_tracked: stats.days_tracked,
       first_tracked: stats.first_tracked,
       stats: {
@@ -292,7 +278,8 @@ router.get('/:figNum/history', async (req: Request, res: Response): Promise<void
         trend_7d: stats.trend_7d,
         trend_30d: stats.trend_30d,
       },
-      data: history,
+      // Price data
+      data: formattedHistory,
     });
     
   } catch (error) {
@@ -328,77 +315,37 @@ router.post('/:figNum/view', async (req: Request, res: Response): Promise<void> 
 router.get('/:figNum', async (req: Request, res: Response): Promise<void> => {
   try {
     const { figNum } = req.params;
-
+    
     // V28: Reject Rebrickable IDs
     if (isRebrickableId(figNum)) {
-      res.status(400).json({ 
-        error: 'Please use LEGO minifig code (e.g., sw0001) instead of Rebrickable ID',
+      res.status(400).json({
+        error: 'rebrickable_id_not_supported',
+        message: 'Please use the BrickLink minifig code (e.g., sw0001, st005).',
       });
       return;
     }
-
-    // V26: Use the lookup service
-    const lookupResult = await lookupMinifig(figNum);
-
-    if (lookupResult.success && lookupResult.name) {
-      res.json({
-        fig_num: lookupResult.bricklink_id || lookupResult.minifig_id,
-        name: lookupResult.name,
-        num_parts: lookupResult.num_parts,
-        image_url: lookupResult.image_url,
-        bricklink_id: lookupResult.bricklink_id,
-        brickowl_boid: lookupResult.brickowl_boid,
-        theme: getThemeName(lookupResult.bricklink_id || lookupResult.minifig_id || figNum),
-      });
+    
+    const minifig = await lookupMinifig(figNum);
+    
+    if (!minifig.success) {
+      res.status(404).json({ error: 'Minifig not found' });
       return;
     }
-
-    res.status(404).json({ error: 'Minifig not found' });
-
+    
+    res.json({
+      fig_num: minifig.bricklink_id || minifig.minifig_id,
+      minifig_id: minifig.minifig_id,
+      bricklink_id: minifig.bricklink_id,
+      name: minifig.name,
+      num_parts: minifig.num_parts,
+      image_url: minifig.image_url,
+      theme: getThemeName(minifig.bricklink_id || figNum),
+    });
+    
   } catch (error) {
-    console.error('Get minifig error:', error);
-    res.status(500).json({ error: 'Failed to get minifig' });
+    console.error('Minifig lookup error:', error);
+    res.status(500).json({ error: 'Lookup failed' });
   }
 });
-
-// ============================================
-// V28: HELPER: Cache minifig ONLY with BrickLink ID
-// ============================================
-async function cacheMinifigWithBricklink(
-  bricklinkId: string,
-  name: string | null,
-  numParts: number | null,
-  imageUrl: string | null,
-  brickowlBoid: string | null
-): Promise<void> {
-  if (!bricklinkId) {
-    console.log('[Minifigs] Skipping cache - no BrickLink ID');
-    return;
-  }
-  
-  const normalizedId = bricklinkId.toLowerCase();
-  
-  // Validate it looks like a BrickLink code
-  if (!isBricklinkCode(normalizedId)) {
-    console.log(`[Minifigs] Skipping cache - invalid BrickLink code: ${normalizedId}`);
-    return;
-  }
-  
-  await query(
-    `INSERT INTO minifigs (minifig_id, bricklink_id, brickowl_boid, name, num_parts, image_url, updated_at)
-     VALUES ($1, $1, $2, $3, $4, $5, NOW())
-     ON CONFLICT (minifig_id) 
-     DO UPDATE SET 
-       bricklink_id = COALESCE(EXCLUDED.bricklink_id, minifigs.bricklink_id),
-       brickowl_boid = COALESCE(EXCLUDED.brickowl_boid, minifigs.brickowl_boid),
-       name = COALESCE(EXCLUDED.name, minifigs.name),
-       num_parts = COALESCE(EXCLUDED.num_parts, minifigs.num_parts),
-       image_url = COALESCE(EXCLUDED.image_url, minifigs.image_url),
-       updated_at = NOW()`,
-    [normalizedId, brickowlBoid, name, numParts, imageUrl]
-  );
-  
-  console.log(`[Minifigs] Cached minifig with BrickLink ID: ${normalizedId}`);
-}
 
 export default router;

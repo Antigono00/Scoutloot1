@@ -720,6 +720,19 @@
     // Global state
     let minifigData = null;
     let priceChart = null;
+    let currencySymbol = '€'; // V30: Updated from API response
+    
+    // V30: Get user country for API calls
+    function getUserCountry() {
+      try {
+        const userData = localStorage.getItem('scoutloot_user');
+        if (userData) {
+          const user = JSON.parse(userData);
+          return user.ship_to_country || 'US';
+        }
+      } catch (e) {}
+      return 'US';
+    }
     let currentChartDays = 30;
     
     // Get minifig ID from URL
@@ -895,7 +908,7 @@
               borderWidth: 1,
               callbacks: {
                 label: function(context) {
-                  return `${context.dataset.label}: €${context.raw.y.toFixed(2)}`;
+                  return `${context.dataset.label}: ${currencySymbol}${context.raw.y.toFixed(2)}`;
                 }
               }
             }
@@ -915,7 +928,7 @@
               ticks: {
                 color: '#606070',
                 callback: function(value) {
-                  return '€' + value;
+                  return currencySymbol + value;
                 }
               }
             }
@@ -933,10 +946,11 @@
       const figNum = getMinifigIdFromUrl();
       
       try {
-        const response = await fetch(`/api/minifigs/${figNum}/history?days=${days}`);
+        const response = await fetch(`/api/minifigs/${figNum}/history?days=${days}&country=${getUserCountry()}`);
         if (!response.ok) throw new Error('Failed to load history');
         
         const history = await response.json();
+        currencySymbol = history.symbol || '€'; // V30: Use API symbol
         
         // Process data
         const newData = (history.data || [])

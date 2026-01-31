@@ -991,6 +991,23 @@
     let currentSetData = null;
     let currentCondition = 'new';
     let priceChart = null;
+    let currencySymbol = '€'; // V30: Dynamic currency symbol
+    
+    // V30: Get currency symbol based on user country
+    function getCurrencySymbol() {
+      try {
+        const userData = localStorage.getItem('scoutloot_user');
+        if (userData) {
+          const user = JSON.parse(userData);
+          const country = (user.ship_to_country || '').toUpperCase();
+          if (country === 'US') return '$';
+          if (country === 'CA') return 'C$';
+          if (country === 'GB') return '£';
+        }
+      } catch (e) {}
+      return '€';
+    }
+    currencySymbol = getCurrencySymbol();
     
     // ============================================
     // INITIALIZATION
@@ -1413,7 +1430,7 @@
               callbacks: {
                 label: function(context) {
                   if (context.raw === null) return null;
-                  return `${context.dataset.label}: €${context.raw.toFixed(2)}`;
+                  return `${context.dataset.label}: ${currencySymbol}${context.raw.toFixed(2)}`;
                 }
               }
             }
@@ -1435,7 +1452,7 @@
               ticks: {
                 color: '#606070',
                 callback: function(value) {
-                  return '€' + value;
+                  return currencySymbol + value;
                 }
               }
             }
