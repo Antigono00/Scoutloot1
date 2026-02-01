@@ -19,6 +19,31 @@ import { generateListingFingerprint } from '../../utils/fingerprint.js';
 import { normalizeTitle, normalizeCondition } from '../../utils/normalize.js';
 
 // ============================================
+// EX-VAT SELLER HANDLING
+// ============================================
+
+// Known B2B sellers that report prices ex-VAT (without VAT included)
+const EX_VAT_SELLERS = ['vivid bricks', 'mt-bricks', 'secondbricks'];
+
+function isExVatSeller(storeName: string): boolean {
+  const normalized = storeName.toLowerCase().trim();
+  return EX_VAT_SELLERS.some(seller => normalized.includes(seller));
+}
+
+// VAT rates by country
+function getVatRateForCountry(country: string): number {
+  const rates: Record<string, number> = {
+    'ES': 0.21, 'DE': 0.19, 'FR': 0.20, 'IT': 0.22, 'NL': 0.21,
+    'BE': 0.21, 'AT': 0.20, 'PL': 0.23, 'PT': 0.23, 'IE': 0.23,
+    'GR': 0.24, 'FI': 0.24, 'SE': 0.25, 'DK': 0.25, 'CZ': 0.21,
+    'HU': 0.27, 'RO': 0.19, 'BG': 0.20, 'SK': 0.20, 'HR': 0.25,
+    'SI': 0.22, 'LT': 0.21, 'LV': 0.21, 'EE': 0.22, 'LU': 0.17,
+    'MT': 0.18, 'CY': 0.19, 'GB': 0.20, 'UK': 0.20,
+  };
+  return rates[country.toUpperCase()] || 0.21;
+}
+
+// ============================================
 // MAIN NORMALIZER - SETS
 // ============================================
 
@@ -41,7 +66,14 @@ export function normalizeBrickOwlSetListing(
   // Parse price from string
   const priceOriginal = parseFloat(listing.price);
   const currencyOriginal = listing.base_currency;
-  const priceEur = convertToEur(priceOriginal, currencyOriginal);
+  let priceEur = convertToEur(priceOriginal, currencyOriginal);
+  
+  // Adjust for known ex-VAT B2B sellers
+  if (isExVatSeller(listing.store_name)) {
+    const vatRate = getVatRateForCountry(buyerCountry);
+    priceEur = Math.round(priceEur * (1 + vatRate) * 100) / 100;
+    console.log(`[BrickOwl VAT] ${listing.store_name}: +${(vatRate * 100).toFixed(0)}% VAT → €${priceEur}`);
+  }
   
   // Estimate shipping
   const shippingEstimate = estimateSetShipping(
@@ -138,7 +170,14 @@ export function normalizeBrickOwlMinifigListing(
   // Parse price from string
   const priceOriginal = parseFloat(listing.price);
   const currencyOriginal = listing.base_currency;
-  const priceEur = convertToEur(priceOriginal, currencyOriginal);
+  let priceEur = convertToEur(priceOriginal, currencyOriginal);
+  
+  // Adjust for known ex-VAT B2B sellers
+  if (isExVatSeller(listing.store_name)) {
+    const vatRate = getVatRateForCountry(buyerCountry);
+    priceEur = Math.round(priceEur * (1 + vatRate) * 100) / 100;
+    console.log(`[BrickOwl VAT] ${listing.store_name}: +${(vatRate * 100).toFixed(0)}% VAT → €${priceEur}`);
+  }
   
   // Estimate shipping (flat rate for minifigs)
   const shippingEstimate = estimateMinifigShipping(

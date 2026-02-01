@@ -1,6 +1,8 @@
 /**
  * BrickOwl Shipping Estimation
  * 
+ * V2: Fixed CURRENCY_TO_EUR to include all EU non-Euro currencies
+ * 
  * Since BrickOwl API doesn't provide shipping costs, we estimate based on:
  * - Seller country
  * - Buyer country (destination)
@@ -262,16 +264,43 @@ export function estimateMinifigShipping(
 // IMPORT CHARGES CALCULATION
 // ============================================
 
-// Currency conversion rates to EUR (approximate)
-const CURRENCY_TO_EUR: Record<string, number> = {
+// ============================================
+// CURRENCY CONVERSION - V2 FIX
+// ============================================
+// Added all EU non-Euro currencies that BrickOwl sellers might use
+// Without these, prices in CZK, PLN, etc. were being treated as EUR!
+
+export const CURRENCY_TO_EUR: Record<string, number> = {
+  // Major currencies
   'EUR': 1.00,
-  'GBP': 1.18,
-  'USD': 0.92,
-  'CAD': 0.68,
+  'GBP': 1.18,    // 1 GBP ≈ 1.18 EUR
+  'USD': 0.92,    // 1 USD ≈ 0.92 EUR
+  'CAD': 0.68,    // 1 CAD ≈ 0.68 EUR
+  
+  // EU non-Euro currencies (V2 FIX)
+  'CZK': 0.040,   // Czech Koruna - 1 CZK ≈ 0.040 EUR
+  'PLN': 0.23,    // Polish Złoty - 1 PLN ≈ 0.23 EUR
+  'HUF': 0.0025,  // Hungarian Forint - 1 HUF ≈ 0.0025 EUR
+  'RON': 0.20,    // Romanian Leu - 1 RON ≈ 0.20 EUR
+  'SEK': 0.087,   // Swedish Krona - 1 SEK ≈ 0.087 EUR
+  'DKK': 0.134,   // Danish Krone - 1 DKK ≈ 0.134 EUR
+  'BGN': 0.51,    // Bulgarian Lev - 1 BGN ≈ 0.51 EUR
+  
+  // Other currencies that might appear
+  'CHF': 1.05,    // Swiss Franc - 1 CHF ≈ 1.05 EUR
+  'NOK': 0.085,   // Norwegian Krone - 1 NOK ≈ 0.085 EUR
 };
 
-function convertToEur(amount: number, currency: string): number {
-  const rate = CURRENCY_TO_EUR[currency.toUpperCase()] ?? 1.0;
+export function convertToEur(amount: number, currency: string): number {
+  const upperCurrency = currency.toUpperCase();
+  const rate = CURRENCY_TO_EUR[upperCurrency];
+  
+  if (rate === undefined) {
+    // Log unknown currency for debugging
+    console.warn(`[BrickOwl] Unknown currency: ${currency}, defaulting to 1.0 rate`);
+    return Math.round(amount * 100) / 100;
+  }
+  
   return Math.round(amount * rate * 100) / 100;
 }
 
@@ -385,6 +414,3 @@ export function filterByRegionalBlock<T extends { country: string }>(
     }
   });
 }
-
-// Export currency converter for normalizer
-export { convertToEur, CURRENCY_TO_EUR };

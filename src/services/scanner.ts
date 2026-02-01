@@ -926,7 +926,7 @@ async function sendNotifications(
       notifyReason: notifyReason,
       importCharges: listing.import_charges_eur,
       importChargesEstimated: listing.import_charges_estimated,
-      currency: listing.currency_original,
+      currency: getDisplayCurrencyForCountry(watch.ship_to_country),
     });
 
     // Add source indicator to message
@@ -1043,6 +1043,19 @@ function getCurrencySymbol(currency: string | null | undefined): string {
 }
 
 // ============================================
+
+/**
+ * Get display currency for buyer's country
+ * All prices are stored in EUR, but display in buyer's regional currency
+ */
+function getDisplayCurrencyForCountry(country: string | null | undefined): string {
+  if (!country) return 'EUR';
+  const upper = country.toUpperCase();
+  if (upper === 'GB' || upper === 'UK') return 'GBP';
+  if (upper === 'US') return 'USD';
+  if (upper === 'CA') return 'CAD';
+  return 'EUR';
+}
 // SINGLE SET SCAN (for API/testing)
 // ============================================
 
